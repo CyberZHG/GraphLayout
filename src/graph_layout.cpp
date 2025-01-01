@@ -3,10 +3,9 @@
 #include <format>
 #include <fstream>
 
-#include <cairo.h>
-#include <cairo-svg.h>
-#include <iostream>
-#include <pango/pangocairo.h>
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
+#include "common/draw_svg.h"
+#endif
 using namespace std;
 using namespace graph_layout;
 
@@ -94,6 +93,7 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
     return {_xs, _ys};
 }
 
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
 void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath) const {
     const int n = static_cast<int>(_graph->numVertices());
     constexpr double scale = 30.0;
@@ -109,34 +109,13 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
     const double height = (maxY - minY + margin * 2) * scale;
     const double shiftX = (margin + abs(minX)) * scale;
     const double shiftY = (margin + abs(minY)) * scale;
-    cairo_surface_t* surface = cairo_svg_surface_create(outputFilePath.c_str(), width, height);
-    cairo_t* cr = cairo_create(surface);
-
+    const auto svg = DrawSVG(outputFilePath, width, height);
     for (int u = 0; u < _initialNumVertices; ++u) {
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
-        cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_set_line_width(cr, 1);
-        cairo_arc(cr, x, y, r, 0, 2 * 3.1415926);
-        cairo_stroke(cr);
-        cairo_new_path(cr);
-
-        PangoLayout* layout = pango_cairo_create_layout(cr);
-        pango_layout_set_text(layout, _vertexLabels[u].c_str(), -1);
-        PangoFontDescription* font_desc = pango_font_description_from_string("Serif 16");
-        pango_layout_set_font_description(layout, font_desc);
-        pango_font_description_free(font_desc);
-        PangoRectangle ink_rect, logical_rect;
-        pango_layout_get_extents(layout, &ink_rect, &logical_rect);
-        const double iw = ink_rect.width / 1024.0;
-        const double ih = ink_rect.height / 1024.0;
-        const double textX = x - iw / 2.0 - ink_rect.x / 1024.0;
-        const double textY = y - ih / 2.0 - ink_rect.y / 1024.0;
-        cairo_move_to(cr, textX, textY);
-        pango_cairo_show_layout(cr, layout);
-        g_object_unref(layout);
-        cairo_new_path(cr);
+        svg.drawCircle(x, y, r);
+        svg.drawText(x, y, _vertexLabels[u]);
     }
 
     for (const auto& edge : _graph->edges()) {
@@ -160,30 +139,10 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         y1 = y1 * scale + shiftY;
         x2 = x2 * scale + shiftX;
         y2 = y2 * scale + shiftY;
-
-        cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_set_line_width(cr, 1);
-        cairo_move_to(cr, x1, y1);
-        cairo_line_to(cr, x2, y2);
-        cairo_stroke(cr);
-        if (!isVirtualVertex(edge.v)) {
-            const double angle = atan2(y2 - y1, x2 - x1);
-            const double x3 = x2 - 10 * cos(angle - M_PI/8);
-            const double y3 = y2 - 10 * sin(angle - M_PI/8);
-            const double x4 = x2 - 10 * cos(angle + M_PI/8);
-            const double y4 = y2 - 10 * sin(angle + M_PI/8);
-            cairo_move_to(cr, x2, y2);
-            cairo_line_to(cr, x3, y3);
-            cairo_line_to(cr, x4, y4);
-            cairo_line_to(cr, x2, y2);
-            cairo_fill(cr);
-        }
+        svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
     }
-
-    cairo_destroy(cr);
-    cairo_surface_finish(surface);
-    cairo_surface_destroy(surface);
 }
+#endif
 
 void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(const int start) {
     const int n = _initialNumVertices;

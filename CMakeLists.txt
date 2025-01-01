@@ -3,13 +3,11 @@ project(GraphLayout)
 
 set(CMAKE_CXX_STANDARD 20)
 
+option(GRAPH_LAYOUT_ENABLE_SVG "Enable exporting to SVG" ON)
+
 if(APPLE)
     set(ENV{PKG_CONFIG_PATH} "/opt/homebrew/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 endif()
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(CAIRO REQUIRED cairo)
-pkg_check_modules(PANGO REQUIRED pango pangocairo)
 
 add_library(GraphLayout STATIC
         include/graph_layout.h
@@ -27,25 +25,42 @@ add_library(GraphLayout STATIC
         src/common/binary_indexed_tree.cpp
         include/directed/vertex_positioning.h
         src/directed/vertex_positioning.cpp
+        include/common/draw_svg.h
+        src/common/draw_svg.cpp
 )
 
 target_include_directories(GraphLayout
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CAIRO_INCLUDE_DIRS}
-        ${PANGO_INCLUDE_DIRS}
 )
 
-target_link_directories(GraphLayout
-        PUBLIC ${CAIRO_LIBRARY_DIRS}
-        PUBLIC ${PANGO_LIBRARY_DIRS}
-)
+if (GRAPH_LAYOUT_ENABLE_SVG)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(CAIRO REQUIRED cairo)
+    pkg_check_modules(PANGO REQUIRED pango pangocairo)
 
-target_link_libraries(GraphLayout
-        PUBLIC ${CAIRO_LIBRARIES}
-        PUBLIC ${PANGO_LIBRARIES}
-)
+    target_include_directories(GraphLayout
+            PRIVATE ${CAIRO_INCLUDE_DIRS}
+            PRIVATE ${PANGO_INCLUDE_DIRS}
+    )
 
-target_compile_options(GraphLayout PUBLIC ${CAIRO_CFLAGS_OTHER} ${PANGO_CFLAGS_OTHER})
+    target_link_directories(GraphLayout
+            PUBLIC ${CAIRO_LIBRARY_DIRS}
+            PUBLIC ${PANGO_LIBRARY_DIRS}
+    )
+
+    target_link_libraries(GraphLayout
+            PUBLIC ${CAIRO_LIBRARIES}
+            PUBLIC ${PANGO_LIBRARIES}
+    )
+
+    target_compile_options(GraphLayout
+            PUBLIC ${CAIRO_CFLAGS_OTHER}
+            PUBLIC ${PANGO_CFLAGS_OTHER})
+
+    target_compile_definitions(GraphLayout
+            PUBLIC GRAPH_LAYOUT_ENABLE_SVG
+    )
+endif()
 
 option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
 

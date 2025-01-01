@@ -20,8 +20,9 @@ namespace graph_layout {
         [[nodiscard]] std::shared_ptr<SPDirectedGraph> graph() const;
 
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
         void drawSVG(const std::string& outputFilePath) const;
-
+#endif
         /** Add numeric vertex labels.
          *
          * @param start The start index.
