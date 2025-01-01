@@ -6,20 +6,22 @@ using namespace graph_layout;
 FeedbackArcsFinder::FeedbackArcsFinder(const FeedbackArcsMethod method) : _method(method) {
 }
 
-vector<int> FeedbackArcsFinder::findFeedbackArcs(SimpleGraph &graph) const {
+unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SimpleGraph &graph) const {
     switch (_method) {
-        case FeedbackArcsMethod::Eades_93:
+        case FeedbackArcsMethod::EADES_93:
             return findFeedbackArcsEades93(graph);
     }
     return {};
 }
 
-vector<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleGraph &graph) {
+unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleGraph &graph) {
     const auto n = graph.numVertices();
     auto &edges = graph.edges();
     const auto m = edges.size();
     vector inDegree(graph.getInDegrees());
     vector outDegree(graph.getOutDegrees());
+    // Group edges by outdegree minus indegree.
+    // so that we can find the edge with the largest difference in amortized O(1) time complexity.
     int bucketUpperBound = static_cast<int>(m) * 2;
     vector<vector<int>> differenceBuckets(bucketUpperBound + 1);
     vector<pair<size_t, size_t>> bucketIndices(n);
@@ -79,7 +81,10 @@ vector<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleGraph &graph) {
             }
         }
     };
-    vector<int> feedbackArcs;
+    // In each iteration, we first remove all source and sink nodes,
+    // and then break cycles by reversing all incoming edges of the node
+    // with the largest outdegree minus indegree.
+    unordered_set<int> feedbackArcs;
     while (num_popped_vertices < n) {
         while (!sinks.empty()) {
             removeNode(sinks.front());
@@ -97,7 +102,7 @@ vector<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleGraph &graph) {
                     const int u = differenceBuckets[bucketUpperBound][0];
                     removeNode(u);
                     for (const auto id : inEdges[u]) {
-                        feedbackArcs.emplace_back(id);
+                        feedbackArcs.emplace(id);
                     }
                     break;
                 }

@@ -2,7 +2,7 @@
 #define GRAPHLAYOUT_GRAPH_DEF_H
 
 #include <vector>
-#include <map>
+#include <unordered_set>
 
 namespace graph_layout {
     struct SimpleEdge {
@@ -21,6 +21,9 @@ namespace graph_layout {
         void addEdge(const SimpleEdge &edge);
         void addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int> &vertices);
+
+        void reverseEdges(const std::unordered_set<int> &ids);
+        void reverseEdgesBack();
 
         const std::unordered_map<int, size_t> &getEdgeIdToIndexMap();
         const std::vector<int> &getInDegrees();
@@ -52,6 +55,8 @@ namespace graph_layout {
 
         bool _hasCycleInitialized = false;
         bool _hasCycle = false;
+
+        std::unordered_set<int> _reverseIds;
 
         void resetInitialization();
         void initDegrees();

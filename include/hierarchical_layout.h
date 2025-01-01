@@ -2,11 +2,13 @@
 #define GRAPHLAYOUT_HIERARCHICAL_LAYOUT_H
 
 #include "feedback_arcs.h"
+#include "layer_assignment.h"
 
 namespace graph_layout {
 
     struct HierarchicalLayoutConfig {
-        FeedbackArcsMethod cycle_break_method = FeedbackArcsMethod::Eades_93;
+        FeedbackArcsMethod feedbackArcsMethod = FeedbackArcsMethod::EADES_93;
+        LayerAssignmentMethod layerAssignmentMethod = LayerAssignmentMethod::NETWORK_SIMPLEX;
     };
 }
 

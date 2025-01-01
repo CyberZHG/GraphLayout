@@ -25,6 +25,24 @@ void SimpleGraph::addOutEdges(const int u, const vector<int> &vertices) {
     }
 }
 
+void SimpleGraph::reverseEdges(const std::unordered_set<int> &ids) {
+    _reverseIds = ids;
+    for (auto &edge : _edges) {
+        if (_reverseIds.contains(edge.id)) {
+            swap(edge.u, edge.v);
+        }
+    }
+}
+
+void SimpleGraph::reverseEdgesBack() {
+    for (auto &edge : _edges) {
+        if (_reverseIds.contains(edge.id)) {
+            swap(edge.u, edge.v);
+        }
+    }
+    _reverseIds.clear();
+}
+
 const unordered_map<int, size_t> & SimpleGraph::getEdgeIdToIndexMap() {
     if (!_edgeIdToIndexMapInitialized) {
         _edgeIdToIndexMap.clear();
