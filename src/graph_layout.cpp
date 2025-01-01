@@ -7,7 +7,7 @@ using namespace graph_layout;
 
 DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
 
-void DirectedGraphHierarchicalLayout::setGraph(const std::shared_ptr<SPDirectedGraph> &graph) {
+void DirectedGraphHierarchicalLayout::setGraph(const std::shared_ptr<SPDirectedGraph>& graph) {
     _initialNumVertices = static_cast<int>(graph->numVertices());
     _graph = graph;
 }
@@ -165,6 +165,11 @@ void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(
     }
 }
 
+/** A vertex is virtual if the vertex ID is greater than the maximum vertex ID in the beginning graph.
+ *
+ * @param u A vertex ID.
+ * @return Whether the vertex is virtual.
+ */
 bool DirectedGraphHierarchicalLayout::isVirtualVertex(const int u) const {
     return u >= _initialNumVertices;
 }

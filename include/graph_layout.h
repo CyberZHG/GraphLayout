@@ -10,17 +10,22 @@
 
 namespace graph_layout {
 
+    /** A Sugiyama style directed graph layout. */
     class DirectedGraphHierarchicalLayout {
     public:
         DirectedGraphHierarchicalLayout();
         ~DirectedGraphHierarchicalLayout() = default;
 
-        void setGraph(const std::shared_ptr<SPDirectedGraph> &graph);
+        void setGraph(const std::shared_ptr<SPDirectedGraph>& graph);
         [[nodiscard]] std::shared_ptr<SPDirectedGraph> graph() const;
 
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
         void drawSVG(const std::string& outputFilePath) const;
 
+        /** Add numeric vertex labels.
+         *
+         * @param start The start index.
+         */
         void initializeVertexLabelsWithNumericalValues(int start = 1);
 
     private:
