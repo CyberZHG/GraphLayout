@@ -11,21 +11,25 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
     py::enum_<FeedbackArcsMethod>(m, "FeedbackArcsMethod")
         .value("EADES_93", FeedbackArcsMethod::EADES_93)
         .value("MIN_ID", FeedbackArcsMethod::MIN_ID)
-        .export_values();
+        .export_values()
+    ;
     py::enum_<LayerAssignmentMethod>(m, "LayerAssignmentMethod")
         .value("TOPOLOGICAL", LayerAssignmentMethod::TOPOLOGICAL)
         .value("MIN_NUM_OF_LAYERS", LayerAssignmentMethod::MIN_NUM_OF_LAYERS)
         .value("GANSNER_93", LayerAssignmentMethod::GANSNER_93)
         .value("MIN_TOTAL_EDGE_LENGTH", LayerAssignmentMethod::MIN_TOTAL_EDGE_LENGTH)
-        .export_values();
+        .export_values()
+    ;
     py::enum_<CrossMinimizationMethod>(m, "CrossMinimizationMethod")
         .value("BARYCENTER", CrossMinimizationMethod::BARYCENTER)
         .value("MEDIAN", CrossMinimizationMethod::MEDIAN)
         .value("PAIRWISE_SWITCH", CrossMinimizationMethod::PAIRWISE_SWITCH)
-        .export_values();
+        .export_values()
+    ;
     py::enum_<VertexPositioningMethod>(m, "VertexPositioningMethod")
         .value("BRANDES_KOPF", VertexPositioningMethod::BRANDES_KOPF)
-        .export_values();
+        .export_values()
+    ;
     py::class_<SPDirectedGraph, shared_ptr<SPDirectedGraph>>(m, "SPDirectedGraph")
         .def(py::init<size_t>(), py::arg("num_vertices"))
         .def("add_edge", py::overload_cast<int, int>(&SPDirectedGraph::addEdge), py::arg("x_margin"), py::arg("y_margin"))
@@ -46,9 +50,9 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def(py::init<>())
         .def_property_readonly_static("NONE", [](py::object) { return AttributeShape::NONE; })
         .def_property_readonly_static("CIRCLE", [](py::object) { return AttributeShape::CIRCLE; })
-    .def_property_readonly_static("DOUBLE_CIRCLE", [](py::object) { return AttributeShape::DOUBLE_CIRCLE; })
-    .def_property_readonly_static("ELLIPSE", [](py::object) { return AttributeShape::ELLIPSE; })
-    .def_property_readonly_static("RECT", [](py::object) { return AttributeShape::RECT; })
+        .def_property_readonly_static("DOUBLE_CIRCLE", [](py::object) { return AttributeShape::DOUBLE_CIRCLE; })
+        .def_property_readonly_static("ELLIPSE", [](py::object) { return AttributeShape::ELLIPSE; })
+        .def_property_readonly_static("RECT", [](py::object) { return AttributeShape::RECT; })
     ;
     py::class_<Attributes>(m, "Attributes")
         .def(py::init<>())

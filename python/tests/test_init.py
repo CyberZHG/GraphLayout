@@ -1,4 +1,4 @@
-from sp_graph_layout import DirectedGraphHierarchicalLayout, SPDirectedGraph
+from sp_graph_layout import DirectedGraphHierarchicalLayout
 
 
 def test_init():
