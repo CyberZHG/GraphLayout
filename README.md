@@ -8,33 +8,21 @@ Graph Layout
 [![PyPI version](https://img.shields.io/pypi/v/sp-graph-layout.svg)](https://pypi.org/project/sp-graph-layout/)
 [![npm version](https://img.shields.io/npm/v/sp-graph-layout.svg)](https://www.npmjs.com/package/sp-graph-layout)
 
-A library for visualizing directed graphs. 
+## Overview
 
-[Demo](./demo)
+A library for visualizing directed graphs.
 
 |         rank dir = TB          |         rank dir = LR          |
 |:------------------------------:|:------------------------------:|
 | ![](docs/images/example1_tb.svg) | ![](docs/images/example1_lr.svg) |
 | ![](docs/images/example2_tb.svg) | ![](docs/images/example2_lr.svg) |
 
-## Requirements
+## Documentation
 
-MacOS:
+* [Documentation](https://cyberzhg.github.io/GraphLayout/)
 
-```bash
-brew install cairo pango pkg-config
-```
-
-Linux:
-
-```bash
-sudo apt install libcairo2-dev libpango1.0-dev pkg-config
-```
-
-## Development
-
-Add the following to CMake options to enable tests:
-
-```bash
--DGRAPH_LAYOUT_ENABLE_TESTS=ON
-```
+  * [Installation](https://cyberzhg.github.io/GraphLayout/install.html)
+  * [Basic Concepts](https://cyberzhg.github.io/GraphLayout/basic.html)
+  * [Graph Attributes](https://cyberzhg.github.io/GraphLayout/graph_attr.html)
+  * [Vertex Attributes](https://cyberzhg.github.io/GraphLayout/vertex_attr.html)
+  * [Edge Attributes](https://cyberzhg.github.io/GraphLayout/edge_attr.html)
