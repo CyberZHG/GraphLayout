@@ -17,11 +17,11 @@ namespace graph_layout {
         explicit FeedbackArcsFinder(FeedbackArcsMethod method = FeedbackArcsMethod::EADES_93);
         ~FeedbackArcsFinder() = default;
 
-        [[nodiscard]] std::unordered_set<int> findFeedbackArcs(SimpleGraph &) const;
+        [[nodiscard]] std::unordered_set<int> findFeedbackArcs(SimpleDirectedGraph &) const;
     private:
         FeedbackArcsMethod _method;
 
-        static std::unordered_set<int> findFeedbackArcsEades93(SimpleGraph &) ;
+        static std::unordered_set<int> findFeedbackArcsEades93(SimpleDirectedGraph &) ;
     };
 }
 

@@ -5,27 +5,46 @@
 using namespace std;
 using namespace graph_layout;
 
-SimpleGraph::SimpleGraph(const size_t num_vertices) : _numVertices(num_vertices) {
+SimpleDirectedGraph::SimpleDirectedGraph(const size_t num_vertices) : _numVertices(num_vertices) {
 }
 
-void SimpleGraph::addEdge(const SimpleEdge &edge) {
+void SimpleDirectedGraph::addEdge(const SimpleEdge &edge) {
     assert(0 <= edge.u && edge.u < _numVertices);
     assert(0 <= edge.v && edge.v < _numVertices);
     _edges.emplace_back(edge);
     resetInitialization();
 }
 
-void SimpleGraph::addEdge(const int u, const int v) {
+void SimpleDirectedGraph::addEdge(const int u, const int v) {
     addEdge(SimpleEdge(static_cast<int>(_edges.size()), u, v));
 }
 
-void SimpleGraph::addOutEdges(const int u, const vector<int> &vertices) {
+void SimpleDirectedGraph::addOutEdges(const int u, const vector<int> &vertices) {
     for (const auto &v: vertices) {
         addEdge(u, v);
     }
 }
 
-void SimpleGraph::reverseEdges(const std::unordered_set<int> &ids) {
+void SimpleDirectedGraph::disableSelfCycleEdges() {
+    resetInitialization();
+    int newNumEdges = 0;
+    for (auto & _edge : _edges) {
+        if (_edge.u == _edge.v) {
+            _selfCycleEdges.emplace_back(_edge);
+        } else {
+            _edges[newNumEdges++] = _edge;
+        }
+    }
+    _edges.erase(_edges.begin() + newNumEdges, _edges.end());
+}
+
+void SimpleDirectedGraph::enableSelfCycleEdges() {
+    resetInitialization();
+    _edges.insert(_edges.end(), _selfCycleEdges.begin(), _selfCycleEdges.end());
+}
+
+void SimpleDirectedGraph::reverseEdges(const std::unordered_set<int> &ids) {
+    resetInitialization();
     _reverseIds = ids;
     for (auto &edge : _edges) {
         if (_reverseIds.contains(edge.id)) {
@@ -34,7 +53,8 @@ void SimpleGraph::reverseEdges(const std::unordered_set<int> &ids) {
     }
 }
 
-void SimpleGraph::reverseEdgesBack() {
+void SimpleDirectedGraph::reverseEdgesBack() {
+    resetInitialization();
     for (auto &edge : _edges) {
         if (_reverseIds.contains(edge.id)) {
             swap(edge.u, edge.v);
@@ -43,7 +63,7 @@ void SimpleGraph::reverseEdgesBack() {
     _reverseIds.clear();
 }
 
-const unordered_map<int, size_t> & SimpleGraph::getEdgeIdToIndexMap() {
+const unordered_map<int, size_t> & SimpleDirectedGraph::getEdgeIdToIndexMap() {
     if (!_edgeIdToIndexMapInitialized) {
         _edgeIdToIndexMap.clear();
         for (size_t i = 0; i < _edges.size(); i++) {
@@ -54,56 +74,56 @@ const unordered_map<int, size_t> & SimpleGraph::getEdgeIdToIndexMap() {
     return _edgeIdToIndexMap;
 }
 
-const vector<int> &SimpleGraph::getInDegrees() {
+const vector<int> &SimpleDirectedGraph::getInDegrees() {
     if (!_degreesInitialized) {
         initDegrees();
     }
     return _inDegrees;
 }
 
-const vector<int> &SimpleGraph::getOutDegrees() {
+const vector<int> &SimpleDirectedGraph::getOutDegrees() {
     if (!_degreesInitialized) {
         initDegrees();
     }
     return _outDegrees;
 }
 
-const vector<vector<int>> &SimpleGraph::getInVertices() {
+const vector<vector<int>> &SimpleDirectedGraph::getInVertices() {
     if (!_inOutVerticesInitialized) {
         initInOutVertices();
     }
     return _inVertices;
 }
 
-const vector<vector<int>> &SimpleGraph::getOutVertices() {
+const vector<vector<int>> &SimpleDirectedGraph::getOutVertices() {
     if (!_inOutVerticesInitialized) {
         initInOutVertices();
     }
     return _outVertices;
 }
 
-const vector<vector<int>> & SimpleGraph::getInEdges() {
+const vector<vector<int>> & SimpleDirectedGraph::getInEdges() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _inEdges;
 }
 
-const vector<vector<int>> & SimpleGraph::getOutEdges() {
+const vector<vector<int>> & SimpleDirectedGraph::getOutEdges() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _outEdges;
 }
 
-bool SimpleGraph::hasCycle() {
+bool SimpleDirectedGraph::hasCycle() {
     if (!_hasCycleInitialized) {
         initHasCycle();
     }
     return _hasCycle;
 }
 
-void SimpleGraph::resetInitialization() {
+void SimpleDirectedGraph::resetInitialization() {
     _edgeIdToIndexMapInitialized = false;
     _degreesInitialized = false;
     _inOutVerticesInitialized = false;
@@ -111,7 +131,7 @@ void SimpleGraph::resetInitialization() {
     _hasCycleInitialized = false;
 }
 
-void SimpleGraph::initDegrees() {
+void SimpleDirectedGraph::initDegrees() {
     _inDegrees = vector(_numVertices, 0);
     _outDegrees = vector(_numVertices, 0);
     for (const auto &edge : _edges) {
@@ -121,7 +141,7 @@ void SimpleGraph::initDegrees() {
     _degreesInitialized = true;
 }
 
-void SimpleGraph::initInOutVertices() {
+void SimpleDirectedGraph::initInOutVertices() {
     _inVertices = vector(_numVertices, vector<int>());
     _outVertices = vector(_numVertices, vector<int>());
     for (const auto &edge : _edges) {
@@ -131,7 +151,7 @@ void SimpleGraph::initInOutVertices() {
     _inOutVerticesInitialized = true;
 }
 
-void SimpleGraph::initInOutEdges() {
+void SimpleDirectedGraph::initInOutEdges() {
     _inEdges = vector(_numVertices, vector<int>());
     _outEdges = vector(_numVertices, vector<int>());
     for (const auto &edge : _edges) {
@@ -141,7 +161,7 @@ void SimpleGraph::initInOutEdges() {
     _inOutEdgesInitialized = true;
 }
 
-void SimpleGraph::initHasCycle() {
+void SimpleDirectedGraph::initHasCycle() {
     auto inDegrees = vector(getInDegrees());
     const auto &outEdges = getOutEdges();
     const auto &edgeIdToIndexMap = getEdgeIdToIndexMap();

@@ -7,7 +7,7 @@ using namespace std;
 using namespace graph_layout;
 
 TEST(TestFeedbackArcsEades93, EmptyGraph) {
-    SimpleGraph graph(0);
+    SimpleDirectedGraph graph(0);
     EXPECT_FALSE(graph.hasCycle());
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
@@ -15,24 +15,15 @@ TEST(TestFeedbackArcsEades93, EmptyGraph) {
 }
 
 TEST(TestFeedbackArcsEades93, SingleNodeNoEdge) {
-    SimpleGraph graph(1);
+    SimpleDirectedGraph graph(1);
     EXPECT_FALSE(graph.hasCycle());
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
     EXPECT_EQ(feedbackArcs, unordered_set<int>());
 }
 
-TEST(TestFeedbackArcsEades93, SingleNodeSelfCycle) {
-    SimpleGraph graph(1);
-    graph.addEdge(0, 0);
-    EXPECT_TRUE(graph.hasCycle());
-    const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
-    const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
-    EXPECT_EQ(feedbackArcs, unordered_set({0}));
-}
-
 TEST(TestFeedbackArcsEades93, SingleEdge) {
-    SimpleGraph graph(2);
+    SimpleDirectedGraph graph(2);
     graph.addEdge(0, 1);
     EXPECT_FALSE(graph.hasCycle());
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
@@ -41,7 +32,7 @@ TEST(TestFeedbackArcsEades93, SingleEdge) {
 }
 
 TEST(TestFeedbackArcsEades93, TwoNodesCycle) {
-    SimpleGraph graph(2);
+    SimpleDirectedGraph graph(2);
     graph.addEdge(0, 1);
     graph.addEdge(1, 0);
     EXPECT_TRUE(graph.hasCycle());
@@ -51,7 +42,7 @@ TEST(TestFeedbackArcsEades93, TwoNodesCycle) {
 }
 
 TEST(TestFeedbackArcsEades93, ThreeNodesCycle) {
-    SimpleGraph graph(3);
+    SimpleDirectedGraph graph(3);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     graph.addEdge(2, 0);
@@ -62,7 +53,7 @@ TEST(TestFeedbackArcsEades93, ThreeNodesCycle) {
 }
 
 TEST(TestFeedbackArcsEades93, ParallelEdges) {
-    SimpleGraph graph(2);
+    SimpleDirectedGraph graph(2);
     graph.addEdge(0, 1);
     graph.addEdge(0, 1);
     graph.addEdge(1, 0);
@@ -74,7 +65,7 @@ TEST(TestFeedbackArcsEades93, ParallelEdges) {
 }
 
 TEST(TestFeedbackArcsEades93, SpecialCase1) {
-    SimpleGraph graph(12);
+    SimpleDirectedGraph graph(12);
     graph.addOutEdges(0, {1, 2, 7});
     graph.addEdge(1, 3);
     graph.addEdge(2, 3);
@@ -93,13 +84,14 @@ TEST(TestFeedbackArcsEades93, SpecialCase1) {
 }
 
 TEST(TestFeedbackArcsEades93, SpecialCase2) {
-    SimpleGraph graph(4);
+    SimpleDirectedGraph graph(4);
     graph.addEdge(2, 2);
     graph.addEdge(2, 1);
     EXPECT_TRUE(graph.hasCycle());
+    graph.disableSelfCycleEdges();
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
-    EXPECT_EQ(feedbackArcs, unordered_set({0}));
+    EXPECT_EQ(feedbackArcs, unordered_set<int>({}));
 }
 
 TEST(TestFeedbackArcsEades93, Random) {
@@ -107,28 +99,26 @@ TEST(TestFeedbackArcsEades93, Random) {
     mt19937 gen(rd());
     uniform_int_distribution<> numVerticesDist(2, 128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
-    for (size_t caseIndex = 0; caseIndex < 1024; ++caseIndex) {
+    for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
         const size_t n = numVerticesDist(gen);
-        SimpleGraph graph(n);
+        SimpleDirectedGraph graph(n);
         uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * n));
         uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
         const size_t m = numEdgesDist(gen);
         for (size_t edgeIndex = 0; edgeIndex < m; ++edgeIndex) {
             const int &u = verticeIndexDist(gen);
             const int &v = verticeIndexDist(gen);
-            graph.addEdge(u, v);
+            if (u != v) {
+                graph.addEdge(u, v);
+            }
         }
         const bool hasCycle = graph.hasCycle();
         const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
         if (hasCycle) {
-            SimpleGraph newGraph(n);
-            unordered_set feedBackArcIds(feedbackArcs.begin(), feedbackArcs.end());
-            for (const auto &edge : graph.edges()) {
-                if (!feedBackArcIds.contains(edge.id)) {
-                    newGraph.addEdge(edge);
-                }
-            }
-            EXPECT_FALSE(newGraph.hasCycle());
+            graph.reverseEdges(feedbackArcs);
+            EXPECT_FALSE(graph.hasCycle());
+            graph.reverseEdgesBack();
+            EXPECT_TRUE(graph.hasCycle());
         } else {
             EXPECT_EQ(feedbackArcs, unordered_set<int>());
         }

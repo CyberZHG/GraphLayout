@@ -9,10 +9,10 @@ namespace graph_layout {
         int id, u, v;
     };
 
-    class SimpleGraph {
+    class SimpleDirectedGraph {
     public:
-        explicit SimpleGraph(size_t num_vertices);
-        ~SimpleGraph() = default;
+        explicit SimpleDirectedGraph(size_t num_vertices);
+        ~SimpleDirectedGraph() = default;
 
         [[nodiscard]] size_t numVertices() const { return _numVertices; }
         [[nodiscard]] size_t numEdges() const { return _edges.size(); }
@@ -21,6 +21,9 @@ namespace graph_layout {
         void addEdge(const SimpleEdge &edge);
         void addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int> &vertices);
+
+        void disableSelfCycleEdges();
+        void enableSelfCycleEdges();
 
         void reverseEdges(const std::unordered_set<int> &ids);
         void reverseEdgesBack();
@@ -55,6 +58,8 @@ namespace graph_layout {
 
         bool _hasCycleInitialized = false;
         bool _hasCycle = false;
+
+        std::vector<SimpleEdge> _selfCycleEdges;
 
         std::unordered_set<int> _reverseIds;
 
