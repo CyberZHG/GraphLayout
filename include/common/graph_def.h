@@ -23,10 +23,10 @@ namespace graph_layout {
 
     class SPDirectedGraph {
     public:
-        explicit SPDirectedGraph(size_t num_vertices);
+        explicit SPDirectedGraph(size_t numVertices);
         ~SPDirectedGraph() = default;
 
-        void updateNumVertices(size_t num_vertices);
+        void updateNumVertices(size_t numVertices);
         [[nodiscard]] size_t numVertices() const { return _numVertices; }
         [[nodiscard]] size_t numEdges() const { return _edges.size(); }
         [[nodiscard]] const std::vector<SPEdge>& edges() const { return _edges; }

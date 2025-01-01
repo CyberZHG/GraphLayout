@@ -52,6 +52,8 @@ namespace graph_layout {
         static const std::string NONE;
         static const std::string CIRCLE;
         static const std::string DOUBLE_CIRCLE;
+        static const std::string ELLIPSE;
+        static const std::string RECT;
     };
 
     class Attributes {
@@ -74,6 +76,8 @@ namespace graph_layout {
 
         [[nodiscard]] std::string rankDir() const;
         void setRankDir(const std::string& value);
+
+        void setVertexShape(int u, const std::string& value);
 
     private:
         static std::unordered_map<std::string, std::string> DEFAULT_GRAPH_ATTRIBUTE_VALUES;

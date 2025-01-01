@@ -17,6 +17,7 @@ namespace graph_layout {
         DirectedGraphHierarchicalLayout();
         ~DirectedGraphHierarchicalLayout() = default;
 
+        [[nodiscard]] std::shared_ptr<SPDirectedGraph> createGraph(size_t numVertices);
         void setGraph(const std::shared_ptr<SPDirectedGraph>& graph);
         [[nodiscard]] std::shared_ptr<SPDirectedGraph> graph() const;
 

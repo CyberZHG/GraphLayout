@@ -13,11 +13,11 @@ bool SPEdge::operator==(const SPEdge& edge) const {
     return id == edge.id && u == edge.u && v == edge.v;
 }
 
-SPDirectedGraph::SPDirectedGraph(const size_t num_vertices) : _numVertices(num_vertices) {
+SPDirectedGraph::SPDirectedGraph(const size_t numVertices) : _numVertices(numVertices) {
 }
 
-void SPDirectedGraph::updateNumVertices(size_t num_vertices) {
-    _numVertices = num_vertices;
+void SPDirectedGraph::updateNumVertices(size_t numVertices) {
+    _numVertices = numVertices;
 }
 
 void SPDirectedGraph::addEdge(const SPEdge& edge) {

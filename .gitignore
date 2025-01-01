@@ -18,6 +18,7 @@ CTestTestfile.cmake
 *.swo
 *~
 *.DS_Store
+__pycache__
 
 # Compile
 *.o

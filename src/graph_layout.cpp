@@ -13,6 +13,11 @@ using namespace graph_layout;
 
 DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
 
+shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::createGraph(const size_t numVertices) {
+    _graph = make_shared<SPDirectedGraph>(numVertices);
+    return _graph;
+}
+
 void DirectedGraphHierarchicalLayout::setGraph(const shared_ptr<SPDirectedGraph>& graph) {
     _initialNumVertices = static_cast<int>(graph->numVertices());
     _graph = graph;
@@ -47,6 +52,9 @@ void DirectedGraphHierarchicalLayout::setLayerMargin(const double margin) {
 }
 
 void DirectedGraphHierarchicalLayout::layoutGraph() {
+    if (_graph == nullptr) {
+        return;
+    }
     computeVertexSizes();
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
@@ -134,6 +142,9 @@ void DirectedGraphHierarchicalLayout::layoutGraph() {
 }
 
 string DirectedGraphHierarchicalLayout::render() const {
+    if (_graph == nullptr) {
+        return "";
+    }
     const int n = static_cast<int>(_graph->numVertices());
     SVGDiagram diagram;
     if (const auto bgColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR); !bgColor.empty()) {
