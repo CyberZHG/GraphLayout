@@ -42,6 +42,28 @@ void VertexPositioning::sortIncidentEdges(SPDirectedGraph &graph, SPLayering &la
     }
 }
 
+std::vector<double> VertexPositioning::assignYCoordinates(SPDirectedGraph &graph, SPLayering &layering) const {
+    const int n = static_cast<int>(graph.numVertices());
+    const int numLayers = static_cast<int>(layering.orders.size());
+    vector<double> heights(numLayers);
+    for (int layerIndex = 1; layerIndex < numLayers; layerIndex++) {
+        double vertexMargin = 0.0;
+        for (const auto u : layering.orders[layerIndex]) {
+            for (const auto &edge : graph.getInEdges(u)) {
+                const int v = edge.u;
+                double margin = (vertexSizeAt(u) + vertexSizeAt(v)) / 2.0;
+                vertexMargin = max(vertexMargin, margin);
+            }
+        }
+        heights[layerIndex] = heights[layerIndex - 1] + _layerMargin * (layering.layerRanks[layerIndex] - layering.layerRanks[layerIndex - 1]) + vertexMargin;
+    }
+    vector<double> positions(n);
+    for (int u = 0; u < n; u++) {
+        positions[u] = heights[layering.idToLayer[u]];
+    }
+    return positions;
+}
+
 std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositioning::verticalAlignment(
     SPDirectedGraph &graph, SPLayering &layering, const bool forward, const bool leftToRight) {
     const int n = static_cast<int>(graph.numVertices());
@@ -82,6 +104,9 @@ std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositio
                 }
             }
             for (const auto v : candidates) {
+                if (v == -1) {
+                    continue;
+                }
                 if (const int posV = layering.positions[lastLayerIndex][v]; forward ? lastPosition < posV : lastPosition > posV) {
                     aligns[v] = u;
                     roots[u] = roots[v];
@@ -162,12 +187,14 @@ std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGrap
     return positions;
 }
 
-std::vector<std::pair<double, double>> VertexPositioning::assignCoordinates(SPDirectedGraph &graph, SPLayering &layering) const {
+std::pair<std::vector<double>, std::vector<double>> VertexPositioning::assignCoordinates(SPDirectedGraph &graph, SPLayering &layering) const {
+    vector<double> xs;
     switch (_method) {
         case VertexPositioningMethod::BRANDES_KOPF:
-            break;
+            xs = assignCoordinatesBrandesKopf(graph, layering);
     }
-    return {};
+    const auto ys = assignYCoordinates(graph, layering);
+    return {xs, ys};
 }
 
 double VertexPositioning::vertexSizeAt(const int index) const {
@@ -175,4 +202,27 @@ double VertexPositioning::vertexSizeAt(const int index) const {
         return _vertexSize;
     }
     return _vertexSizes[index];
+}
+
+std::vector<double> VertexPositioning::assignCoordinatesBrandesKopf(SPDirectedGraph &graph, SPLayering &layering) const {
+    const int n = static_cast<int>(graph.numVertices());
+    sortIncidentEdges(graph, layering);
+    const vector forwardOptions = {true, false};
+    const vector leftToRightOptions = {true, false};
+    vector<vector<double>> positions;
+    for (const auto forward : forwardOptions) {
+        for (const auto leftToRight : leftToRightOptions) {
+            const auto [roots, aligns] = verticalAlignment(graph, layering, forward, leftToRight);
+            positions.emplace_back(horizontalCompaction(graph, layering, roots, aligns, leftToRight));
+        }
+    }
+    vector<double> buffer(4);
+    for (int u = 0; u < n; ++u) {
+        for (int i = 0; i < 4; ++i) {
+            buffer[i] = positions[i][u];
+        }
+        ranges::sort(buffer);
+        positions[0][u] = (buffer[1] + buffer[2]) / 2.0;
+    }
+    return positions[0];
 }

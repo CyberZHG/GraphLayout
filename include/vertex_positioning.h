@@ -30,10 +30,11 @@ namespace graph_layout {
         void setVertexSizes(double size);
         void setVertexSizes(std::vector<double> &&sizes);
 
-        [[nodiscard]] std::vector<std::pair<double, double>> assignCoordinates(SPDirectedGraph &, SPLayering &) const;
+        [[nodiscard]] std::pair<std::vector<double>, std::vector<double>> assignCoordinates(SPDirectedGraph &, SPLayering &) const;
 
     protected:
         static void sortIncidentEdges(SPDirectedGraph &, SPLayering &);
+        std::vector<double> assignYCoordinates(SPDirectedGraph &, SPLayering &) const;
         static std::pair<RootVec, AlignVec> verticalAlignment(SPDirectedGraph &, SPLayering &, bool forward, bool leftToRight);
         std::vector<double> horizontalCompaction(const SPDirectedGraph &, SPLayering &, const RootVec &, const AlignVec &, bool leftToRight) const;
 
@@ -46,6 +47,7 @@ namespace graph_layout {
         std::vector<double> _vertexSizes;
 
         [[nodiscard]] double vertexSizeAt(int index) const;
+        std::vector<double> assignCoordinatesBrandesKopf(SPDirectedGraph &, SPLayering &) const;
     };
 }
 

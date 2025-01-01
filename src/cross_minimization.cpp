@@ -90,6 +90,7 @@ std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::addVirtualE
     for (const auto &order : orders) {
         layering.width = max(layering.width, order.size());
     }
+    layering.initMappings();
     return {layering, virtualEdges};
 }
 
