@@ -78,6 +78,11 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
         DirectedGraphHierarchicalLayout layout;
         layout.graphAttributes().bgcolor.set("white");
         layout.graphAttributes().rank = rank;
+        layout.setVertexAttributes(14, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+        layout.setVertexAttributes(16, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+        layout.setVertexAttributes(19, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+        layout.setVertexAttributes(22, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+        layout.setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "边");
         layout.setGraph(graph);
         layout.layoutGraph();
         layout.initializeVertexLabelsWithNumericalValues();

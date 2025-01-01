@@ -229,8 +229,8 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
             const double ny = dx / len;
             const double midX = (x1 + x2) / 2;
             const double midY = (y1 + y2) / 2;
-            const double x = midX + nx * 10.0;
-            const double y = midY + ny * 10.0;
+            const double x = midX + nx * 15.0;
+            const double y = midY + ny * 15.0;
             svg.drawText(x, y, attributes.label);
         }
     }
