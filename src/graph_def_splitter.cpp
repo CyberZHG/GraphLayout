@@ -5,7 +5,7 @@
 using namespace std;
 using namespace graph_layout;
 
-std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const SimpleDirectedGraph &graph) {
+std::vector<int> GraphComponentSplitter::getConnectedComponents(const SimpleDirectedGraph &graph) {
     const size_t n = graph.numVertices();
     vector<int> parent(n);
     for (int i = 0; i < n; ++i) {
@@ -23,10 +23,18 @@ std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const Simp
     for (const auto &edge : graph.edges()) {
         combine(edge.u, edge.v);
     }
+    for (int i = 0; i < n; ++i) {
+        parent[i] = find(i);
+    }
+    return parent;
+}
 
+std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const SimpleDirectedGraph &graph) {
+    const size_t n = graph.numVertices();
+    const auto parent = getConnectedComponents(graph);
     unordered_map<int, vector<int>> groupsMap;
     for (int i = 0; i < n; ++i) {
-        groupsMap[find(i)].emplace_back(i);
+        groupsMap[parent[i]].emplace_back(i);
     }
     _groups.clear();
     for (auto &val: groupsMap | views::values) {

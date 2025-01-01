@@ -97,7 +97,7 @@ TEST(TestFeedbackArcsEades93, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
-        auto graph = graphGen.generateGraph();
+        auto graph = graphGen.generateRandomGraph();
         const bool hasCycle = graph.hasCycle();
         const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
         if (hasCycle) {

@@ -26,6 +26,7 @@ namespace graph_layout {
         void addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int> &vertices);
         SimpleEdge &getEdge(int id);
+        void removeEdge(int id);
 
         bool operator==(const SimpleDirectedGraph &other) const;
 
@@ -46,6 +47,8 @@ namespace graph_layout {
         EdgeIterationWithIDs getInEdges(int v);
         EdgeIterationWithIDs getOutEdges(int u);
         bool hasCycle();
+
+        [[nodiscard]] SimpleDirectedGraph buildSpanningTree(const std::vector<int> &parents);
 
     private:
         size_t _numVertices{};
@@ -107,7 +110,8 @@ namespace graph_layout {
     public:
         explicit RandomSimpleDirectedGraphGenerator(const int maxNumVertices) : _minNumVertices(1), _maxNumVertices(maxNumVertices), _allowSelfCycle(false) {}
 
-        [[nodiscard]] SimpleDirectedGraph generateGraph() const;
+        [[nodiscard]] SimpleDirectedGraph generateRandomGraph() const;
+        [[nodiscard]] SimpleDirectedGraph generateRandomGraphWithoutDuplicateEdge() const;
     private:
         int _minNumVertices;
         int _maxNumVertices;
@@ -116,6 +120,7 @@ namespace graph_layout {
 
     class GraphComponentSplitter {
     public:
+        static std::vector<int> getConnectedComponents(const SimpleDirectedGraph &graph);
         std::vector<SimpleDirectedGraph> &splitGraph(const SimpleDirectedGraph &graph);
         [[nodiscard]] SimpleDirectedGraph mergeBack() const;
     private:

@@ -19,8 +19,10 @@ namespace graph_layout {
         explicit LayerAssignment(LayerAssignmentMethod method = LayerAssignmentMethod::TOPOLOGICAL);
         ~LayerAssignment() = default;
 
-        void setMinimumEdgeLengths(std::unordered_map<int, int> &&);
-        void cleanMinimumEdgeLengths();
+        void setMethod(LayerAssignmentMethod method);
+
+        void setMinEdgeLengths(std::unordered_map<int, int> &&);
+        void clearMinEdgeLengths();
         [[nodiscard]] int minEdgeLength(int) const;
 
         // Input graph must be a DAG.
@@ -38,7 +40,11 @@ namespace graph_layout {
         static constexpr int NO_PARENT = -1;
 
         std::pair<int, std::vector<int>> networkSimplexInitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
-        std::vector<int> networkSimplexComputeCutValues(SimpleDirectedGraph &, int root, const std::vector<int> &parents) const;
+        std::pair<int, std::vector<int>> networkSimplexComputeCutValues(
+            SimpleDirectedGraph &,
+            SimpleDirectedGraph &,
+            int root,
+            const std::vector<int> &parents) const;
     };
 }
 

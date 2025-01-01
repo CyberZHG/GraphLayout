@@ -3,6 +3,7 @@
 #include <cassert>
 #include <queue>
 #include <random>
+#include <iostream>
 using namespace std;
 using namespace graph_layout;
 
@@ -31,8 +32,15 @@ void SimpleDirectedGraph::addOutEdges(const int u, const vector<int> &vertices) 
 }
 
 SimpleEdge &SimpleDirectedGraph::getEdge(const int id) {
-    const int index = getEdgeIdToIndexMap().find(id)->second;
+    const int index = static_cast<int>(getEdgeIdToIndexMap().find(id)->second);
     return _edges[index];
+}
+
+void SimpleDirectedGraph::removeEdge(const int id) {
+    resetInitialization();
+    const int index = static_cast<int>(getEdgeIdToIndexMap().find(id)->second);
+    _edges[index] = _edges[_edges.size() - 1];
+    _edges.pop_back();
 }
 
 bool SimpleDirectedGraph::operator==(const SimpleDirectedGraph &other) const {
@@ -162,6 +170,17 @@ bool SimpleDirectedGraph::hasCycle() {
     return _hasCycle;
 }
 
+SimpleDirectedGraph SimpleDirectedGraph::buildSpanningTree(const std::vector<int> &parents) {
+    const size_t n = numVertices();
+    SimpleDirectedGraph tree(n);
+    for (const auto id : parents) {
+        if (id >= 0) {
+            tree.addEdge(getEdge(id));
+        }
+    }
+    return tree;
+}
+
 void SimpleDirectedGraph::resetInitialization() {
     _edgeIdToIndexMapInitialized = false;
     _degreesInitialized = false;
@@ -230,13 +249,14 @@ const SimpleEdge & EdgeIterationWithIDs::iterator::operator*() const {
     return _graph.edges()[edgeIndex];
 }
 
-SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateGraph() const {
+SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraph() const {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> numVerticesDist(_minNumVertices, _maxNumVertices);
     const size_t n = numVerticesDist(gen);
     SimpleDirectedGraph graph(n);
-    uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * min(static_cast<int>(n), 16)));
+    uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * min(static_cast<int>(n), 8)));
+    // uniform_int_distribution<> numEdgesDist(0, 16);
     uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
     const size_t m = numEdgesDist(gen);
     for (size_t edgeIndex = 0; edgeIndex < m; ++edgeIndex) {
@@ -246,6 +266,31 @@ SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateGraph() const {
             continue;
         }
         graph.addEdge(u, v);
+    }
+    return graph;
+}
+
+SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraphWithoutDuplicateEdge() const {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> numVerticesDist(_minNumVertices, _maxNumVertices);
+    const size_t n = numVerticesDist(gen);
+    SimpleDirectedGraph graph(n);
+    uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * min(static_cast<int>(n), 8)));
+    uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
+    const size_t m = numEdgesDist(gen);
+    vector<unordered_set<int>> existingEdges(n);
+    for (size_t edgeIndex = 0; edgeIndex < m; ++edgeIndex) {
+        const int &u = verticeIndexDist(gen);
+        const int &v = verticeIndexDist(gen);
+        if (!_allowSelfCycle && u == v) {
+            continue;
+        }
+        if (existingEdges[u].contains(v)) {
+            continue;
+        }
+        graph.addEdge(u, v);
+        existingEdges[u].insert(v);
     }
     return graph;
 }

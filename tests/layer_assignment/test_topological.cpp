@@ -30,7 +30,7 @@ TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge1) {
     EXPECT_EQ(ranks, vector({0, 1}));
     EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 1);
     unordered_map<int, int> minEdgeLengths = {{0, 2}};
-    layerAssignment.setMinimumEdgeLengths(std::move(minEdgeLengths));
+    layerAssignment.setMinEdgeLengths(std::move(minEdgeLengths));
     const auto newRanks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(newRanks, vector({0, 2}));
     EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, newRanks), 2);
@@ -119,7 +119,7 @@ TEST(TestLayerAssignmentTopological, Random) {
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
-        auto graph = graphGen.generateGraph();
+        auto graph = graphGen.generateRandomGraph();
         if (graph.hasCycle()) {
             const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
             graph.reverseEdges(feedbackArcs);

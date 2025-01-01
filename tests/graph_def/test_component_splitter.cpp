@@ -37,7 +37,7 @@ TEST(TestGraphComponentSplitter, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     GraphComponentSplitter splitter;
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
-        auto graph = graphGen.generateGraph();
+        auto graph = graphGen.generateRandomGraph();
         splitter.splitGraph(graph);
         auto newGraph = splitter.mergeBack();
         EXPECT_EQ(newGraph, graph);
