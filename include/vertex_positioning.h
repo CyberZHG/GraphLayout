@@ -35,7 +35,7 @@ namespace graph_layout {
     protected:
         static void sortIncidentEdges(SPDirectedGraph &, SPLayering &);
         static std::pair<RootVec, AlignVec> verticalAlignment(SPDirectedGraph &, SPLayering &, bool forward, bool leftToRight);
-        // std::vector<double> horizontalCompaction(SPDirectedGraph &, RootVec &, AlignVec &, bool forward, bool leftToRight);
+        std::vector<double> horizontalCompaction(const SPDirectedGraph &, SPLayering &, const RootVec &, const AlignVec &, bool leftToRight) const;
 
     private:
         VertexPositioningMethod _method;

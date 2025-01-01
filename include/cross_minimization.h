@@ -15,9 +15,10 @@ namespace graph_layout {
         std::vector<int> layerRanks;
         std::vector<std::vector<int>> orders;
         std::vector<std::unordered_map<int, int>> positions;
+        std::unordered_map<int, int> idToLayer;
         size_t width;
 
-        void initPositions();
+        void initMappings();
     };
 
     class CrossMinimization {

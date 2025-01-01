@@ -10,6 +10,7 @@ public:
     using VertexPositioning::VertexPositioning;
     using VertexPositioning::sortIncidentEdges;
     using VertexPositioning::verticalAlignment;
+    using VertexPositioning::horizontalCompaction;
 };
 
 TEST(TestVertexPositioningSortIncidentEdges, EmptyGraph) {
@@ -24,7 +25,7 @@ TEST(TestVertexPositioningSortIncidentEdges, SpecialCase1) {
     graph.addEdge(1, 4); graph.addEdge(2, 4); graph.addEdge(3, 4);
     SPLayering layering;
     layering.orders = {{0}, {2, 1, 3}, {4}};
-    layering.initPositions();
+    layering.initMappings();
     TestVertexPositioning::sortIncidentEdges(graph, layering);
     vector<int> vertices;
     for (const auto& edge : graph.getOutEdges(0)) {
@@ -38,23 +39,33 @@ TEST(TestVertexPositioningSortIncidentEdges, SpecialCase1) {
     EXPECT_EQ(vertices, vector({2, 1, 3}));
 }
 
-TEST(TestVertexPositioningVerticalAlignment, SpecialCase101) {
+TEST(TestVertexPositioningHorizontalCompaction, SpecialCase101) {
     SPDirectedGraph graph(4);
     graph.addEdge(0, 1); graph.addEdge(0, 2);
     graph.addEdge(1, 3); graph.addEdge(2, 3);
     SPLayering layering;
     layering.orders = {{0}, {1, 2}, {3}};
-    layering.initPositions();
+    layering.initMappings();
+    TestVertexPositioning vertexPositioning;
+    constexpr double UNIT_SIZE = TestVertexPositioning::DEFAULT_VERTEX_SIZE + TestVertexPositioning::DEFAULT_VERTEX_MARGIN;
     const auto [rootsFL, alignsFL] = TestVertexPositioning::verticalAlignment(graph, layering, true, true);
     EXPECT_EQ(rootsFL, vector({0, 0, 2, 0}));
     EXPECT_EQ(alignsFL, vector({1, 3, 2, 0}));
+    const auto positionsFL = vertexPositioning.horizontalCompaction(graph, layering, rootsFL, alignsFL, true);
+    EXPECT_EQ(positionsFL, vector({0.0, 0.0, UNIT_SIZE, 0.0}));
     const auto [rootsFR, alignsFR] = TestVertexPositioning::verticalAlignment(graph, layering, true, false);
     EXPECT_EQ(rootsFR, vector({0, 1, 0, 0}));
     EXPECT_EQ(alignsFR, vector({2, 1, 3, 0}));
+    const auto positionsFR = vertexPositioning.horizontalCompaction(graph, layering, rootsFR, alignsFR, false);
+    EXPECT_EQ(positionsFR, vector({UNIT_SIZE, 0.0, UNIT_SIZE, UNIT_SIZE}));
     const auto [rootsBL, alignsBL] = TestVertexPositioning::verticalAlignment(graph, layering, false, true);
     EXPECT_EQ(rootsBL, vector({3, 3, 2, 3}));
     EXPECT_EQ(alignsBL, vector({3, 0, 2, 1}));
+    const auto positionsBL = vertexPositioning.horizontalCompaction(graph, layering, rootsBL, alignsBL, true);
+    EXPECT_EQ(positionsBL, vector({0.0, 0.0, UNIT_SIZE, 0.0}));
     const auto [rootsBR, alignsBR] = TestVertexPositioning::verticalAlignment(graph, layering, false, false);
     EXPECT_EQ(rootsBR, vector({3, 1, 3, 3}));
     EXPECT_EQ(alignsBR, vector({3, 1, 0, 2}));
+    const auto positionsBR = vertexPositioning.horizontalCompaction(graph, layering, rootsBR, alignsBR, false);
+    EXPECT_EQ(positionsBR, vector({UNIT_SIZE, 0.0, UNIT_SIZE, UNIT_SIZE}));
 }
