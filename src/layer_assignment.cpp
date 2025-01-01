@@ -15,7 +15,7 @@ void LayerAssignment::setMethod(const LayerAssignmentMethod method) {
     _method = method;
 }
 
-void LayerAssignment::setMinEdgeLengths(unordered_map<int, int> &&minEdgeLens) {
+void LayerAssignment::setMinEdgeLengths(unordered_map<int, int>&& minEdgeLens) {
     _minEdgeLens = std::move(minEdgeLens);
 }
 
@@ -30,27 +30,33 @@ int LayerAssignment::minEdgeLength(const int id) const {
     return 1;
 }
 
-vector<int> LayerAssignment::rankVertices(SPDirectedGraph &graph) const {
+vector<int> LayerAssignment::rankVertices(SPDirectedGraph& graph) const {
     switch (_method) {
         case LayerAssignmentMethod::TOPOLOGICAL:
         case LayerAssignmentMethod::MIN_NUM_OF_LAYERS:
             return rankVerticesTopological(graph);
         case LayerAssignmentMethod::GANSNER_93:
         case LayerAssignmentMethod::MIN_TOTAL_EDGE_LENGTH:
-            return rankVerticesNetworkSimplex(graph);
+            return rankVerticesGansner93(graph);
     }
     return {};
 }
 
-long long LayerAssignment::calcTotalEdgeLength(const SPDirectedGraph &graph, const vector<int> &ranks) {
+long long LayerAssignment::computeTotalEdgeLength(const SPDirectedGraph& graph, const vector<int>& ranks) {
     long long cost = 0;
-    for (const auto &edge : graph.edges()) {
+    for (const auto& edge : graph.edges()) {
         cost += ranks[edge.v] - ranks[edge.u];
     }
     return cost;
 }
 
-vector<int> LayerAssignment::rankVerticesTopological(SPDirectedGraph &graph) const {
+/** Assign vertices to layers with topological sort.
+ * This also results in the graph having the minimum possible height.
+ *
+ * @param graph A DAG.
+ * @return The layers that each vertex belongs to.
+ */
+vector<int> LayerAssignment::rankVerticesTopological(SPDirectedGraph& graph) const {
     const size_t n = graph.numVertices();
     const auto edges = graph.edges();
     vector inDegrees(graph.getInDegrees());
@@ -65,7 +71,7 @@ vector<int> LayerAssignment::rankVerticesTopological(SPDirectedGraph &graph) con
     while (!q.empty()) {
         const auto u = q.front();
         q.pop();
-        for (const auto &edge : graph.getOutEdges(u)) {
+        for (const auto& edge : graph.getOutEdges(u)) {
             const int v = edge.v;
             ranks[v] = max(ranks[v], ranks[u] + minEdgeLength(edge.id));
             if (--inDegrees[v] == 0) {
@@ -76,7 +82,17 @@ vector<int> LayerAssignment::rankVerticesTopological(SPDirectedGraph &graph) con
     return ranks;
 }
 
-vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) const {
+/** Assign vertices to layers with the algorithm in graphviz.
+ * This also results in the graph having the minimum total edge length.
+ *
+ * This algorithm first builds a spanning tree based on the "slack" values.
+ * Then it repeatedly finds the edge with the smallest "cut value" in the spanning tree and
+ * replaces it with an adjacent edge that has the smallest "slack".
+ *
+ * @param graph A DAG.
+ * @return The layers that each vertex belongs to.
+ */
+vector<int> LayerAssignment::rankVerticesGansner93(SPDirectedGraph& graph) const {
     const size_t n = graph.numVertices();
     if (n == 0) {
         return {};
@@ -87,20 +103,19 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) 
     auto ranks = rankVerticesTopological(graph);
     auto [root, parents] = gansner93InitFeasibleTree(graph, ranks);
     auto tree = graph.buildSpanningTree(parents);
-    // No optimization.
     while (true) {
         auto [minCutIndex, cuts] = gansner93ComputeCutValues(graph, tree, root, parents);
         if (cuts[minCutIndex] >= 0) {
             break;
         }
         const auto cutEdgeId = parents[minCutIndex];
-        const auto &cutEdge = graph.getEdge(cutEdgeId);
+        const auto& cutEdge = graph.getEdge(cutEdgeId);
         tree.removeEdge(cutEdgeId);
         const auto connectedComponents = GraphComponentSplitter::getConnectedComponents(tree);
         int minSlackId = -1, minSlack = 0;
         for (int u = 0; u < n; ++u) {
             if (connectedComponents[u] == connectedComponents[cutEdge.v]) {
-                for (const auto &edge : graph.getOutEdges(u)) {
+                for (const auto& edge : graph.getOutEdges(u)) {
                     if (connectedComponents[edge.v] == connectedComponents[cutEdge.u]) {
                         const int slack = ranks[edge.v] - ranks[u] - minEdgeLength(edge.id);
                         if (minSlackId == -1 || slack < minSlack) {
@@ -111,7 +126,7 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) 
                 }
             }
         }
-        const auto &newEdge = graph.getEdge(minSlackId);
+        const auto& newEdge = graph.getEdge(minSlackId);
         if (minSlack) {
             int delta = minSlack;
             if (connectedComponents[newEdge.u] != connectedComponents[0]) {
@@ -129,7 +144,7 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) 
         while (!q.empty()) {
             const auto [u, p] = q.front();
             q.pop();
-            for (const auto &edge : tree.getInEdges(u)) {
+            for (const auto& edge : tree.getInEdges(u)) {
                 const int v = edge.u;
                 if (v == p) {
                     continue;
@@ -137,7 +152,7 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) 
                 parents[v] = edge.id;
                 q.emplace(v, u);
             }
-            for (const auto &edge : tree.getOutEdges(u)) {
+            for (const auto& edge : tree.getOutEdges(u)) {
                 const int v = edge.v;
                 if (v == p) {
                     continue;
@@ -171,8 +186,7 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) 
  * are also used to store the updated ranks.
  * @return The root and a parent vector that represents the spanning tree.
  */
-pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGraph &graph,
-                                                                       std::vector<int> &ranks) const {
+pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGraph& graph, std::vector<int>& ranks) const {
     const size_t n = graph.numVertices();
     const size_t m = graph.numEdges();
     unordered_map<int, int> slacks;  // slack(e) = rank(e.v) - rank(e.u) - minEdgeLength(e)
@@ -185,7 +199,7 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGrap
     for (int u = 0; u < n; ++u) {
         if (ranks[u] == 0) {
             root = u;
-            for (const auto &edge : graph.getOutEdges(u)) {
+            for (const auto& edge : graph.getOutEdges(u)) {
                 incidentEdges.insert(make_pair(calcSlack(edge), edge.id));
             }
             break;
@@ -199,7 +213,7 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGrap
     while (!incidentEdges.empty()) {
         const auto [slack, id] = *incidentEdges.begin();
         incidentEdges.erase(incidentEdges.begin());
-        const auto &edge = graph.getEdge(id);
+        const auto& edge = graph.getEdge(id);
         const bool headInTree = inTree(edge.u);
         if (headInTree && inTree(edge.v)) {
             continue;
@@ -213,14 +227,14 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGrap
                 ranks[u] += delta;
             }
             int numSlacksToUpdate = 0;
-            for (const auto &val: incidentEdges | views::values) {
-                const auto &incidentEdge = graph.getEdge(val);
+            for (const auto& val: incidentEdges | views::values) {
+                const auto& incidentEdge = graph.getEdge(val);
                 if (inTree(incidentEdge.u) ^ inTree(incidentEdge.v)) {
                     slacksToUpdate[numSlacksToUpdate++] = incidentEdge.id;
                 }
             }
             for (int i = 0; i < numSlacksToUpdate; ++i) {
-                const auto &incidentEdge = graph.getEdge(slacksToUpdate[i]);
+                const auto& incidentEdge = graph.getEdge(slacksToUpdate[i]);
                 incidentEdges.erase({slacks[incidentEdge.id], incidentEdge.id});
                 incidentEdges.insert(make_pair(calcSlack(incidentEdge), incidentEdge.id));
             }
@@ -228,13 +242,13 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGrap
         const int newVertex = headInTree ? edge.v : edge.u;
         parents[newVertex] = id;
         verticesInTree.emplace(newVertex);
-        for (const auto &newEdge : graph.getInEdges(newVertex)) {
+        for (const auto& newEdge : graph.getInEdges(newVertex)) {
             if (inTree(newEdge.u)) {
                 continue;
             }
             incidentEdges.insert(make_pair(calcSlack(newEdge), newEdge.id));
         }
-        for (const auto &newEdge : graph.getOutEdges(newVertex)) {
+        for (const auto& newEdge : graph.getOutEdges(newVertex)) {
             if (inTree(newEdge.v)) {
                 incidentEdges.erase(make_pair(calcSlack(newEdge), newEdge.id));
                 continue;
@@ -258,10 +272,10 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGrap
  * @return Minimum cut index and the cut values.
  */
 pair<int, vector<int>> LayerAssignment::gansner93ComputeCutValues(
-    SPDirectedGraph &graph,
-    SPDirectedGraph &tree,
+    SPDirectedGraph& graph,
+    SPDirectedGraph& tree,
     const int root,
-    const std::vector<int> &parents) const {
+    const std::vector<int>& parents) const {
     const size_t n = graph.numVertices();
     stack<int> forward, backward;
     forward.push(root);
@@ -269,12 +283,12 @@ pair<int, vector<int>> LayerAssignment::gansner93ComputeCutValues(
         const int u = forward.top();
         forward.pop();
         backward.push(u);
-        for (const auto &edge : tree.getInEdges(u)) {
+        for (const auto& edge : tree.getInEdges(u)) {
             if (const int v = edge.u; parents[v] == edge.id) {
                 forward.push(v);
             }
         }
-        for (const auto &edge : tree.getOutEdges(u)) {
+        for (const auto& edge : tree.getOutEdges(u)) {
             if (const int v = edge.v; parents[v] == edge.id) {
                 forward.push(v);
             }
@@ -289,7 +303,7 @@ pair<int, vector<int>> LayerAssignment::gansner93ComputeCutValues(
     while (backward.size() > 1) {
         const auto v = backward.top();
         backward.pop();
-        const auto &edge = graph.getEdge(parents[v]);
+        const auto& edge = graph.getEdge(parents[v]);
         cuts[v] = delta[v];
         if (edge.u == v) {
             cuts[v] = -cuts[v];

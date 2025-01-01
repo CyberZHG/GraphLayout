@@ -11,7 +11,7 @@ TEST(TestLayerAssignmentTopological, EmptyGraph) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector<int>());
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 0);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 0);
 }
 
 TEST(TestLayerAssignmentTopological, SingleNodeNoEdge) {
@@ -19,7 +19,7 @@ TEST(TestLayerAssignmentTopological, SingleNodeNoEdge) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 0);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 0);
 }
 
 TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge1) {
@@ -28,12 +28,12 @@ TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge1) {
     LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 1}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 1);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 1);
     unordered_map<int, int> minEdgeLengths = {{0, 2}};
     layerAssignment.setMinEdgeLengths(std::move(minEdgeLengths));
     const auto newRanks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(newRanks, vector({0, 2}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, newRanks), 2);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, newRanks), 2);
 }
 
 TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge2) {
@@ -42,7 +42,7 @@ TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge2) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({1, 0}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 1);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 1);
 }
 
 TEST(TestLayerAssignmentTopological, TwoNodesDuplicateEdge) {
@@ -52,7 +52,7 @@ TEST(TestLayerAssignmentTopological, TwoNodesDuplicateEdge) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 1}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 2);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 2);
 }
 
 TEST(TestLayerAssignmentTopological, ThreeNodesLine1) {
@@ -62,7 +62,7 @@ TEST(TestLayerAssignmentTopological, ThreeNodesLine1) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 1, 2}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 2);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 2);
 }
 
 TEST(TestLayerAssignmentTopological, SpecialCase1) {
@@ -74,11 +74,11 @@ TEST(TestLayerAssignmentTopological, SpecialCase1) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 1, 2, 1}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 4);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 4);
     graph.addEdge(1, 3);
     const auto newRanks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(newRanks, vector({0, 1, 3, 2}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, newRanks), 7);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, newRanks), 7);
 }
 
 TEST(TestLayerAssignmentTopological, SpecialCase2) {
@@ -111,7 +111,7 @@ TEST(TestLayerAssignmentTopological, SpecialCase3) {
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 1, 1, 2, 3, 4, 4}));
-    EXPECT_EQ(layerAssignment.calcTotalEdgeLength(graph, ranks), 12);
+    EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 12);
 }
 
 TEST(TestLayerAssignmentTopological, Random) {

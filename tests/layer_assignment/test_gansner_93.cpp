@@ -246,7 +246,7 @@ TEST(TestLayerAssignmentGansner93ComputeCutValues, Random) {
             layerAssignment.setMinEdgeLengths(std::move(minEdgeLengths));
             layerAssignment.setMethod(LayerAssignmentMethod::TOPOLOGICAL);
             auto ranks = layerAssignment.rankVertices(subGraph);
-            const long long initialTotalEdgeLength = LayerAssignment::calcTotalEdgeLength(subGraph, ranks);
+            const long long initialTotalEdgeLength = LayerAssignment::computeTotalEdgeLength(subGraph, ranks);
             const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(subGraph, ranks);
             testInitialFeasibleTree(subGraph, layerAssignment, ranks, parents);
             auto tree = subGraph.buildSpanningTree(parents);
@@ -254,7 +254,7 @@ TEST(TestLayerAssignmentGansner93ComputeCutValues, Random) {
             testCutValues(subGraph, parents, cuts);
             layerAssignment.setMethod(LayerAssignmentMethod::GANSNER_93);
             ranks = layerAssignment.rankVertices(subGraph);
-            const long long finalTotalEdgeLength = LayerAssignment::calcTotalEdgeLength(subGraph, ranks);
+            const long long finalTotalEdgeLength = LayerAssignment::computeTotalEdgeLength(subGraph, ranks);
             EXPECT_LE(finalTotalEdgeLength, initialTotalEdgeLength);
             layerAssignment.clearMinEdgeLengths();
         }

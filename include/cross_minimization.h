@@ -64,6 +64,7 @@ namespace graph_layout {
         static std::pair<SPLayering, std::vector<SPVirtualEdge>> addVirtualEdges(SPDirectedGraph& graph, std::vector<int>& ranks);
 
         /** Compute the total number of crossings between each two adjacent layers.
+         *
          * This function is mainly used for testing.
          *
          * @param graph  A connected DAG.
