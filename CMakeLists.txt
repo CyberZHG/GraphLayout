@@ -106,6 +106,7 @@ endif ()
 option(GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY "Compiling for WebAssembly" OFF)
 
 if (GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY)
+
     add_executable(GraphLayoutWASM
             js/graph_layout_js.cpp)
 
@@ -113,10 +114,14 @@ if (GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY)
             PRIVATE GraphLayout
     )
 
-    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    target_compile_options(GraphLayoutWASM PRIVATE "-O3")
+
+    set_target_properties(GraphLayoutWASM PROPERTIES SUFFIX ".js")
+
     target_link_options(GraphLayoutWASM PRIVATE
-            "-s WASM=1"
-            "-s ALLOW_MEMORY_GROWTH=1"
             "--bind"
+            "-sMODULARIZE=1"
+            "-sEXPORT_ES6=1"
+            "-sEXPORT_NAME=GraphLayoutWASMModule"
     )
 endif ()
