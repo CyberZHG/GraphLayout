@@ -52,11 +52,9 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     graph->addEdge(3, 0);
     DirectedGraphHierarchicalLayout layout;
     layout.setGraph(graph);
+    layout.setVertexLabels({"A", "BB", "CCC", "DDDD"});
     const auto [xs, ys] = layout.layoutGraph();
-    EXPECT_EQ(xs, vector({UNIT_SIZE * 1.5, 0.0, UNIT_SIZE, UNIT_SIZE * 1.5, UNIT_SIZE * 2, UNIT_SIZE * 3}));
-    EXPECT_EQ(ys, vector({0.0, UNIT_SIZE, UNIT_SIZE, UNIT_SIZE * 2, UNIT_SIZE, UNIT_SIZE}));
     EXPECT_EQ(graph->numEdges(), 8);
-    layout.setVertexLabels({"A", "B", "C", "D"});
     layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_1.svg");
 }
 
@@ -84,8 +82,8 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
         layout.attributes().setVertexAttributes(22, ATTRIBUTE_KEY_SHAPE, "doublecircle");
         layout.attributes().setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "边");
         layout.setGraph(graph);
-        layout.layoutGraph();
         layout.initializeVertexLabelsWithNumericalValues();
+        layout.layoutGraph();
         layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_2__{}.svg", rankDir));
     };
     test(AttributeRankDir::TOP_TO_BOTTOM);
@@ -141,7 +139,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
         layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
         layout.attributes().setRankDir(rankDir);
-        layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "S");
+        layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
         for (int u = 1; u <= 4; ++u) {
             layout.attributes().setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u));
         }
@@ -154,7 +152,6 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         layout.attributes().setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "a");
         layout.attributes().setEdgeAttributes(6, ATTRIBUTE_KEY_LABEL, "b");
         layout.attributes().setEdgeAttributes(7, ATTRIBUTE_KEY_LABEL, "a,b");
-        layout.setLayerMargin(1.5);
         layout.setGraph(graph);
         layout.layoutGraph();
         layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", rankDir));

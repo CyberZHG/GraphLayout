@@ -11,12 +11,12 @@ using namespace graph_layout;
 
 DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
 
-void DirectedGraphHierarchicalLayout::setGraph(const std::shared_ptr<SPDirectedGraph>& graph) {
+void DirectedGraphHierarchicalLayout::setGraph(const shared_ptr<SPDirectedGraph>& graph) {
     _initialNumVertices = static_cast<int>(graph->numVertices());
     _graph = graph;
 }
 
-std::shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::graph() const {
+shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::graph() const {
     return _graph;
 }
 
@@ -44,7 +44,10 @@ void DirectedGraphHierarchicalLayout::setLayerMargin(const double margin) {
     _vertexPositioning.setLayerMargin(margin);
 }
 
-std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
+pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
+    computeVertexSizes();
+#endif
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
     int edgeIndex = CrossMinimization::VIRTUAL_EDGE_ID_OFFSET;
@@ -130,7 +133,7 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
 }
 
 #ifdef GRAPH_LAYOUT_ENABLE_SVG
-void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath) const {
+void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) const {
     const int n = static_cast<int>(_graph->numVertices());
     constexpr double margin = 30.0;
     double minX, maxX, minY, maxY;
@@ -328,4 +331,33 @@ void DirectedGraphHierarchicalLayout::adjustCoordinatesByGraphRank() {
     if (rankDir == AttributeRankDir::LEFT_TO_RIGHT || rankDir == AttributeRankDir::RIGHT_TO_LEFT) {
         swap_ranges(_xs.begin(), _xs.end(), _ys.begin());
     }
+}
+
+void DirectedGraphHierarchicalLayout::computeVertexSizes() {
+    const int n = static_cast<int>(_graph->numVertices());
+    const auto rankDir = _attributes.rankDir();
+    double layerMargin = VertexPositioning::DEFAULT_LAYER_MARGIN;
+    double vertexMargin = VertexPositioning::DEFAULT_VERTEX_MARGIN;
+    vector vertexSizes(n, VertexPositioning::DEFAULT_VERTEX_SIZE);
+    for (int u = 0; u < n; ++u) {
+        const auto label = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL);
+        const auto fontName = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_NAME);
+        const auto fontSize = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_SIZE);
+        const auto font = format("{} {}", fontName, fontSize);
+        if (!label.empty()) {
+            const auto [width, height] = DrawSVG::computeTextSize(label, font);
+            if (rankDir == AttributeRankDir::TOP_TO_BOTTOM || rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
+                vertexSizes[u] = max(vertexSizes[u], max(width, height) + 15.0);
+                vertexMargin = max(vertexMargin, width + 15.0);
+                layerMargin = max(layerMargin, height + 15.0);
+            } else {
+                vertexSizes[u] = max(vertexSizes[u], max(width, height) + 15.0);
+                vertexMargin = max(vertexMargin, height + 15.0);
+                layerMargin = max(layerMargin, width + 15.0);
+            }
+        }
+    }
+    _vertexPositioning.setVertexSizes(std::move(vertexSizes));
+    _vertexPositioning.setVertexMargin(vertexMargin);
+    _vertexPositioning.setLayerMargin(layerMargin);
 }

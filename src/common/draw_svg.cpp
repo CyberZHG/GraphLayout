@@ -96,7 +96,7 @@ pair<double, double> DrawSVG::computeTextSize(const string &text, const string& 
     g_object_unref(layout);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
-    return make_pair(ink_rect.width, ink_rect.height);
+    return make_pair(ink_rect.width / 1024.0, ink_rect.height / 1024.0);
 }
 
 pair<double, double> DrawSVG::computeTextSize(const string &text, const string &fontName, const string &fontSize) {

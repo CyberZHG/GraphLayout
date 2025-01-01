@@ -8,6 +8,8 @@ using namespace graph_layout;
 unordered_map<string, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
     {ATTRIBUTE_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
     {ATTRIBUTE_KEY_BG_COLOR, ""},
+    {ATTRIBUTE_KEY_FONT_NAME, "Serif"},
+    {ATTRIBUTE_KEY_FONT_SIZE, "16"},
 };
 
 unordered_map<string, string> Attributes::DEFAULT_VERTEX_ATTRIBUTE_VALUES = {

@@ -55,6 +55,10 @@ namespace graph_layout {
 
         [[nodiscard]] bool isVirtualVertex(int u) const;
         void adjustCoordinatesByGraphRank();
+
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
+        void computeVertexSizes();
+#endif
     };
 
 }
