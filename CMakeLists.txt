@@ -16,6 +16,8 @@ add_library(GraphLayout STATIC
         src/graph_def_splitter.cpp
         include/cross_minimization.h
         src/cross_minimization.cpp
+        include/binary_indexed_tree.h
+        src/binary_indexed_tree.cpp
 )
 
 target_include_directories(GraphLayout
