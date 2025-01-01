@@ -8,6 +8,10 @@ CrossMinimization::CrossMinimization(const CrossMinimizationMethod method) : _me
 }
 
 
+void CrossMinimization::setMethod(CrossMinimizationMethod method) {
+    _method = method;
+}
+
 std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::reduceNumCross(SPDirectedGraph &graph, std::vector<int> &ranks) const {
     auto [layeredOrder, virtualEdges] = addVirtualEdges(graph, ranks);
     switch (_method) {
@@ -18,6 +22,7 @@ std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::reduceN
             reduceNumCrossWithMedianHeuristic(graph, layeredOrder);
             break;
         case CrossMinimizationMethod::PAIRWISE_SWITCH:
+            reduceNumCrossWithPairwiseSwitchHeuristic(graph, layeredOrder);
             break;
     }
     return {layeredOrder, virtualEdges};
@@ -75,13 +80,13 @@ std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::addVirt
     return {layeredOrder, virtualEdges};
 }
 
-long long CrossMinimization::calcNumCross(
+long long CrossMinimization::computeNumCross(
     SPDirectedGraph &graph,
     BinaryIndexedTree &bit,
     const std::vector<int> &order1,
     const std::vector<int> &order2,
     const bool forward) {
-    bit.clear();
+    bit.clear(order1.size());
     unordered_map<int, int> positions;
     for (int i = 0; i < order1.size(); ++i) {
         positions[order1[i]] = i;
@@ -121,33 +126,34 @@ long long CrossMinimization::calcNumCross(
     return numCross;
 }
 
-long long CrossMinimization::calcNumCross(SPDirectedGraph &graph, const SPLayeredOrder &layeredOrder) {
+long long CrossMinimization::computeNumCross(SPDirectedGraph &graph, const SPLayeredOrder &layeredOrder) {
     const auto &orders = layeredOrder.orders;
     BinaryIndexedTree bit(layeredOrder.width);
     long long numCross = 0;
     for (size_t i = 1; i < orders.size(); ++i) {
-        numCross += calcNumCross(graph, bit, orders[i - 1], orders[i], true);
+        numCross += computeNumCross(graph, bit, orders[i - 1], orders[i], true);
     }
     return numCross;
 }
 
 void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &graph,
-    SPLayeredOrder &layeredOrder,
-    const std::function<double(SPDirectedGraph&, const unordered_map<int, int>&, int, bool)> &weighting) {
+                                                             SPLayeredOrder &layeredOrder,
+                                                             const std::function<double(SPDirectedGraph&, const unordered_map<int, int>&, int, bool)> &weighting) {
     constexpr int NUM_REPEAT = 2;
 
-    const int numLayers = static_cast<int>(layeredOrder.layerRanks.size());
     auto &orders = layeredOrder.orders;
+    const int numLayers = static_cast<int>(orders.size());
 
     vector<pair<double, pair<int, int>>> weights(layeredOrder.width);
 
     SPLayeredOrder bestLayeredOrder(layeredOrder);
-    long long bestNumCross = calcNumCross(graph, layeredOrder);
+    long long bestNumCross = computeNumCross(graph, layeredOrder);
     bool lastIsBest = false, hasUpdate = false;
+    unordered_map<int, int> positions;
     for (int repeatIndex = 0; repeatIndex < NUM_REPEAT; ++repeatIndex) {
         hasUpdate = false;
         for (int layerIndex = 1; layerIndex < numLayers; ++layerIndex) {
-            unordered_map<int, int> positions;
+            positions.clear();
             for (int i = 0; i < orders[layerIndex - 1].size(); ++i) {
                 positions[orders[layerIndex - 1][i]] = i;
             }
@@ -165,13 +171,13 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &gr
                 orders[layerIndex][i] = v;
             }
         }
-        if (const long long numCross = calcNumCross(graph, layeredOrder); numCross < bestNumCross) {
+        if (const long long numCross = computeNumCross(graph, layeredOrder); numCross < bestNumCross) {
             bestLayeredOrder = layeredOrder;
             bestNumCross = numCross;
         }
 
         for (int layerIndex = numLayers - 2; layerIndex >= 0; --layerIndex) {
-            unordered_map<int, int> positions;
+            positions.clear();
             for (int i = 0; i < orders[layerIndex + 1].size(); ++i) {
                 positions[orders[layerIndex + 1][i]] = i;
             }
@@ -197,7 +203,7 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &gr
             }
         }
         lastIsBest = false;
-        if (const long long numCross = calcNumCross(graph, layeredOrder); numCross < bestNumCross) {
+        if (const long long numCross = computeNumCross(graph, layeredOrder); numCross < bestNumCross) {
             if (repeatIndex + 1 != NUM_REPEAT) {
                 bestLayeredOrder = layeredOrder;
             }
@@ -256,4 +262,102 @@ void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph
         return weight;
     };
     reduceNumCrossWithWeightingHeuristic(graph, layeredOrder, weighting);
+}
+
+long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
+    const std::vector<std::unordered_map<int, int>> &positions,
+    std::vector<int> &adjPositionsU,
+    std::vector<int> &adjPositionsV,
+    const int layerIndex, const int u, const int v, const bool forward) {
+    const int numLayers = static_cast<int>(positions.size());
+    const int adjLayerIndex = forward ? layerIndex + 1 : layerIndex - 1;
+    if (adjLayerIndex < 0 || adjLayerIndex >= numLayers) {
+        return 0;
+    }
+    const auto &edgesU = forward ? graph.getOutEdges(u) : graph.getInEdges(u);
+    const auto &edgesV = forward ? graph.getOutEdges(v) : graph.getInEdges(v);
+    int degU = 0, degV = 0;
+    for (const auto &edge : edgesU) {
+        adjPositionsU[degU++] = positions[adjLayerIndex].find(edge.u == u ? edge.v : edge.u)->second;
+    }
+    for (const auto &edge : edgesV) {
+        adjPositionsV[degV++] = positions[adjLayerIndex].find(edge.u == v ? edge.v : edge.u)->second;
+    }
+    sort(adjPositionsU.begin(), adjPositionsU.begin() + degU);
+    sort(adjPositionsV.begin(), adjPositionsV.begin() + degV);
+    long long numCross = 0;
+    for (int indexU = 0, indexV = 0; indexU < degU && indexV < degV;) {
+        if (adjPositionsU[indexU] <= adjPositionsV[indexV]) {
+            ++indexU;
+        } else {
+            ++indexV;
+            numCross += degU - indexU;
+        }
+    }
+    return numCross;
+}
+
+long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
+    const std::vector<std::unordered_map<int, int>> &positions,
+    std::vector<int> &adjPositionsU,
+    std::vector<int> &adjPositionsV,
+    const int layerIndex, const int u, const int v) {
+    const long long numCrossForward = computeNumCross(graph, positions, adjPositionsU, adjPositionsV, layerIndex, u, v, true);
+    const long long numCrossBackward = computeNumCross(graph, positions, adjPositionsU, adjPositionsV, layerIndex, u, v, false);
+    return numCrossForward + numCrossBackward;
+}
+
+void CrossMinimization::
+reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph &graph, SPLayeredOrder &layeredOrder) {
+    constexpr int NUM_REPEAT = 2;
+
+    auto &orders = layeredOrder.orders;
+    const int numLayers = static_cast<int>(orders.size());
+
+    vector<unordered_map<int, int>> positions(numLayers);
+    for (int layerIndex = 0; layerIndex < numLayers; layerIndex++) {
+        for (int i = 0; i < orders[layerIndex].size(); i++) {
+            positions[layerIndex][orders[layerIndex][i]] = i;
+        }
+    }
+
+    int maxDegree = 0;
+    for (const auto &order : orders) {
+        for (const auto &u : order) {
+            maxDegree = max(maxDegree, max(graph.getInDegrees()[u], graph.getOutDegrees()[u]));
+        }
+    }
+    vector<int> adjPositions1(maxDegree), adjPositions2(maxDegree);
+
+    bool hasUpdate = false;
+    const auto swapIfLessNumCross = [&](const int layerIndex, const int index) {
+        const int u = orders[layerIndex][index];
+        const int v = orders[layerIndex][index + 1];
+        const long long currentNumCross = computeNumCross(graph, positions, adjPositions1, adjPositions2, layerIndex, u, v);
+        const long long newNumCross = computeNumCross(graph, positions, adjPositions1, adjPositions2, layerIndex, v, u);
+        if (currentNumCross > newNumCross) {
+            hasUpdate = true;
+            swap(orders[layerIndex][index], orders[layerIndex][index + 1]);
+            swap(positions[layerIndex][u], positions[layerIndex][v]);
+        }
+    };
+
+    for (int repeatIndex = 0; repeatIndex < NUM_REPEAT; ++repeatIndex) {
+        hasUpdate = false;
+        for (int layerIndex = 0; layerIndex < numLayers; ++layerIndex) {
+            for (int i = 0; i + 1 < orders[layerIndex].size(); ++i) {
+                swapIfLessNumCross(layerIndex, i);
+            }
+        }
+        if (!hasUpdate) {
+            break;
+        }
+
+        hasUpdate = false;
+        for (int layerIndex = numLayers - 1; layerIndex >= 0; --layerIndex) {
+            for (int i = 0; i + 1 < orders[layerIndex].size(); ++i) {
+                swapIfLessNumCross(layerIndex, i);
+            }
+        }
+    }
 }

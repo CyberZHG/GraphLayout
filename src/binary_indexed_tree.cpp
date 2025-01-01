@@ -34,3 +34,11 @@ long long BinaryIndexedTree::prefixSum(int index) const {
 void BinaryIndexedTree::clear() {
     ranges::fill(_bit, 0);
 }
+
+void BinaryIndexedTree::clear(const size_t n) {
+    if (n + 1 < _bit.size()) {
+        fill(_bit.begin(), _bit.begin() + static_cast<int>(n) + 1, 0);
+    } else {
+        clear();
+    }
+}

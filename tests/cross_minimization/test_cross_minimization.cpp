@@ -74,7 +74,7 @@ void testNumCrossing(SPDirectedGraph &graph, const SPLayeredOrder &layeredOrder)
             }
         }
     }
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), numCross);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), numCross);
 }
 
 TEST(TestCrossMinimizationNumCross, SpecialCase1) {
@@ -84,7 +84,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase1) {
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1}, {3, 2}});
     layeredOrder.width = 2;
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 1);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 1);
     testNumCrossing(graph, layeredOrder);
 }
 
@@ -96,19 +96,19 @@ TEST(TestCrossMinimizationNumCross, SpecialCase2) {
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}});
     layeredOrder.width = 3;
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 2);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 2);
     testNumCrossing(graph, layeredOrder);
     graph.addEdge(1, 5);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 3);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 3);
     testNumCrossing(graph, layeredOrder);
     graph.addEdge(2, 3);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 5);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 5);
     testNumCrossing(graph, layeredOrder);
     graph.addEdge(0, 4);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 7);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 7);
     testNumCrossing(graph, layeredOrder);
     graph.addEdge(1, 4);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 9);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 9);
     testNumCrossing(graph, layeredOrder);
 }
 
@@ -123,7 +123,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase3) {
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}, {6, 7, 8}});
     layeredOrder.width = 3;
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 4);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 4);
     testNumCrossing(graph, layeredOrder);
 }
 
@@ -140,7 +140,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase4) {
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1, 2, 3}, {4, 5, 6, 7}});
     layeredOrder.width = 4;
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 14);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 14);
     testNumCrossing(graph, layeredOrder);
 }
 

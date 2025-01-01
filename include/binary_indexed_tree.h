@@ -24,6 +24,7 @@ namespace graph_layout {
         [[nodiscard]] long long prefixSum(int index) const;
 
         void clear();
+        void clear(size_t n);
 
     private:
         std::vector<long long> _bit;

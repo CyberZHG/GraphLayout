@@ -45,6 +45,7 @@ add_executable(runTests
         tests/cross_minimization/test_cross_minimization.cpp
         tests/cross_minimization/test_barycenter.cpp
         tests/cross_minimization/test_median.cpp
+        tests/cross_minimization/test_pairwise_switch.cpp
 )
 
 target_link_libraries(runTests

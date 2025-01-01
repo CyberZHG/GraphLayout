@@ -9,36 +9,48 @@ using namespace std;
 using namespace graph_layout;
 
 
-TEST(TestCrossMinimizationBaryCenter, TwoEdgesCross) {
+TEST(TestCrossMinimizationPairwiseSwitch, TwoEdgesCross) {
     SPDirectedGraph graph(4);
     graph.addEdge(0, 3);
     graph.addEdge(1, 2);
     auto ranks = vector({0, 0, 1, 1});
-    const CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
+    const CrossMinimization crossMinimization(CrossMinimizationMethod::PAIRWISE_SWITCH);
     auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
     EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder), 1);
     auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
     EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 0);
 }
 
-TEST(TestCrossMinimizationBaryCenter, SpecialCase1) {
+TEST(TestCrossMinimizationPairwiseSwitch, SpecialCase1) {
     SPDirectedGraph graph(5);
     graph.addEdge(0, 4);
     graph.addEdge(1, 4);
     graph.addEdge(2, 3);
     auto ranks = vector({0, 0, 0, 1, 1});
-    const CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
+    const CrossMinimization crossMinimization(CrossMinimizationMethod::PAIRWISE_SWITCH);
     auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
     EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder),2);
     auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
     EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 0);
 }
 
-TEST(TestCrossMinimizationBaryCenter, RandomBaryCenter) {
+TEST(TestCrossMinimizationPairwiseSwitch, SpecialCase2) {
+    SPDirectedGraph graph(11);
+    graph.addEdge(9, 4); graph.addEdge(8, 1); graph.addEdge(2, 3); graph.addEdge(2, 5); graph.addEdge(9, 10);
+    graph.addEdge(0, 9); graph.addEdge(0, 6); graph.addEdge(7, 1); graph.addEdge(9, 1); graph.addEdge(8, 2);
+    auto ranks = vector({0, 2, 2, 3, 2, 3, 1, 1, 1, 1, 2});
+    const CrossMinimization crossMinimization(CrossMinimizationMethod::PAIRWISE_SWITCH);
+    auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder),1);
+    auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 1);
+}
+
+TEST(TestCrossMinimizationPairwiseSwitch, RandomPairwiseSwitch) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
-    const CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
+    CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
     GraphComponentSplitter splitter;
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
         auto graph = graphGen.generateRandomGraph();
@@ -49,9 +61,11 @@ TEST(TestCrossMinimizationBaryCenter, RandomBaryCenter) {
         }
         for (auto subGraphs = splitter.splitGraph(graph); auto &subGraph : subGraphs) {
             auto ranks = layerAssignment.rankVertices(subGraph);
-            auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(subGraph, ranks);
             auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(subGraph, ranks);
+
+            auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(subGraph, ranks);
             const auto initNumCross = CrossMinimization::computeNumCross(subGraph, initLayeredOrder);
+            crossMinimization.setMethod(CrossMinimizationMethod::PAIRWISE_SWITCH);
             const auto numCross = CrossMinimization::computeNumCross(subGraph, layeredOrder);
             EXPECT_GE(initNumCross, numCross);
         }

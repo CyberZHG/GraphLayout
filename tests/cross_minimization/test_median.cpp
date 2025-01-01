@@ -16,9 +16,9 @@ TEST(TestCrossMinimizationMedian, TwoEdgesCross) {
     auto ranks = vector({0, 0, 1, 1});
     const CrossMinimization crossMinimization(CrossMinimizationMethod::MEDIAN);
     auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, initLayeredOrder), 1);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder), 1);
     auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 0);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 0);
 }
 
 TEST(TestCrossMinimizationMedian, SpecialCase1) {
@@ -29,9 +29,9 @@ TEST(TestCrossMinimizationMedian, SpecialCase1) {
     auto ranks = vector({0, 0, 0, 1, 1});
     const CrossMinimization crossMinimization(CrossMinimizationMethod::MEDIAN);
     auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, initLayeredOrder),2);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder),2);
     auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 0);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 0);
 }
 
 TEST(TestCrossMinimizationMedian, SpecialCase2) {
@@ -41,9 +41,9 @@ TEST(TestCrossMinimizationMedian, SpecialCase2) {
     auto ranks = vector({0, 2, 2, 3, 2, 3, 1, 1, 1, 1, 2});
     const CrossMinimization crossMinimization(CrossMinimizationMethod::MEDIAN);
     auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, initLayeredOrder),1);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder),1);
     auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 1);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 1);
 }
 
 TEST(TestCrossMinimizationMedian, RandomMedian) {
@@ -63,12 +63,9 @@ TEST(TestCrossMinimizationMedian, RandomMedian) {
             auto ranks = layerAssignment.rankVertices(subGraph);
             auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(subGraph, ranks);
             auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(subGraph, ranks);
-            const auto initNumCross = CrossMinimization::calcNumCross(subGraph, initLayeredOrder);
-            const auto numCross = CrossMinimization::calcNumCross(subGraph, layeredOrder);
+            const auto initNumCross = CrossMinimization::computeNumCross(subGraph, initLayeredOrder);
+            const auto numCross = CrossMinimization::computeNumCross(subGraph, layeredOrder);
             EXPECT_GE(initNumCross, numCross);
-            if (initNumCross < numCross) {
-                cout << initNumCross << " " << numCross << endl;
-            }
         }
     }
 }

@@ -24,25 +24,38 @@ namespace graph_layout {
 
         static constexpr int VIRTUAL_EDGE_ID_OFFSET = 1000000000;
 
+        void setMethod(CrossMinimizationMethod method);
+
         std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> reduceNumCross(SPDirectedGraph &, std::vector<int>& ranks) const;
 
         static std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> addVirtualEdges(SPDirectedGraph& graph, std::vector<int>& ranks);
-        static long long calcNumCross(SPDirectedGraph& graph, const SPLayeredOrder& layeredOrder);
+        static long long computeNumCross(SPDirectedGraph& graph, const SPLayeredOrder& layeredOrder);
 
     private:
         CrossMinimizationMethod _method;
 
-        static long long calcNumCross(
+        static long long computeNumCross(
             SPDirectedGraph &graph,
             BinaryIndexedTree &bit,
             const std::vector<int> &order1,
             const std::vector<int> &order2,
             bool forward = true);
+        static long long computeNumCross(SPDirectedGraph& graph,
+            const std::vector<std::unordered_map<int, int>> &positions,
+            std::vector<int> &adjPositionsU,
+            std::vector<int> &adjPositionsV,
+            int layerIndex, int u, int v, bool forward);
+        static long long computeNumCross(SPDirectedGraph& graph,
+            const std::vector<std::unordered_map<int, int>> &positions,
+            std::vector<int> &adjPositionsU,
+            std::vector<int> &adjPositionsV,
+            int layerIndex, int u, int v);
 
         static void reduceNumCrossWithWeightingHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder,
             const std::function<double(SPDirectedGraph&, const std::unordered_map<int, int>&, int, bool)> &weighting);
         static void reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
         static void reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
+        static void reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
     };
 }
 
