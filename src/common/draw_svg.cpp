@@ -28,6 +28,10 @@ void DrawSVG::drawBackground(const double red, const double green, const double 
     cairo_fill(_cairo);
 }
 
+void DrawSVG::translate(const double dx, const double dy) const {
+    cairo_translate(_cairo, dx, dy);
+}
+
 void DrawSVG::drawCircle(const double x, const double y, const double r) const {
     cairo_set_source_rgb(_cairo, 0, 0, 0);
     cairo_set_line_width(_cairo, 1);

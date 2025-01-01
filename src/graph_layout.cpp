@@ -161,17 +161,16 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
     }
     const double width = maxX - minX + margin * 2;
     const double height = maxY - minY + margin * 2;
-    const double shiftX = margin + abs(minX);
-    const double shiftY = margin + abs(minY);
     const auto svg = DrawSVG(outputFilePath, width, height);
     const auto backgroundColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR);
     if (!backgroundColor.empty()) {
         auto [red, green, blue] = AttributeColor::toRGB(backgroundColor);
         svg.drawBackground(red, green, blue);
     }
+    svg.translate(margin - minX, margin - minY);
     for (int u = 0; u < _initialNumVertices; ++u) {
-        const double x = _xs[u] + shiftX;
-        const double y = _ys[u] + shiftY;
+        const double x = _xs[u];
+        const double y = _ys[u];
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5;
         const auto shape = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE);
         if (shape == AttributeShape::CIRCLE) {
@@ -203,10 +202,6 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
                 x2 = _xs[edge.v] + (_xs[edge.u] - _xs[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
                 y2 = _ys[edge.v] + (_ys[edge.u] - _ys[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
             }
-            x1 = x1 + shiftX;
-            y1 = y1 + shiftY;
-            x2 = x2 + shiftX;
-            y2 = y2 + shiftY;
             if (outEdges[edge.v].contains(edge.u)) {  // There is a reverse edge
                 const double dx = x2 - x1;
                 const double dy = y2 - y1;
@@ -217,10 +212,10 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
                 const double midY = (y1 + y2) / 2;
                 const double x = midX + nx * 15.0;
                 const double y = midY + ny * 15.0;
-                x1 = _xs[edge.u] + shiftX;
-                y1 = _ys[edge.u] + shiftY;
-                x2 = _xs[edge.v] + shiftX;
-                y2 = _ys[edge.v] + shiftY;
+                x1 = _xs[edge.u];
+                y1 = _ys[edge.u];
+                x2 = _xs[edge.v];
+                y2 = _ys[edge.v];
                 const double radius1 = _vertexPositioning.vertexSizeAt(edge.u) * 0.5;
                 const double radius2 = _vertexPositioning.vertexSizeAt(edge.v) * 0.5;
                 const double edgeLen1 = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
@@ -263,7 +258,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
                 dx = -1.0;
             }
             const double nx = -dy, ny = dx;
-            const double x = _xs[edge.u] + shiftX, y = _ys[edge.u] + shiftY;
+            const double x = _xs[edge.u], y = _ys[edge.u];
             const double dir3 = atan2(ny, nx);
             constexpr double rotate = 3.14 / 6.0;
             const double dir12 = dir3 + rotate;

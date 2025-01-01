@@ -132,7 +132,7 @@ namespace graph_layout {
     class GraphComponentSplitter {
     public:
         static std::vector<int> getConnectedComponents(const SPDirectedGraph& graph);
-        std::vector<SPDirectedGraph> &splitGraph(const SPDirectedGraph& graph);
+        std::vector<SPDirectedGraph>& splitGraph(const SPDirectedGraph& graph);
         [[nodiscard]] SPDirectedGraph mergeBack() const;
         [[nodiscard]] int originalVertexId(int groupIndex, int u) const;
 

@@ -28,7 +28,7 @@ std::vector<int> GraphComponentSplitter::getConnectedComponents(const SPDirected
     return parent;
 }
 
-std::vector<SPDirectedGraph> & GraphComponentSplitter::splitGraph(const SPDirectedGraph &graph) {
+std::vector<SPDirectedGraph>& GraphComponentSplitter::splitGraph(const SPDirectedGraph &graph) {
     const size_t n = graph.numVertices();
     const auto parent = getConnectedComponents(graph);
     unordered_map<int, vector<int>> groupsMap;
