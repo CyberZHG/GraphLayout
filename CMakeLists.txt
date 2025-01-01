@@ -40,11 +40,11 @@ target_include_directories(GraphLayout
 )
 
 target_link_libraries(GraphLayout
-        ${CAIRO_LIBRARIES}
-        ${PANGO_LIBRARIES}
+        PUBLIC ${CAIRO_LIBRARIES}
+        PUBLIC ${PANGO_LIBRARIES}
 )
 
-target_compile_options(GraphLayout PRIVATE ${CAIRO_CFLAGS_OTHER} ${PANGO_CFLAGS_OTHER})
+target_compile_options(GraphLayout PUBLIC ${CAIRO_CFLAGS_OTHER} ${PANGO_CFLAGS_OTHER})
 
 option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
 
