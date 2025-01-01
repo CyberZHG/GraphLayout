@@ -15,15 +15,15 @@ public:
 
 TEST(TestLayerAssignmentNetworkSimplex, EmptyGraph) {
     SimpleDirectedGraph graph(0);
-    const LayerAssignment layerAssigment(LayerAssignmentMethod::NETWORK_SIMPLEX);
-    const auto ranks = layerAssigment.rankVertices(graph);
+    const LayerAssignment layerAssignment(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector<int>());
 }
 
 TEST(TestLayerAssignmentNetworkSimplex, SingleNodeNoEdge) {
     SimpleDirectedGraph graph(1);
-    const LayerAssignment layerAssigment(LayerAssignmentMethod::NETWORK_SIMPLEX);
-    const auto ranks = layerAssigment.rankVertices(graph);
+    const LayerAssignment layerAssignment(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0}));
 }
 
@@ -67,10 +67,10 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase1) {
     graph.addEdge(1, 2);
     graph.addEdge(2, 3);
     graph.addEdge(0, 3);
-    const TestLayerAssignment layerAssigment(LayerAssignmentMethod::TOPOLOGICAL);
-    auto ranks = layerAssigment.rankVertices(graph);
-    const auto parents = layerAssigment.networkSimplexInitFeasibleTree(graph, ranks);
-    testInitialFeasibleTree(graph, layerAssigment, ranks, parents);
+    const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
+    auto ranks = layerAssignment.rankVertices(graph);
+    const auto parents = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
 TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase2) {
@@ -80,10 +80,10 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase2) {
     graph.addEdge(2, 3);
     graph.addEdge(0, 4);
     graph.addEdge(3, 3);
-    const TestLayerAssignment layerAssigment(LayerAssignmentMethod::TOPOLOGICAL);
-    auto ranks = layerAssigment.rankVertices(graph);
-    const auto parents = layerAssigment.networkSimplexInitFeasibleTree(graph, ranks);
-    testInitialFeasibleTree(graph, layerAssigment, ranks, parents);
+    const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
+    auto ranks = layerAssignment.rankVertices(graph);
+    const auto parents = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
 TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, Random) {

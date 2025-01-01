@@ -236,7 +236,7 @@ SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateGraph() const {
     uniform_int_distribution<> numVerticesDist(_minNumVertices, _maxNumVertices);
     const size_t n = numVerticesDist(gen);
     SimpleDirectedGraph graph(n);
-    uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * n));
+    uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * min(static_cast<int>(n), 16)));
     uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
     const size_t m = numEdgesDist(gen);
     for (size_t edgeIndex = 0; edgeIndex < m; ++edgeIndex) {
