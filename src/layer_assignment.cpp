@@ -1,6 +1,10 @@
 #include <queue>
+#include <set>
 #include <utility>
 #include "layer_assignment.h"
+
+#include <iostream>
+#include <ostream>
 using namespace std;
 using namespace graph_layout;
 
@@ -69,6 +73,102 @@ vector<int> LayerAssignment::rankVerticesTopological(SimpleDirectedGraph &graph)
 }
 
 vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &graph) const {
-    vector<int> ranks(graph.getInDegrees());
+    const size_t n = graph.numVertices();
+    if (n == 0) {
+        return {};
+    }
+    if (n == 1) {
+        return {0};
+    }
+    auto ranks = rankVerticesTopological(graph);
+    auto results = networkSimplexInitFeasibleTree(graph, ranks);
     return ranks;
+}
+
+/**
+ * Find an initial spanning tree based on the given initial ranks.
+ *
+ * The spanning tree should be "tight", i.e., for every edge in the tree, slack(e) = 0.
+ * The "slack" of an edge is defined as its length minus the minimum length of that edge.
+ * While the spanning tree does not cover all the vertices in the graph,
+ * in each iteration we select a non-tree edge that is incident on the tree and has the minimum slack.
+ * We then add it to the spanning tree and adjust the ranks of the vertices
+ * that are already in the tree, so that the new edge remains tight.
+ *
+ * @param graph A DAG.
+ * @param ranks Initial ranks, which could be the result of the topological solution,
+ *      are also used to store the updated ranks.
+ * @return A parent vector that represents the spanning tree.
+ */
+std::vector<int> LayerAssignment::networkSimplexInitFeasibleTree(SimpleDirectedGraph &graph,
+                                                                 std::vector<int> &ranks) const {
+    const size_t n = graph.numVertices();
+    unordered_map<int, int> slacks;  // slack(e) = rank(e.v) - rank(e.u) - minEdgeLength(e)
+    vector parents(n, -1);
+    set<pair<int, int>> incidentEdges;
+    int source = -1;
+    auto calcSlack = [&](const SimpleEdge &edge) {
+        return slacks[edge.id] = ranks[edge.v] - ranks[edge.u] - minEdgeLength(edge.id);
+    };
+    for (int u = 0; u < n; ++u) {
+        if (ranks[u] == 0) {
+            source = u;
+            for (const auto &edge : graph.getOutEdges(u)) {
+                incidentEdges.insert(make_pair(calcSlack(edge), edge.id));
+            }
+            break;
+        }
+    }
+    auto inTree = [&](const int u) {
+        return u == source || parents[u] != -1;
+    };
+    while (!incidentEdges.empty()) {
+        const auto [slack, id] = *incidentEdges.begin();
+        incidentEdges.erase(incidentEdges.begin());
+        const auto &edge = graph.getEdge(id);
+        const bool headInTree = inTree(edge.u);
+        if (headInTree && inTree(edge.v)) {
+            continue;
+        }
+        if (slack) {
+            int delta = slack;
+            if (!headInTree) {
+                delta = - delta;
+            }
+            for (int u = 0; u < n; ++u) {
+                if (inTree(u)) {
+                    ranks[u] += delta;
+                    for (const auto &newEdge : graph.getInEdges(u)) {
+                        if (inTree(newEdge.u)) {
+                            continue;
+                        }
+                        incidentEdges.erase({slacks[newEdge.id], newEdge.id});
+                        incidentEdges.insert(make_pair(calcSlack(newEdge), newEdge.id));
+                    }
+                    for (const auto &newEdge : graph.getOutEdges(u)) {
+                        if (inTree(newEdge.v)) {
+                            continue;
+                        }
+                        incidentEdges.erase({slacks[newEdge.id], newEdge.id});
+                        incidentEdges.insert(make_pair(calcSlack(newEdge), newEdge.id));
+                    }
+                }
+            }
+        }
+        const int newVertex = headInTree ? edge.v : edge.u;
+        parents[newVertex] = id;
+        for (const auto &newEdge : graph.getInEdges(newVertex)) {
+            if (inTree(newEdge.u)) {
+                continue;
+            }
+            incidentEdges.insert(make_pair(calcSlack(newEdge), newEdge.id));
+        }
+        for (const auto &newEdge : graph.getOutEdges(newVertex)) {
+            if (inTree(newEdge.v)) {
+                continue;
+            }
+            incidentEdges.insert(make_pair(calcSlack(newEdge), newEdge.id));
+        }
+    }
+    return parents;
 }

@@ -33,6 +33,9 @@ namespace graph_layout {
 
         std::vector<int> rankVerticesTopological(SimpleDirectedGraph &) const;
         std::vector<int> rankVerticesNetworkSimplex(SimpleDirectedGraph &) const;
+
+    protected:
+        std::vector<int> networkSimplexInitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
     };
 }
 

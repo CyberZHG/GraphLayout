@@ -50,7 +50,6 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleDirectedGra
     }
     int num_popped_vertices = 0;
     vector<bool> popped(n);
-    auto &edgeIdToIndexMap = graph.getEdgeIdToIndexMap();
     auto removeNode = [&](const int u) {
         if (popped[u]) {
             return;

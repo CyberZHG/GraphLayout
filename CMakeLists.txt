@@ -35,8 +35,9 @@ FetchContent_MakeAvailable(googletest)
 add_executable(runTests
         tests/test_main.cpp
         tests/feedback_arcs/test_eades_93.cpp
-        tests/layer_assignment/topological.cpp
+        tests/layer_assignment/test_topological.cpp
         tests/graph_def/test_component_splitter.cpp
+        tests/layer_assignment/test_network_simplex.cpp
 )
 
 target_link_libraries(runTests

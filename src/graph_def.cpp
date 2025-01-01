@@ -30,6 +30,11 @@ void SimpleDirectedGraph::addOutEdges(const int u, const vector<int> &vertices) 
     }
 }
 
+SimpleEdge &SimpleDirectedGraph::getEdge(const int id) {
+    const int index = getEdgeIdToIndexMap().find(id)->second;
+    return _edges[index];
+}
+
 bool SimpleDirectedGraph::operator==(const SimpleDirectedGraph &other) const {
     if (_numVertices != other._numVertices) {
         return false;
@@ -224,8 +229,6 @@ const SimpleEdge & EdgeIterationWithIDs::iterator::operator*() const {
     const auto edgeIndex = _graph.getEdgeIdToIndexMap().find(_ids[_index])->second;
     return _graph.edges()[edgeIndex];
 }
-
-
 
 SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateGraph() const {
     random_device rd;

@@ -25,6 +25,7 @@ namespace graph_layout {
         void addEdge(const SimpleEdge &edge);
         void addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int> &vertices);
+        SimpleEdge &getEdge(int id);
 
         bool operator==(const SimpleDirectedGraph &other) const;
 
