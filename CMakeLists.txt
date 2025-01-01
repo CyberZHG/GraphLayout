@@ -8,14 +8,8 @@ if(APPLE)
 endif()
 
 find_package(PkgConfig REQUIRED)
-
 pkg_check_modules(CAIRO REQUIRED cairo)
-include_directories(${CAIRO_INCLUDE_DIRS})
-link_directories(${CAIRO_LIBRARY_DIRS})
-
 pkg_check_modules(PANGO REQUIRED pango pangocairo)
-include_directories(${PANGO_INCLUDE_DIRS})
-link_directories(${PANGO_LIBRARY_DIRS})
 
 add_library(GraphLayout STATIC
         include/graph_layout.h
@@ -37,6 +31,13 @@ add_library(GraphLayout STATIC
 
 target_include_directories(GraphLayout
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CAIRO_INCLUDE_DIRS}
+        ${PANGO_INCLUDE_DIRS}
+)
+
+target_link_directories(GraphLayout
+        PUBLIC ${CAIRO_LIBRARY_DIRS}
+        PUBLIC ${PANGO_LIBRARY_DIRS}
 )
 
 target_link_libraries(GraphLayout
