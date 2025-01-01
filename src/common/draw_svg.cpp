@@ -9,6 +9,8 @@
 using namespace std;
 using namespace graph_layout;
 
+constexpr double PANGO_SCALE_DOUBLE = PANGO_SCALE;
+
 DrawSVG::DrawSVG(const string& path, const double width, const double height) {
     _width = width;
     _height = height;
@@ -73,10 +75,10 @@ void DrawSVG::drawText(const double x, const double y, const string& text, const
     pango_font_description_free(font_desc);
     PangoRectangle ink_rect, logical_rect;
     pango_layout_get_extents(layout, &ink_rect, &logical_rect);
-    const double iw = ink_rect.width / 1024.0;
-    const double ih = ink_rect.height / 1024.0;
-    const double textX = x - iw / 2.0 - ink_rect.x / 1024.0;
-    const double textY = y - ih / 2.0 - ink_rect.y / 1024.0;
+    const double iw = ink_rect.width / PANGO_SCALE_DOUBLE;
+    const double ih = ink_rect.height / PANGO_SCALE_DOUBLE;
+    const double textX = x - iw / 2.0 - ink_rect.x / PANGO_SCALE_DOUBLE;
+    const double textY = y - ih / 2.0 - ink_rect.y / PANGO_SCALE_DOUBLE;
     cairo_move_to(_cairo, textX, textY);
     pango_cairo_show_layout(_cairo, layout);
     g_object_unref(layout);
@@ -87,7 +89,7 @@ cairo_status_t dummy_cairo_write_func(void*, const unsigned char*, unsigned int)
     return CAIRO_STATUS_SUCCESS;
 }
 
-pair<double, double> DrawSVG::computeTextSize(const string &text, const string& font) {
+tuple<double, double, double, double> DrawSVG::computeTextInkRect(const string &text, const string &font) {
     const auto surface = cairo_svg_surface_create_for_stream(&dummy_cairo_write_func, nullptr, 400, 300);
     const auto cr = cairo_create(surface);
     PangoLayout* layout = pango_cairo_create_layout(cr);
@@ -100,7 +102,15 @@ pair<double, double> DrawSVG::computeTextSize(const string &text, const string& 
     g_object_unref(layout);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
-    return make_pair(ink_rect.width / 1024.0, ink_rect.height / 1024.0);
+    return {ink_rect.x / PANGO_SCALE_DOUBLE,
+        ink_rect.y / PANGO_SCALE_DOUBLE,
+        ink_rect.width / PANGO_SCALE_DOUBLE,
+        ink_rect.height / PANGO_SCALE_DOUBLE};
+}
+
+pair<double, double> DrawSVG::computeTextSize(const string &text, const string& font) {
+    const auto& [x, y, width, height] = computeTextInkRect(text, font);
+    return {width, height};
 }
 
 pair<double, double> DrawSVG::computeTextSize(const string &text, const string &fontName, const string &fontSize) {

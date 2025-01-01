@@ -52,7 +52,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     graph->addEdge(3, 0);
     DirectedGraphHierarchicalLayout layout;
     layout.setGraph(graph);
-    layout.setVertexLabels({"A", "BB", "CCC", "DDDD"});
+    layout.setVertexLabels({"A", "BB", "CCC", "DD\nDD"});
     const auto [xs, ys] = layout.layoutGraph();
     EXPECT_EQ(graph->numEdges(), 8);
     layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_1.svg");
