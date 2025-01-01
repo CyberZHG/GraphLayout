@@ -15,13 +15,28 @@ namespace graph_layout {
         DirectedGraphHierarchicalLayout();
         ~DirectedGraphHierarchicalLayout() = default;
 
-        std::pair<std::vector<double>, std::vector<double>> layoutGraph(SPDirectedGraph &) const;
+        void setGraph(const std::shared_ptr<SPDirectedGraph> &graph);
+        [[nodiscard]] std::shared_ptr<SPDirectedGraph> graph() const;
+
+        std::pair<std::vector<double>, std::vector<double>> layoutGraph();
+        void drawSVG(const std::string& outputFilePath) const;
+
+        void initializeVertexLabelsWithNumericalValues(int start = 1);
 
     private:
+        std::shared_ptr<SPDirectedGraph> _graph = nullptr;
+
         FeedbackArcsFinder _feedbackArcsFinder;
         LayerAssignment _layerAssignment;
         CrossMinimization _crossMinimization;
         VertexPositioning _vertexPositioning;
+
+        int _initialNumVertices = 0;
+        std::vector<double> _xs, _ys;
+
+        std::vector<std::string> _vertexLabels;
+
+        [[nodiscard]] bool isVirtualVertex(int u) const;
     };
 
 }
