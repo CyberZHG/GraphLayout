@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(GraphLayout STATIC
         include/graph_layout.h
         src/graph_layout.cpp
-        include/hierarchical_layout.h
         include/feedback_arcs.h
         src/feedback_arcs.cpp
         include/graph_def.h
@@ -49,6 +48,7 @@ add_executable(runTests
         tests/cross_minimization/test_median.cpp
         tests/cross_minimization/test_pairwise_switch.cpp
         tests/vertex_positioning/test_brandes_kopf.cpp
+        tests/graph_layout/test_directed_graph_hierarchical_layout.cpp
 )
 
 target_link_libraries(runTests

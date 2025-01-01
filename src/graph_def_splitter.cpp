@@ -81,3 +81,7 @@ SPDirectedGraph GraphComponentSplitter::mergeBack() const {
     newGraph.sortEdgesById();
     return newGraph;
 }
+
+int GraphComponentSplitter::originalVertexId(const int groupIndex, const int u) const {
+    return _groups[groupIndex][u];
+}

@@ -26,9 +26,11 @@ namespace graph_layout {
         static constexpr double DEFAULT_VERTEX_SIZE = 1.0;
 
         void setVertexMargin(double margin);
+        [[nodiscard]] double vertexMargin() const;
         void setLayerMargin(double margin);
         void setVertexSizes(double size);
         void setVertexSizes(std::vector<double> &&sizes);
+        [[nodiscard]] double vertexSizeAt(int index) const;
 
         [[nodiscard]] std::pair<std::vector<double>, std::vector<double>> assignCoordinates(SPDirectedGraph &, SPLayering &) const;
 
@@ -46,7 +48,6 @@ namespace graph_layout {
         double _vertexSize = DEFAULT_VERTEX_SIZE;
         std::vector<double> _vertexSizes;
 
-        [[nodiscard]] double vertexSizeAt(int index) const;
         std::vector<double> assignCoordinatesBrandesKopf(SPDirectedGraph &, SPLayering &) const;
     };
 }

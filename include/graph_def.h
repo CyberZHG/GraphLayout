@@ -131,6 +131,8 @@ namespace graph_layout {
         static std::vector<int> getConnectedComponents(const SPDirectedGraph &graph);
         std::vector<SPDirectedGraph> &splitGraph(const SPDirectedGraph &graph);
         [[nodiscard]] SPDirectedGraph mergeBack() const;
+        [[nodiscard]] int originalVertexId(int groupIndex, int u) const;
+
     private:
         std::vector<SPDirectedGraph> _graphs;
         std::vector<std::vector<int>> _groups;

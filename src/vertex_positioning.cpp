@@ -11,6 +11,10 @@ void VertexPositioning::setVertexMargin(const double margin) {
     _vertexMargin = margin;
 }
 
+double VertexPositioning::vertexMargin() const {
+    return _vertexMargin;
+}
+
 void VertexPositioning::setLayerMargin(const double margin) {
     _layerMargin = margin;
 }
