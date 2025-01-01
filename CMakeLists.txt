@@ -43,7 +43,7 @@ endif()
 
 if(GRAPH_LAYOUT_ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(--coverage -O0 -g)
+        add_compile_options(--coverage -O0 -g -fno-elide-constructors -fno-default-inline)
         add_link_options(--coverage)
     endif()
 endif()
