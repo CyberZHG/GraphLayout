@@ -56,6 +56,7 @@ void DrawSVG::drawLine(const double x1, const double y1, const double x2, const 
 }
 
 void DrawSVG::drawText(const double x, const double y, const std::string &text) const {
+    cairo_set_source_rgb(_cairo, 0, 0, 0);
     PangoLayout* layout = pango_cairo_create_layout(_cairo);
     pango_layout_set_text(layout, text.c_str(), -1);
     PangoFontDescription* font_desc = pango_font_description_from_string("Serif 16");

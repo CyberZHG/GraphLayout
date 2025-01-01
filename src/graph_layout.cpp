@@ -138,7 +138,12 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
-        svg.drawCircle(x, y, r);
+        if (attributes.shape == VertexAttributes::Shape::Circle) {
+            svg.drawCircle(x, y, r);
+        } else if (attributes.shape == VertexAttributes::Shape::DoubleCircle) {
+            svg.drawCircle(x, y, r);
+            svg.drawCircle(x, y, r * 0.8);
+        }
         svg.drawText(x, y, attributes.label);
     }
 
