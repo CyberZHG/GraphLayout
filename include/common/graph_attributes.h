@@ -10,6 +10,8 @@ namespace graph_layout {
     constexpr std::string ATTRIBUTE_KEY_RANK_DIR = "rankdir";
     constexpr std::string ATTRIBUTE_KEY_LABEL = "label";
     constexpr std::string ATTRIBUTE_KEY_SHAPE = "shape";
+    constexpr std::string ATTRIBUTE_KEY_FONT_NAME = "fontname";
+    constexpr std::string ATTRIBUTE_KEY_FONT_SIZE = "fontsize";
 
     class Attribute {
     public:

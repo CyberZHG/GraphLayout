@@ -23,9 +23,9 @@ namespace graph_layout {
         using RootVec = std::vector<int>;
         using AlignVec = std::vector<int>;
 
-        static constexpr double DEFAULT_VERTEX_MARGIN = 1.0;
-        static constexpr double DEFAULT_LAYER_MARGIN = 1.0;
-        static constexpr double DEFAULT_VERTEX_SIZE = 1.0;
+        static constexpr double DEFAULT_VERTEX_MARGIN = 30.0;
+        static constexpr double DEFAULT_LAYER_MARGIN = 30.0;
+        static constexpr double DEFAULT_VERTEX_SIZE = 30.0;
 
         /** Set the minimum margin between two vertices that are in the same layer.
          *

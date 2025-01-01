@@ -17,9 +17,10 @@ namespace graph_layout {
 
         void drawCircle(double x, double y, double r) const;
         void drawLine(double x1, double y1, double x2, double y2, bool arrowhead = false) const;
-        void drawText(double x, double y, const std::string& text) const;
+        void drawText(double x, double y, const std::string& text, const std::string& font = "Serif 16") const;
 
         [[nodiscard]] static std::pair<double, double> computeTextSize(const std::string& text, const std::string& font);
+        [[nodiscard]] static std::pair<double, double> computeTextSize(const std::string& text, const std::string& fontName, const std::string& fontSize);
 
     private:
         double _width, _height;

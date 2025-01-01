@@ -3,6 +3,8 @@
 #ifdef GRAPH_LAYOUT_ENABLE_SVG
 #include <cairo.h>
 #include <cairo-svg.h>
+#include <format>
+
 #include <pango/pangocairo.h>
 using namespace std;
 using namespace graph_layout;
@@ -55,14 +57,14 @@ void DrawSVG::drawLine(const double x1, const double y1, const double x2, const 
     cairo_new_path(_cairo);
 }
 
-void DrawSVG::drawText(const double x, const double y, const std::string &text) const {
+void DrawSVG::drawText(const double x, const double y, const string& text, const string& font) const {
     if (text.empty()) {
         return;
     }
     cairo_set_source_rgb(_cairo, 0, 0, 0);
     PangoLayout* layout = pango_cairo_create_layout(_cairo);
     pango_layout_set_text(layout, text.c_str(), -1);
-    PangoFontDescription* font_desc = pango_font_description_from_string("Serif 16");
+    PangoFontDescription* font_desc = pango_font_description_from_string(font.c_str());
     pango_layout_set_font_description(layout, font_desc);
     pango_font_description_free(font_desc);
     PangoRectangle ink_rect, logical_rect;
@@ -81,7 +83,7 @@ cairo_status_t dummy_cairo_write_func(void*, const unsigned char*, unsigned int)
     return CAIRO_STATUS_SUCCESS;
 }
 
-std::pair<double, double> DrawSVG::computeTextSize(const std::string &text, const std::string& font) {
+pair<double, double> DrawSVG::computeTextSize(const string &text, const string& font) {
     const auto surface = cairo_svg_surface_create_for_stream(&dummy_cairo_write_func, nullptr, 400, 300);
     const auto cr = cairo_create(surface);
     PangoLayout* layout = pango_cairo_create_layout(cr);
@@ -94,7 +96,12 @@ std::pair<double, double> DrawSVG::computeTextSize(const std::string &text, cons
     g_object_unref(layout);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
-    return std::make_pair(ink_rect.width, ink_rect.height);
+    return make_pair(ink_rect.width, ink_rect.height);
+}
+
+pair<double, double> DrawSVG::computeTextSize(const string &text, const string &fontName, const string &fontSize) {
+    const string font = format("{} {}", fontName, fontSize);
+    return computeTextSize(text, font);
 }
 
 #endif

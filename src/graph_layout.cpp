@@ -132,8 +132,7 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
 #ifdef GRAPH_LAYOUT_ENABLE_SVG
 void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath) const {
     const int n = static_cast<int>(_graph->numVertices());
-    constexpr double scale = 30.0;
-    constexpr double margin = 1.0;
+    constexpr double margin = 30.0;
     double minX, maxX, minY, maxY;
     for (int u = 0; u < n; ++u) {
         minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u));
@@ -157,10 +156,10 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
             }
         }
     }
-    const double width = (maxX - minX + margin * 2) * scale;
-    const double height = (maxY - minY + margin * 2) * scale;
-    const double shiftX = (margin + abs(minX)) * scale;
-    const double shiftY = (margin + abs(minY)) * scale;
+    const double width = maxX - minX + margin * 2;
+    const double height = maxY - minY + margin * 2;
+    const double shiftX = margin + abs(minX);
+    const double shiftY = margin + abs(minY);
     const auto svg = DrawSVG(outputFilePath, width, height);
     const auto backgroundColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR);
     if (!backgroundColor.empty()) {
@@ -168,9 +167,9 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         svg.drawBackground(red, green, blue);
     }
     for (int u = 0; u < _initialNumVertices; ++u) {
-        const double x = _xs[u] * scale + shiftX;
-        const double y = _ys[u] * scale + shiftY;
-        const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
+        const double x = _xs[u] + shiftX;
+        const double y = _ys[u] + shiftY;
+        const double r = _vertexPositioning.vertexSizeAt(u) * 0.5;
         const auto shape = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE);
         if (shape == AttributeShape::CIRCLE) {
             svg.drawCircle(x, y, r);
@@ -201,10 +200,10 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
                 x2 = _xs[edge.v] + (_xs[edge.u] - _xs[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
                 y2 = _ys[edge.v] + (_ys[edge.u] - _ys[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
             }
-            x1 = x1 * scale + shiftX;
-            y1 = y1 * scale + shiftY;
-            x2 = x2 * scale + shiftX;
-            y2 = y2 * scale + shiftY;
+            x1 = x1 + shiftX;
+            y1 = y1 + shiftY;
+            x2 = x2 + shiftX;
+            y2 = y2 + shiftY;
             if (outEdges[edge.v].contains(edge.u)) {  // There is a reverse edge
                 const double dx = x2 - x1;
                 const double dy = y2 - y1;
@@ -215,12 +214,12 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
                 const double midY = (y1 + y2) / 2;
                 const double x = midX + nx * 15.0;
                 const double y = midY + ny * 15.0;
-                x1 = _xs[edge.u] * scale + shiftX;
-                y1 = _ys[edge.u] * scale + shiftY;
-                x2 = _xs[edge.v] * scale + shiftX;
-                y2 = _ys[edge.v] * scale + shiftY;
-                const double radius1 = _vertexPositioning.vertexSizeAt(edge.u) * 0.5 * scale;
-                const double radius2 = _vertexPositioning.vertexSizeAt(edge.v) * 0.5 * scale;
+                x1 = _xs[edge.u] + shiftX;
+                y1 = _ys[edge.u] + shiftY;
+                x2 = _xs[edge.v] + shiftX;
+                y2 = _ys[edge.v] + shiftY;
+                const double radius1 = _vertexPositioning.vertexSizeAt(edge.u) * 0.5;
+                const double radius2 = _vertexPositioning.vertexSizeAt(edge.v) * 0.5;
                 const double edgeLen1 = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
                 const double edgeLen2 = sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
                 x1 += (x - x1) * radius1 / edgeLen1;
@@ -261,12 +260,12 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
                 dx = -1.0;
             }
             const double nx = -dy, ny = dx;
-            const double x = _xs[edge.u] * scale + shiftX, y = _ys[edge.u] * scale + shiftY;
+            const double x = _xs[edge.u] + shiftX, y = _ys[edge.u] + shiftY;
             const double dir3 = atan2(ny, nx);
             constexpr double rotate = 3.14 / 6.0;
             const double dir12 = dir3 + rotate;
             const double dir45 = dir3 - rotate;
-            const double radius = _vertexPositioning.vertexSizeAt(edge.u) * 0.5 * scale;
+            const double radius = _vertexPositioning.vertexSizeAt(edge.u) * 0.5;
             const double x1 = x + cos(dir12) * radius;
             const double y1 = y + sin(dir12) * radius;
             const double x2 = x + cos(dir12) * radius * 2.5;
