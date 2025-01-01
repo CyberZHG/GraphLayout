@@ -104,6 +104,7 @@ if(GRAPH_LAYOUT_ENABLE_TESTS)
             tests/feedback_arcs/test_min_id.cpp
             tests/docs/test_basic.cpp
             tests/docs/test_graph_attr.cpp
+            tests/docs/test_vertex_attr.cpp
     )
 
     target_link_libraries(runTests

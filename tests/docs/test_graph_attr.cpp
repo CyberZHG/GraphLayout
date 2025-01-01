@@ -8,7 +8,7 @@ using namespace graph_layout;
 
 static const auto OUTPUT_DIR = std::string("../docs/source/_static/images/graph_attr/");
 
-TEST(TestDocsGraphAttributes, Directed) {
+TEST(TestDocsGraphAttributes, RankDir) {
     const auto rankDirs = {
         AttributeRankDir::TOP_TO_BOTTOM,
         AttributeRankDir::BOTTOM_TO_TOP,
