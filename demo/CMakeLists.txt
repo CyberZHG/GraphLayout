@@ -13,7 +13,7 @@ FetchContent_Declare(
         GraphLayout
         GIT_REPOSITORY https://github.com/CyberZHG/GraphLayout.git
         # GIT_REPOSITORY git@github.com:CyberZHG/GraphLayout.git
-        GIT_TAG v0.1
+        GIT_TAG v0.2
 )
 
 FetchContent_MakeAvailable(GraphLayout)

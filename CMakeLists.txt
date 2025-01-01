@@ -25,35 +25,39 @@ target_include_directories(GraphLayout
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-enable_testing()
+option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
 
-include(FetchContent)
+if(GRAPH_LAYOUT_BUILD_TESTS)
+    enable_testing()
 
-FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG v1.17.0
-)
+    include(FetchContent)
 
-FetchContent_MakeAvailable(googletest)
+    FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG v1.17.0
+    )
 
-add_executable(runTests
-        tests/test_main.cpp
-        tests/feedback_arcs/test_eades_93.cpp
-        tests/layer_assignment/test_topological.cpp
-        tests/graph_def/test_component_splitter.cpp
-        tests/layer_assignment/test_gansner_93.cpp
-        tests/cross_minimization/test_cross_minimization.cpp
-        tests/cross_minimization/test_barycenter.cpp
-        tests/cross_minimization/test_median.cpp
-        tests/cross_minimization/test_pairwise_switch.cpp
-        tests/vertex_positioning/test_brandes_kopf.cpp
-        tests/graph_layout/test_directed_graph_hierarchical_layout.cpp
-)
+    FetchContent_MakeAvailable(googletest)
 
-target_link_libraries(runTests
-        PRIVATE GraphLayout
-        PRIVATE gtest gtest_main
-)
+    add_executable(runTests
+            tests/test_main.cpp
+            tests/feedback_arcs/test_eades_93.cpp
+            tests/layer_assignment/test_topological.cpp
+            tests/graph_def/test_component_splitter.cpp
+            tests/layer_assignment/test_gansner_93.cpp
+            tests/cross_minimization/test_cross_minimization.cpp
+            tests/cross_minimization/test_barycenter.cpp
+            tests/cross_minimization/test_median.cpp
+            tests/cross_minimization/test_pairwise_switch.cpp
+            tests/vertex_positioning/test_brandes_kopf.cpp
+            tests/graph_layout/test_directed_graph_hierarchical_layout.cpp
+    )
 
-add_test(NAME GraphLayoutTests COMMAND runTests)
+    target_link_libraries(runTests
+            PRIVATE GraphLayout
+            PRIVATE gtest gtest_main
+    )
+
+    add_test(NAME GraphLayoutTests COMMAND runTests)
+endif ()
