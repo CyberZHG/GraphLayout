@@ -3,6 +3,20 @@ project(GraphLayout)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if(APPLE)
+    set(ENV{PKG_CONFIG_PATH} "/opt/homebrew/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+endif()
+
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(CAIRO REQUIRED cairo)
+include_directories(${CAIRO_INCLUDE_DIRS})
+link_directories(${CAIRO_LIBRARY_DIRS})
+
+pkg_check_modules(PANGO REQUIRED pango pangocairo)
+include_directories(${PANGO_INCLUDE_DIRS})
+link_directories(${PANGO_LIBRARY_DIRS})
+
 add_library(GraphLayout STATIC
         include/graph_layout.h
         src/graph_layout.cpp
@@ -24,6 +38,13 @@ add_library(GraphLayout STATIC
 target_include_directories(GraphLayout
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+target_link_libraries(GraphLayout
+        ${CAIRO_LIBRARIES}
+        ${PANGO_LIBRARIES}
+)
+
+target_compile_options(GraphLayout PRIVATE ${CAIRO_CFLAGS_OTHER} ${PANGO_CFLAGS_OTHER})
 
 option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
 
