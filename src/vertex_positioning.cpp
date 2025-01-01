@@ -86,7 +86,7 @@ std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositio
         forward ? ++layerIndex : --layerIndex) {
         const int lastLayerIndex = forward ? layerIndex - 1 : layerIndex + 1;
         const int numVertices = static_cast<int>(layering.orders[layerIndex].size());
-        int lastPosition = forward ? -1 : INT32_MAX;
+        int lastPosition = leftToRight ? -1 : INT32_MAX;
         for (int vertexIndex = leftToRight ? 0 : numVertices - 1;
             leftToRight ? vertexIndex < numVertices : vertexIndex >= 0;
             leftToRight ? ++vertexIndex : --vertexIndex) {
@@ -111,7 +111,7 @@ std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositio
                 if (v == -1) {
                     continue;
                 }
-                if (const int posV = layering.positions[lastLayerIndex][v]; forward ? lastPosition < posV : lastPosition > posV) {
+                if (const int posV = layering.positions[lastLayerIndex][v]; leftToRight ? lastPosition < posV : lastPosition > posV) {
                     aligns[v] = u;
                     roots[u] = roots[v];
                     aligns[u] = roots[v];
@@ -165,8 +165,8 @@ std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGrap
                     }
                 } else {
                     const double newPos = leftToRight ? positions[v] + vertexMargin : positions[v] - vertexMargin;
-                    if (leftToRight ? newPos > positions[u] : newPos < positions[u]) {
-                        positions[u] = newPos;
+                    if (leftToRight ? newPos > positions[root] : newPos < positions[root]) {
+                        positions[root] = newPos;
                     }
                 }
             }

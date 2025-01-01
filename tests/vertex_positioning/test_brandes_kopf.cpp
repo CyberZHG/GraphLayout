@@ -104,6 +104,99 @@ TEST(TestVertexPositioningHorizontalCompaction, SpecialCase102FL) {
     EXPECT_EQ(vector({positionsFL[0], positionsFL[12], positionsFL[16]}), vector<double>(3, 0.0));
 }
 
+bool checkMargins(const SPLayering& layering, const TestVertexPositioning& vertexPositioning, const vector<double>& positions) {
+    bool valid = true;
+    for (const auto& orders : layering.orders) {
+        for (size_t i = 1; i < orders.size(); ++i) {
+            const int u = orders[i - 1];
+            const int v = orders[i];
+            double margin = positions[v] - positions[u];
+            double marginRequirement = (vertexPositioning.vertexSizeAt(u) + vertexPositioning.vertexSizeAt(v)) * 0.5 + vertexPositioning.vertexMargin();
+            EXPECT_GE(margin, marginRequirement);
+            valid &= margin >= marginRequirement - 1e-8;
+        }
+    }
+    return valid;
+}
+
+TEST(TestVertexPositioningHorizontalCompaction, SpecialCase103) {
+    SPDirectedGraph graph(5);
+    graph.addEdge(0, 1);
+    graph.addEdge(0, 1);
+    graph.addEdge(3, 2);
+    graph.addEdge(2, 1);
+    graph.addEdge(3, 2);
+    graph.addEdge(3, 4);
+    graph.addEdge(4, 1);
+    SPLayering layering;
+    layering.layerRanks = {0, 1, 2};
+    layering.orders = {
+        {3},
+        {0, 2, 4},
+        {1},
+    };
+    layering.initMappings();
+    TestVertexPositioning::sortIncidentEdges(graph, layering);
+    const TestVertexPositioning vertexPositioning(VertexPositioningMethod::BRANDES_KOPF);
+    const auto [roots, aligns] = TestVertexPositioning::verticalAlignment(graph, layering, true, true);
+    const auto positions = vertexPositioning.horizontalCompaction(graph, layering, roots, aligns, true);
+    checkMargins(layering, vertexPositioning, positions);
+}
+
+TEST(TestVertexPositioningHorizontalCompaction, SpecialCase104) {
+    SPDirectedGraph graph(4);
+    graph.addEdge(3, 0);
+    graph.addEdge(3, 2);
+    graph.addEdge(3, 2);
+    graph.addEdge(1, 2);
+    graph.addEdge(3, 0);
+    graph.addEdge(3, 0);
+    graph.addEdge(1, 0);
+    graph.addEdge(1, 2);
+    graph.addEdge(3, 0);
+    SPLayering layering;
+    layering.layerRanks = {0, 1};
+    layering.orders = {
+        {1, 3},
+        {2, 0},
+    };
+    layering.initMappings();
+    TestVertexPositioning::sortIncidentEdges(graph, layering);
+    const TestVertexPositioning vertexPositioning(VertexPositioningMethod::BRANDES_KOPF);
+    const auto [roots, aligns] = TestVertexPositioning::verticalAlignment(graph, layering, false, true);
+    const auto positions = vertexPositioning.horizontalCompaction(graph, layering, roots, aligns, true);
+    checkMargins(layering, vertexPositioning, positions);
+}
+
+TEST(TestVertexPositioningHorizontalCompaction, Random) {
+    const RandomSimpleDirectedGraphGenerator graphGen(128);
+    const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
+    const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
+    const CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
+    const TestVertexPositioning vertexPositioning(VertexPositioningMethod::BRANDES_KOPF);
+    GraphComponentSplitter splitter;
+    for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
+        auto graph = graphGen.generateRandomGraph();
+        if (graph.hasCycle()) {
+            const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
+            graph.reverseEdges(feedbackArcs);
+            EXPECT_FALSE(graph.hasCycle());
+        }
+        for (auto subGraphs = splitter.splitGraph(graph); auto &subGraph : subGraphs) {
+            auto ranks = layerAssignment.rankVertices(subGraph);
+            auto [layering, virtualEdges] = crossMinimization.reduceNumCross(subGraph, ranks);
+            TestVertexPositioning::sortIncidentEdges(subGraph, layering);
+            for (int forward = 0; forward < 2; ++forward) {
+                for (int leftToRight = 0; leftToRight < 2; ++leftToRight) {
+                    const auto [roots, aligns] = TestVertexPositioning::verticalAlignment(subGraph, layering, forward, leftToRight);
+                    const auto positions = vertexPositioning.horizontalCompaction(subGraph, layering, roots, aligns, leftToRight);
+                    checkMargins(layering, vertexPositioning, positions);
+                }
+            }
+        }
+    }
+}
+
 TEST(TestVertexPositioningBrandesKopf, RandomNoCheck) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);

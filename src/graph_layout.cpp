@@ -119,8 +119,8 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
-        file << format(R"(  <circle cx="{}" cy="{}" r="{}" fill="none" stroke="black" stroke-width="1"/>)", x, y, r) << endl;
-        file << format(R"(  <text x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">)", x, y);
+        file << format(R"(  <circle id="{}" cx="{}" cy="{}" r="{}" fill="none" stroke="black" stroke-width="1"/>)", u, x, y, r) << endl;
+        file << format(R"(  <text id="{}" x="{}" y="{}" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">)", u, x, y);
         file << _vertexLabels[u];
         file << "</text>" << endl;
     }
@@ -147,7 +147,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         x2 = x2 * scale + shiftX;
         y2 = y2 * scale + shiftY;
 
-        file << format(R"(  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" stroke-width="1")", x1, y1, x2, y2);
+        file << format(R"(  <line id="{}->{}" x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" stroke-width="1")", edge.u, edge.v, x1, y1, x2, y2);
         if (!isVirtualVertex(edge.v)) {
             file << " marker-end=\"url(#arrowhead)\"";
         }
