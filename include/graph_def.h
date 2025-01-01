@@ -41,6 +41,7 @@ namespace graph_layout {
 
         void reverseEdges(const std::unordered_set<int> &ids);
         void reverseEdgesBack();
+        [[nodiscard]] bool isReverseEdge(int id) const;
 
         void sortEdgesById();
         const std::unordered_map<int, size_t> &getEdgeIdToIndexMap();

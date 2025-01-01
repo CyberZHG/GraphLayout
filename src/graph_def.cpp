@@ -100,6 +100,10 @@ void SPDirectedGraph::reverseEdgesBack() {
     _reverseIds.clear();
 }
 
+bool SPDirectedGraph::isReverseEdge(const int id) const {
+    return _reverseIds.contains(id);
+}
+
 void SPDirectedGraph::sortEdgesById() {
     ranges::sort(_edges, [] (const SPEdge &a, const SPEdge &b) {
         return a.id < b.id;

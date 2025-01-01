@@ -6,6 +6,8 @@ DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
 
 std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph(SPDirectedGraph &graph) const {
     const size_t n = graph.numVertices();
+    int newVertexIndex = static_cast<int>(n);
+    int edgeIndex = CrossMinimization::VIRTUAL_EDGE_ID_OFFSET;
     graph.disableSelfCycleEdges();
     GraphComponentSplitter splitter;
     const auto feedbackArcs = _feedbackArcsFinder.findFeedbackArcs(graph);
@@ -31,6 +33,37 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
         }
         if (groupIndex > 0) {
             subGraphShift += maxLeftVertexSize * 0.5;
+        }
+        for (const auto &virtualEdge : virtualEdges) {
+            const auto &originalEdge = virtualEdge.originalEdge;
+            const auto &edgeIds = virtualEdge.virtualEdgeIds;
+            bool isReversed = graph.isReverseEdge(originalEdge.id);
+            bool removeOriginalEdge = false;
+            int lastVertex = originalEdge.u;
+            for (int i = 0; i + 1 < edgeIds.size(); ++i) {
+                const auto &inEdge = subGraph.getEdge(edgeIds[i]);
+                const auto &outEdge = subGraph.getEdge(edgeIds[i + 1]);
+                if (abs(subXs[inEdge.u] - subXs[inEdge.v]) > 1e-8 || abs(subXs[outEdge.u] - subXs[outEdge.v]) > 1e-8) {
+                    removeOriginalEdge = true;
+                    graph.updateNumVertices(newVertexIndex + 1);
+                    if (!isReversed) {
+                        graph.addEdge({edgeIndex++, lastVertex, newVertexIndex});
+                    } else {
+                        graph.addEdge({edgeIndex++, newVertexIndex, lastVertex});
+                    }
+                    xs.push_back(subXs[inEdge.v] + subGraphShift);
+                    ys.push_back(subYs[inEdge.v] + subGraphShift);
+                    lastVertex = newVertexIndex++;
+                }
+            }
+            if (removeOriginalEdge) {
+                graph.removeEdge(originalEdge.id);
+                if (!isReversed) {
+                    graph.addEdge({edgeIndex++, lastVertex, originalEdge.v});
+                } else {
+                    graph.addEdge({edgeIndex++, originalEdge.v, lastVertex});
+                }
+            }
         }
         for (int u = 0; u < subN; ++u) {
             xs[splitter.originalVertexId(groupIndex, u)] = subXs[u] + subGraphShift;
