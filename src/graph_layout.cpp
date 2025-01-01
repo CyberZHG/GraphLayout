@@ -164,7 +164,6 @@ string DirectedGraphHierarchicalLayout::render() const {
         const auto label = _attributes.edgeAttributes(edge.id, ATTRIBUTE_KEY_LABEL);
         const auto e = diagram.addEdge(nodeIds[edge.u], nodeIds[edge.v]);
         e->setLabel(label);
-        e->setSplines(SVGEdge::SPLINES_LINE);
         e->setMargin(2);
         e->setArrowHead();
         if (edge.u != edge.v) {
@@ -181,37 +180,21 @@ string DirectedGraphHierarchicalLayout::render() const {
                 const double ny = dx / len;
                 const double midX = (x1 + x2) / 2;
                 const double midY = (y1 + y2) / 2;
-                const double x = midX + nx * 15.0;
-                const double y = midY + ny * 15.0;
+                const double x = midX + nx * 10.0;
+                const double y = midY + ny * 10.0;
                 e->addConnectionPoint(x, y);
             }
         } else {
-            double dx = 0, dy = 0;
+            const double vertexSize = _vertexPositioning.vertexSizeAt(edge.u);
             if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
-                dy = 1.0;
+                e->setSelfLoopAttributes(180, vertexSize * 0.8, 30);
             } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-                dy = -1.0;
+                e->setSelfLoopAttributes(0, vertexSize * 0.8, 30);
             } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
-                dx = 1.0;
+                e->setSelfLoopAttributes(-90, vertexSize * 0.8, 30);
             } else {
-                dx = -1.0;
+                e->setSelfLoopAttributes(90, vertexSize * 0.8, 30);
             }
-            const double nx = -dy, ny = dx;
-            const double x = _xs[edge.u], y = _ys[edge.u];
-            const double dir3 = atan2(ny, nx);
-            constexpr double rotate = 3.14 / 6.0;
-            const double dir12 = dir3 + rotate;
-            const double dir45 = dir3 - rotate;
-            const double radius = _vertexPositioning.vertexSizeAt(edge.u) * 0.5;
-            const double x2 = x + cos(dir12) * radius * 2.5;
-            const double y2 = y + sin(dir12) * radius * 2.5;
-            const double x3 = x + cos(dir3) * radius * 3;
-            const double y3 = y + sin(dir3) * radius * 3;
-            const double x4 = x + cos(dir45) * radius * 2.5;
-            const double y4 = y + sin(dir45) * radius * 2.5;
-            e->addConnectionPoint(x2, y2);
-            e->addConnectionPoint(x3, y3);
-            e->addConnectionPoint(x4, y4);
         }
     }
     for (const auto& virtualEdge : _virtualEdges) {
