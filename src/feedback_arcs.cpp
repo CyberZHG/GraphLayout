@@ -1,12 +1,13 @@
-#include <queue>
 #include "feedback_arcs.h"
+
+#include <queue>
 using namespace std;
 using namespace graph_layout;
 
 FeedbackArcsFinder::FeedbackArcsFinder(const FeedbackArcsMethod method) : _method(method) {
 }
 
-unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SPDirectedGraph &graph) const {
+unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SPDirectedGraph& graph) const {
     switch (_method) {
     case FeedbackArcsMethod::EADES_93:
         return findFeedbackArcsEades93(graph);
@@ -14,9 +15,19 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SPDirectedGraph &graph) 
     return {};
 }
 
-unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph &graph) {
+/** Find feedback arcs with the greedy heuristic.
+ *
+ * While the graph is not empty, the algorithm first tries to remove all sinks and sources,
+ * along with their corresponding edges.
+ * Then it removes the vertex with the maximum out-degree minus in-degree to break cycles.
+ * All the in-edges are added to the feedback arcs set.
+ *
+ * @param graph A graph.
+ * @return A set of edge IDs representing the feedback arcs.
+ */
+unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& graph) {
     const auto n = graph.numVertices();
-    auto &edges = graph.edges();
+    auto& edges = graph.edges();
     const auto m = edges.size();
     vector inDegree(graph.getInDegrees());
     vector outDegree(graph.getOutDegrees());
@@ -57,7 +68,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph &
         ++num_popped_vertices;
         popped[u] = true;
         removeFromDifferenceBuckets(u);
-        for (const auto &edge : graph.getInEdges(u)) {
+        for (const auto& edge : graph.getInEdges(u)) {
             if (const int v = edge.u; !popped[v]) {
                 if (--outDegree[v] == 0) {
                     sinks.push(v);
@@ -66,7 +77,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph &
                 addToDifferenceBuckets(v);
             }
         }
-        for (const auto &edge : graph.getOutEdges(u)) {
+        for (const auto& edge : graph.getOutEdges(u)) {
             if (const int v = edge.v; !popped[v]) {
                 if (--inDegree[v] == 0) {
                     sources.push(v);
@@ -96,7 +107,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph &
                 } else {
                     const int u = differenceBuckets[bucketUpperBound][0];
                     removeNode(u);
-                    for (const auto &edge : graph.getInEdges(u)) {
+                    for (const auto& edge : graph.getInEdges(u)) {
                         if (const int v = edge.u; !popped[v]) {
                             feedbackArcs.emplace(edge.id);
                         }
