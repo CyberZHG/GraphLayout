@@ -39,7 +39,10 @@ namespace graph_layout {
             const std::vector<int> &order2,
             bool forward = true);
 
-        static void reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder) ;
+        static void reduceNumCrossWithWeightingHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder,
+            const std::function<double(SPDirectedGraph&, const std::unordered_map<int, int>&, int, bool)> &weighting);
+        static void reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
+        static void reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
     };
 }
 

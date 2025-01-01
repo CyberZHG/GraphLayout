@@ -15,6 +15,8 @@ std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::reduceN
             reduceNumCrossWithBaryCenterHeuristic(graph, layeredOrder);
             break;
         case CrossMinimizationMethod::MEDIAN:
+            reduceNumCrossWithMedianHeuristic(graph, layeredOrder);
+            break;
         case CrossMinimizationMethod::PAIRWISE_SWITCH:
             break;
     }
@@ -129,8 +131,9 @@ long long CrossMinimization::calcNumCross(SPDirectedGraph &graph, const SPLayere
     return numCross;
 }
 
-void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &graph,
-    SPLayeredOrder &layeredOrder) {
+void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &graph,
+    SPLayeredOrder &layeredOrder,
+    const std::function<double(SPDirectedGraph&, const unordered_map<int, int>&, int, bool)> &weighting) {
     constexpr int NUM_REPEAT = 2;
 
     const int numLayers = static_cast<int>(layeredOrder.layerRanks.size());
@@ -138,8 +141,7 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &g
 
     vector<pair<double, pair<int, int>>> weights(layeredOrder.width);
 
-    SPLayeredOrder bestLayeredOrder;
-    bestLayeredOrder.width = 0;
+    SPLayeredOrder bestLayeredOrder(layeredOrder);
     long long bestNumCross = calcNumCross(graph, layeredOrder);
     bool lastIsBest = false, hasUpdate = false;
     for (int repeatIndex = 0; repeatIndex < NUM_REPEAT; ++repeatIndex) {
@@ -152,11 +154,7 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &g
             const int n = static_cast<int>(orders[layerIndex].size());
             for (int i = 0; i < n; ++i) {
                 const int v = orders[layerIndex][i];
-                weights[i] = {0.0, {i, v}};
-                for (const auto &edge : graph.getInEdges(v)) {
-                    weights[i].first += positions[edge.u];
-                }
-                weights[i].first /= graph.getInDegrees()[v];
+                weights[i] = {weighting(graph, positions, v, true), {i, v}};
             }
             sort(weights.begin(), weights.begin() + n);
             for (int i = 0; i < n; ++i) {
@@ -180,11 +178,7 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &g
             const int n = static_cast<int>(orders[layerIndex].size());
             for (int i = 0; i < n; ++i) {
                 const int u = orders[layerIndex][i];
-                weights[i] = {0.0, {i, u}};
-                for (const auto &edge : graph.getOutEdges(u)) {
-                    weights[i].first += positions[edge.v];
-                }
-                weights[i].first /= graph.getOutDegrees()[u];
+                weights[i] = {weighting(graph, positions, u, false), {i, u}};
             }
             sort(weights.begin(), weights.begin() + n);
             for (int i = 0; i < n; ++i) {
@@ -214,4 +208,52 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &g
     if (bestLayeredOrder.width > 0 && !lastIsBest) {
         layeredOrder = bestLayeredOrder;
     }
+}
+
+void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &graph, SPLayeredOrder &layeredOrder) {
+    auto weighting = [](SPDirectedGraph &_graph, const unordered_map<int, int> &positions, const int u, const bool forward) {
+        double weight = 0.0;
+        if (forward) {
+            for (const auto &edge : _graph.getInEdges(u)) {
+                weight += positions.find(edge.u)->second;
+            }
+            weight /= _graph.getInDegrees()[u];
+        } else {
+            for (const auto &edge : _graph.getOutEdges(u)) {
+                weight += positions.find(edge.v)->second;
+            }
+            weight /= _graph.getOutDegrees()[u];
+        }
+        return weight;
+    };
+    reduceNumCrossWithWeightingHeuristic(graph, layeredOrder, weighting);
+}
+
+void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph, SPLayeredOrder &layeredOrder) {
+    auto weighting = [](SPDirectedGraph &_graph, const unordered_map<int, int> &positions, const int u, const bool forward) {
+        vector<int> adjPositions;
+        if (forward) {
+            for (const auto &edge : _graph.getInEdges(u)) {
+                adjPositions.emplace_back(positions.find(edge.u)->second);
+            }
+            ranges::sort(adjPositions);
+        } else {
+            for (const auto &edge : _graph.getOutEdges(u)) {
+                adjPositions.emplace_back(positions.find(edge.v)->second);
+            }
+        }
+        const int n = static_cast<int>(adjPositions.size());
+        if (n == 0) {
+            return 0.0;
+        }
+        const auto mid = adjPositions.begin() + n / 2;
+        ranges::nth_element(adjPositions, mid);
+        double weight = *mid;
+        if (n % 2 == 0) {
+            const double weight2 = *max_element(adjPositions.begin(), mid);
+            weight = (weight + weight2) * 0.5;
+        }
+        return weight;
+    };
+    reduceNumCrossWithWeightingHeuristic(graph, layeredOrder, weighting);
 }
