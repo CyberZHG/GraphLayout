@@ -20,6 +20,10 @@ std::shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::graph() const 
     return _graph;
 }
 
+GraphAttributes& DirectedGraphHierarchicalLayout::graphAttributes() {
+    return _graphAttributes;
+}
+
 std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
@@ -90,6 +94,7 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
     }
     _graph->reverseEdgesBack();
     _graph->enableSelfCycleEdges();
+    adjustCoordinatesByGraphRank();
     return {_xs, _ys};
 }
 
@@ -110,6 +115,10 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
     const double shiftX = (margin + abs(minX)) * scale;
     const double shiftY = (margin + abs(minY)) * scale;
     const auto svg = DrawSVG(outputFilePath, width, height);
+    if (!_graphAttributes.bgcolor.isNone()) {
+        auto [red, green, blue] = _graphAttributes.bgcolor.toRGB();
+        svg.drawBackground(red, green, blue);
+    }
     for (int u = 0; u < _initialNumVertices; ++u) {
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
@@ -167,4 +176,23 @@ void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vert
  */
 bool DirectedGraphHierarchicalLayout::isVirtualVertex(const int u) const {
     return u >= _initialNumVertices;
+}
+
+/** Adjust the coordinates by `_graphAttributes.rank`.
+ * The default rank is top to bottom.
+ */
+void DirectedGraphHierarchicalLayout::adjustCoordinatesByGraphRank() {
+    if (_graphAttributes.rank == GraphAttributes::Rank::TopToBottom) {
+        return;
+    }
+    if (_graphAttributes.rank == GraphAttributes::Rank::BottomToTop || _graphAttributes.rank == GraphAttributes::Rank::RightToLeft) {
+        const auto yMin = ranges::min(_ys);
+        const auto yMax = ranges::max(_ys);
+        for (auto& y : _ys) {
+            y = yMax - y + yMin;
+        }
+    }
+    if (_graphAttributes.rank == GraphAttributes::Rank::LeftToRight || _graphAttributes.rank == GraphAttributes::Rank::RightToLeft) {
+        swap_ranges(_xs.begin(), _xs.end(), _ys.begin());
+    }
 }

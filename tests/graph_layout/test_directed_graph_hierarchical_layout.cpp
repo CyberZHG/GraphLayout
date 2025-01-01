@@ -68,24 +68,32 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
-    const auto graph = make_shared<SPDirectedGraph>(23);
-    const vector<vector<int>> edges = {
-        {3, 4, 10, 13}, {3, 20}, {4, 5}, {6}, {7},
-        {8, 16, 23}, {9}, {10, 11}, {12}, {13, 14, 15},
-        {15, 16}, {20}, {17}, {17, 18}, {},
-        {18, 19, 20}, {}, {21}, {22}, {},
-        {23}, {23},
-    };
-    for (int u = 0; u < edges.size(); ++u) {
-        for (const auto v : edges[u]) {
-            graph->addEdge(u, v - 1);
+    auto test = [](const GraphAttributes::Rank rank) {
+        const auto graph = make_shared<SPDirectedGraph>(23);
+        const vector<vector<int>> edges = {
+            {3, 4, 10, 13}, {3, 20}, {4, 5}, {6}, {7},
+            {8, 16, 23}, {9}, {10, 11}, {12}, {13, 14, 15},
+            {15, 16}, {20}, {17}, {17, 18}, {},
+            {18, 19, 20}, {}, {21}, {22}, {},
+            {23}, {23},
+        };
+        for (int u = 0; u < edges.size(); ++u) {
+            for (const auto v : edges[u]) {
+                graph->addEdge(u, v - 1);
+            }
         }
-    }
-    DirectedGraphHierarchicalLayout layout;
-    layout.setGraph(graph);
-    layout.layoutGraph();
-    layout.initializeVertexLabelsWithNumericalValues();
-    layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_2.svg");
+        DirectedGraphHierarchicalLayout layout;
+        layout.graphAttributes().bgcolor.set("white");
+        layout.graphAttributes().rank = rank;
+        layout.setGraph(graph);
+        layout.layoutGraph();
+        layout.initializeVertexLabelsWithNumericalValues();
+        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_2__{}.svg", static_cast<int>(rank)));
+    };
+    test(GraphAttributes::Rank::TopToBottom);
+    test(GraphAttributes::Rank::BottomToTop);
+    test(GraphAttributes::Rank::LeftToRight);
+    test(GraphAttributes::Rank::RightToLeft);
 }
 
 TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {

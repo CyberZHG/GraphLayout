@@ -8,6 +8,8 @@ using namespace std;
 using namespace graph_layout;
 
 DrawSVG::DrawSVG(const string& path, const double width, const double height) {
+    _width = width;
+    _height = height;
     _surface = cairo_svg_surface_create(path.c_str(), width, height);
     _cairo = cairo_create(_surface);
 }
@@ -16,6 +18,12 @@ DrawSVG::~DrawSVG() {
     cairo_destroy(_cairo);
     cairo_surface_finish(_surface);
     cairo_surface_destroy(_surface);
+}
+
+void DrawSVG::drawBackground(const double red, const double green, const double blue) const {
+    cairo_set_source_rgb(_cairo, red, green, blue);
+    cairo_rectangle(_cairo, 0, 0, _width, _height);
+    cairo_fill(_cairo);
 }
 
 void DrawSVG::drawCircle(const double x, const double y, const double r) const {

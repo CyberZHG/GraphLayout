@@ -27,6 +27,8 @@ add_library(GraphLayout STATIC
         src/directed/vertex_positioning.cpp
         include/common/draw_svg.h
         src/common/draw_svg.cpp
+        include/common/graph_attributes.h
+        src/common/graph_attributes.cpp
 )
 
 target_include_directories(GraphLayout

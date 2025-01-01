@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "common/graph_def.h"
+#include "common/graph_attributes.h"
 #include "directed/feedback_arcs.h"
 #include "directed/layer_assignment.h"
 #include "directed/cross_minimization.h"
@@ -19,6 +20,8 @@ namespace graph_layout {
         void setGraph(const std::shared_ptr<SPDirectedGraph>& graph);
         [[nodiscard]] std::shared_ptr<SPDirectedGraph> graph() const;
 
+        GraphAttributes& graphAttributes();
+
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
 #ifdef GRAPH_LAYOUT_ENABLE_SVG
         void drawSVG(const std::string& outputFilePath) const;
@@ -33,6 +36,8 @@ namespace graph_layout {
     private:
         std::shared_ptr<SPDirectedGraph> _graph = nullptr;
 
+        GraphAttributes _graphAttributes;
+
         FeedbackArcsFinder _feedbackArcsFinder;
         LayerAssignment _layerAssignment;
         CrossMinimization _crossMinimization;
@@ -44,6 +49,7 @@ namespace graph_layout {
         std::vector<std::string> _vertexLabels;
 
         [[nodiscard]] bool isVirtualVertex(int u) const;
+        void adjustCoordinatesByGraphRank();
     };
 
 }

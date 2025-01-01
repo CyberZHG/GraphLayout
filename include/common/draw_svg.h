@@ -13,11 +13,15 @@ namespace graph_layout {
         DrawSVG(const std::string& path, double width, double height);
         ~DrawSVG();
 
+        void drawBackground(double red, double green, double blue) const;
+
         void drawCircle(double x, double y, double r) const;
         void drawLine(double x1, double y1, double x2, double y2, bool arrowhead) const;
         void drawText(double x, double y, const std::string& text) const;
 
     private:
+        double _width, _height;
+
         cairo_surface_t* _surface{};
         cairo_t* _cairo{};
     };
