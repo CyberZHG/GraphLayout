@@ -8,8 +8,8 @@ FeedbackArcsFinder::FeedbackArcsFinder(const FeedbackArcsMethod method) : _metho
 
 unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SimpleDirectedGraph &graph) const {
     switch (_method) {
-        case FeedbackArcsMethod::EADES_93:
-            return findFeedbackArcsEades93(graph);
+    case FeedbackArcsMethod::EADES_93:
+        return findFeedbackArcsEades93(graph);
     }
     return {};
 }

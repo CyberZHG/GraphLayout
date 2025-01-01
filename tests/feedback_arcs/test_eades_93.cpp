@@ -2,8 +2,6 @@
 #include <gtest/gtest.h>
 #include "feedback_arcs.h"
 #include "graph_def.h"
-#include "graph_def_utils.h"
-#include "../include/graph_def_utils.h"
 using namespace std;
 using namespace graph_layout;
 
@@ -96,7 +94,7 @@ TEST(TestFeedbackArcsEades93, SpecialCase2) {
 }
 
 TEST(TestFeedbackArcsEades93, Random) {
-    const RandomGraphGenerator graphGen(128);
+    const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
         auto graph = graphGen.generateGraph();

@@ -26,6 +26,8 @@ namespace graph_layout {
         void addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int> &vertices);
 
+        bool operator==(const SimpleDirectedGraph &other) const;
+
         void disableSelfCycleEdges();
         void enableSelfCycleEdges();
 
@@ -98,6 +100,17 @@ namespace graph_layout {
     private:
         SimpleDirectedGraph &_graph;
         const std::vector<int> &_ids;
+    };
+
+    class RandomSimpleDirectedGraphGenerator {
+    public:
+        explicit RandomSimpleDirectedGraphGenerator(const int maxNumVertices) : _minNumVertices(1), _maxNumVertices(maxNumVertices), _allowSelfCycle(false) {}
+
+        [[nodiscard]] SimpleDirectedGraph generateGraph() const;
+    private:
+        int _minNumVertices;
+        int _maxNumVertices;
+        bool _allowSelfCycle;
     };
 
     class GraphComponentSplitter {
