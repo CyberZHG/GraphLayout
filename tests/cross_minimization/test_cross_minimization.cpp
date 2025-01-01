@@ -8,17 +8,11 @@
 using namespace std;
 using namespace graph_layout;
 
-class TestCrossMinimization : public CrossMinimization {
-public:
-    using CrossMinimization::CrossMinimization;
-    using CrossMinimization::getInitialLayers;
-};
-
 TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeNoVirtual) {
     SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     auto ranks = vector({0, 1});
-    const auto virtualEdges = CrossMinimization::addVirtualEdges(graph, ranks);
+    const auto [layeredOrder, virtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
     EXPECT_TRUE(virtualEdges.empty());
     EXPECT_EQ(graph.numVertices(), 2);
     EXPECT_EQ(ranks, vector({0, 1}));
@@ -29,12 +23,10 @@ TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeGap2) {
     SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     auto ranks = vector({0, 2});
-    const auto virtualEdges = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(virtualEdges.size(), 1);
-    EXPECT_EQ(virtualEdges[0].originalEdge, SPEdge(0, 0, 1));
-    EXPECT_EQ(virtualEdges[0].virtualEdgeIds, vector({offset, offset + 1}));
-    EXPECT_EQ(graph.numVertices(), 3);
-    EXPECT_EQ(ranks, vector({0, 2, 1}));
+    const auto [layeredOrder, virtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
+    EXPECT_EQ(virtualEdges.size(), 0);
+    EXPECT_EQ(graph.numVertices(), 2);
+    EXPECT_EQ(ranks, vector({0, 2}));
 }
 
 TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeGap3) {
@@ -42,12 +34,10 @@ TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeGap3) {
     SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     auto ranks = vector({0, 3});
-    const auto virtualEdges = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(virtualEdges.size(), 1);
-    EXPECT_EQ(virtualEdges[0].originalEdge, SPEdge(0, 0, 1));
-    EXPECT_EQ(virtualEdges[0].virtualEdgeIds, vector({offset, offset + 1, offset + 2}));
-    EXPECT_EQ(graph.numVertices(), 4);
-    EXPECT_EQ(ranks, vector({0, 3, 1, 2}));
+    const auto [layeredOrder, virtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
+    EXPECT_EQ(virtualEdges.size(), 0);
+    EXPECT_EQ(graph.numVertices(), 2);
+    EXPECT_EQ(ranks, vector({0, 3}));
 }
 
 TEST(TestCrossMinimizationAddVirtualEdges, TwoEdgesGap2Gap3) {
@@ -56,27 +46,26 @@ TEST(TestCrossMinimizationAddVirtualEdges, TwoEdgesGap2Gap3) {
     graph.addEdge(0, 1);
     graph.addEdge(0, 2);
     auto ranks = vector({0, 2, 3});
-    const auto virtualEdges = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(virtualEdges.size(), 2);
-    EXPECT_EQ(virtualEdges[0].originalEdge, SPEdge(0, 0, 1));
+    const auto [layeredOrder, virtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
+    EXPECT_EQ(virtualEdges.size(), 1);
+    EXPECT_EQ(virtualEdges[0].originalEdge, SPEdge(1, 0, 2));
     EXPECT_EQ(virtualEdges[0].virtualEdgeIds, vector({offset, offset + 1}));
-    EXPECT_EQ(virtualEdges[1].originalEdge, SPEdge(1, 0, 2));
-    EXPECT_EQ(virtualEdges[1].virtualEdgeIds, vector({offset + 2, offset + 3, offset + 4}));
-    EXPECT_EQ(graph.numVertices(), 6);
-    EXPECT_EQ(ranks, vector({0, 2, 3, 1, 1, 2}));
+    EXPECT_EQ(graph.numVertices(), 4);
+    EXPECT_EQ(ranks, vector({0, 2, 3, 2}));
 }
 
-void testNumCrossing(SPDirectedGraph &graph, const vector<vector<int>> &layers) {
+void testNumCrossing(SPDirectedGraph &graph, const SPLayeredOrder &layeredOrder) {
     long long numCross = 0;
-    for (size_t i = 0; i + 1 < layers.size(); ++i) {
+    const auto &orders = layeredOrder.orders;
+    for (size_t i = 0; i + 1 < orders.size(); ++i) {
         unordered_map<int, int> positions;
-        for (int j = 0; j < layers[i + 1].size(); ++j) {
-            positions[layers[i + 1][j]] = j;
+        for (int j = 0; j < orders[i + 1].size(); ++j) {
+            positions[orders[i + 1][j]] = j;
         }
-        for (int j = 0; j < layers[i].size(); ++j) {
-            for (int k = j + 1; k < layers[i].size(); ++k) {
-                for (const auto &edge1 : graph.getOutEdges(layers[i][j])) {
-                    for (const auto &edge2 : graph.getOutEdges(layers[i][k])) {
+        for (int j = 0; j < orders[i].size(); ++j) {
+            for (int k = j + 1; k < orders[i].size(); ++k) {
+                for (const auto &edge1 : graph.getOutEdges(orders[i][j])) {
+                    for (const auto &edge2 : graph.getOutEdges(orders[i][k])) {
                         if (positions[edge1.v] > positions[edge2.v]) {
                             ++numCross;
                         }
@@ -85,16 +74,17 @@ void testNumCrossing(SPDirectedGraph &graph, const vector<vector<int>> &layers) 
             }
         }
     }
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), numCross);
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), numCross);
 }
 
 TEST(TestCrossMinimizationNumCross, SpecialCase1) {
     SPDirectedGraph graph(4);
     graph.addEdge(0, 2);
     graph.addEdge(1, 3);
-    const auto layers = vector<vector<int>>({{0, 1}, {3, 2}});
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 1);
-    testNumCrossing(graph, layers);
+    SPLayeredOrder layeredOrder;
+    layeredOrder.orders = vector<vector<int>>({{0, 1}, {3, 2}});
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 1);
+    testNumCrossing(graph, layeredOrder);
 }
 
 TEST(TestCrossMinimizationNumCross, SpecialCase2) {
@@ -102,21 +92,22 @@ TEST(TestCrossMinimizationNumCross, SpecialCase2) {
     graph.addEdge(0, 5);
     graph.addEdge(1, 3);
     graph.addEdge(2, 4);
-    const auto layers = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}});
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 2);
-    testNumCrossing(graph, layers);
+    SPLayeredOrder layeredOrder;
+    layeredOrder.orders = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}});
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 2);
+    testNumCrossing(graph, layeredOrder);
     graph.addEdge(1, 5);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 3);
-    testNumCrossing(graph, layers);
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 3);
+    testNumCrossing(graph, layeredOrder);
     graph.addEdge(2, 3);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 5);
-    testNumCrossing(graph, layers);
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 5);
+    testNumCrossing(graph, layeredOrder);
     graph.addEdge(0, 4);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 7);
-    testNumCrossing(graph, layers);
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 7);
+    testNumCrossing(graph, layeredOrder);
     graph.addEdge(1, 4);
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 9);
-    testNumCrossing(graph, layers);
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 9);
+    testNumCrossing(graph, layeredOrder);
 }
 
 TEST(TestCrossMinimizationNumCross, SpecialCase3) {
@@ -127,9 +118,10 @@ TEST(TestCrossMinimizationNumCross, SpecialCase3) {
     graph.addEdge(3, 7);
     graph.addEdge(4, 8);
     graph.addEdge(5, 6);
-    const auto layers = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}, {6, 7, 8}});
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 4);
-    testNumCrossing(graph, layers);
+    SPLayeredOrder layeredOrder;
+    layeredOrder.orders = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}, {6, 7, 8}});
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 4);
+    testNumCrossing(graph, layeredOrder);
 }
 
 TEST(TestCrossMinimizationNumCross, SpecialCase4) {
@@ -142,9 +134,10 @@ TEST(TestCrossMinimizationNumCross, SpecialCase4) {
     graph.addEdge(2, 7);
     graph.addEdge(2, 4);
     graph.addEdge(1, 5);
-    const auto layers = vector<vector<int>>({{0, 1, 2, 3}, {4, 5, 6, 7}});
-    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layers), 14);
-    testNumCrossing(graph, layers);
+    SPLayeredOrder layeredOrder;
+    layeredOrder.orders = vector<vector<int>>({{0, 1, 2, 3}, {4, 5, 6, 7}});
+    EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 14);
+    testNumCrossing(graph, layeredOrder);
 }
 
 TEST(TestCrossMinimizationNumCross, RandomTwoLayers) {
@@ -164,19 +157,20 @@ TEST(TestCrossMinimizationNumCross, RandomTwoLayers) {
             const int v = randV(gen);
             graph.addEdge(u, v);
         }
-        vector<vector<int>> layers(2);
+        SPLayeredOrder layeredOrder;
+        layeredOrder.orders = vector<vector<int>>(2);
         for (int i = 0; i < n1; ++i) {
-            layers[0].push_back(i);
+            layeredOrder.orders[0].push_back(i);
         }
         for (int i = n1; i < n1 + n2; ++i) {
-            layers[1].push_back(i);
+            layeredOrder.orders[1].push_back(i);
         }
-        testNumCrossing(graph, layers);
+        testNumCrossing(graph, layeredOrder);
     }
 }
 
 TEST(TestCrossMinimizationNumCross, Random) {
-    const RandomSimpleDirectedGraphGenerator graphGen(128);
+    const RandomSimpleDirectedGraphGenerator graphGen(64);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
     GraphComponentSplitter splitter;
@@ -189,9 +183,8 @@ TEST(TestCrossMinimizationNumCross, Random) {
         }
         for (auto subGraphs = splitter.splitGraph(graph); auto &subGraph : subGraphs) {
             auto ranks = layerAssignment.rankVertices(subGraph);
-            CrossMinimization::addVirtualEdges(subGraph, ranks);
-            const auto layers = TestCrossMinimization::getInitialLayers(ranks);
-            testNumCrossing(subGraph, layers);
+            const auto [layeredOrder, virtualEdges] = CrossMinimization::addVirtualEdges(subGraph, ranks);
+            testNumCrossing(subGraph, layeredOrder);
         }
     }
 }

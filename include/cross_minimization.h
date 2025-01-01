@@ -11,6 +11,11 @@ namespace graph_layout {
         GREEDY_SWITCH_HEURISTIC,
     };
 
+    struct SPLayeredOrder {
+        std::vector<int> layerRanks;
+        std::vector<std::vector<int>> orders;
+    };
+
     class CrossMinimization {
     public:
         explicit CrossMinimization(CrossMinimizationMethod method = CrossMinimizationMethod::BARYCENTER_HEURISTIC);
@@ -18,11 +23,10 @@ namespace graph_layout {
 
         static constexpr int VIRTUAL_EDGE_ID_OFFSET = 1000000000;
 
-        static std::vector<SPVirtualEdge> addVirtualEdges(SPDirectedGraph& graph, std::vector<int>& ranks);
-        static long long calcNumCross(SPDirectedGraph& graph, const std::vector<std::vector<int>>& layers);
+        static std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> addVirtualEdges(SPDirectedGraph& graph, std::vector<int>& ranks);
+        static long long calcNumCross(SPDirectedGraph& graph, const SPLayeredOrder& layeredOrder);
 
-    protected:
-        static std::vector<std::vector<int>> getInitialLayers(const std::vector<int>& ranks);
+        // void reduceNumCross(SPDirectedGraph &, std::vector<int>& ranks) const;
 
     private:
         CrossMinimizationMethod _method;
@@ -30,8 +34,8 @@ namespace graph_layout {
         static long long calcNumCross(
             SPDirectedGraph &graph,
             BinaryIndexedTree &bit,
-            const std::vector<int> &layer1,
-            const std::vector<int> &layer2,
+            const std::vector<int> &order1,
+            const std::vector<int> &order2,
             bool forward = true);
     };
 }
