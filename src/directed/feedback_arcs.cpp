@@ -1,16 +1,23 @@
 #include "directed/feedback_arcs.h"
 
 #include <queue>
+#include <set>
 using namespace std;
 using namespace graph_layout;
 
 FeedbackArcsFinder::FeedbackArcsFinder(const FeedbackArcsMethod method) : _method(method) {
 }
 
+void FeedbackArcsFinder::setMethod(const FeedbackArcsMethod method) {
+    _method = method;
+}
+
 unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SPDirectedGraph& graph) const {
     switch (_method) {
     case FeedbackArcsMethod::EADES_93:
         return findFeedbackArcsEades93(graph);
+    case FeedbackArcsMethod::MIN_ID:
+        return findFeedbackArcsMinID(graph);
     }
     return {};
 }
@@ -27,7 +34,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SPDirectedGraph& graph) 
  */
 unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& graph) {
     const auto n = graph.numVertices();
-    auto& edges = graph.edges();
+    const auto& edges = graph.edges();
     const auto m = edges.size();
     vector inDegree(graph.getInDegrees());
     vector outDegree(graph.getOutDegrees());
@@ -59,13 +66,13 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
         }
         addToDifferenceBuckets(i);
     }
-    int num_popped_vertices = 0;
+    int numPoppedVertices = 0;
     vector<bool> popped(n);
     auto removeNode = [&](const int u) {
         if (popped[u]) {
             return;
         }
-        ++num_popped_vertices;
+        ++numPoppedVertices;
         popped[u] = true;
         removeFromDifferenceBuckets(u);
         for (const auto& edge : graph.getInEdges(u)) {
@@ -91,7 +98,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
     // and then break cycles by reversing all incoming edges of the node
     // with the largest outdegree minus indegree.
     unordered_set<int> feedbackArcs;
-    while (num_popped_vertices < n) {
+    while (numPoppedVertices < n) {
         while (!sinks.empty()) {
             removeNode(sinks.front());
             sinks.pop();
@@ -100,7 +107,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
             removeNode(sources.front());
             sources.pop();
         }
-        if (num_popped_vertices < n) {
+        if (numPoppedVertices < n) {
             while (bucketUpperBound >= 0) {
                 if (differenceBuckets[bucketUpperBound].empty()) {
                     --bucketUpperBound;
@@ -113,6 +120,61 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
                         }
                     }
                     break;
+                }
+            }
+        }
+    }
+    return feedbackArcs;
+}
+
+std::unordered_set<int> FeedbackArcsFinder::findFeedbackArcsMinID(SPDirectedGraph& graph) {
+    const auto n = graph.numVertices();
+    const auto& edges = graph.edges();
+    vector inDegree(graph.getInDegrees());
+    vector outDegree(graph.getOutDegrees());
+    set<int> remainingVertices;
+    queue<int> sources, sinks;
+    for (int i = 0; i < n; ++i) {
+        remainingVertices.emplace(i);
+        if (outDegree[i] == 0) {
+            sinks.emplace(i);
+        }
+        if (inDegree[i] == 0) {
+            sources.emplace(i);
+        }
+    }
+    auto removeNode = [&](const int u) {
+        if (!remainingVertices.contains(u)) {
+            return;
+        }
+        remainingVertices.erase(u);
+        for (const auto& edge : graph.getInEdges(u)) {
+            if (const int v = edge.u; --outDegree[v] == 0) {
+                sinks.push(v);
+            }
+        }
+        for (const auto& edge : graph.getOutEdges(u)) {
+            if (const int v = edge.v; --inDegree[v] == 0) {
+                sources.push(v);
+            }
+        }
+    };
+    unordered_set<int> feedbackArcs;
+    while (!remainingVertices.empty()) {
+        while (!sinks.empty()) {
+            removeNode(sinks.front());
+            sinks.pop();
+        }
+        while (!sources.empty()) {
+            removeNode(sources.front());
+            sources.pop();
+        }
+        if (!remainingVertices.empty()) {
+            const int u = *remainingVertices.begin();
+            removeNode(u);
+            for (const auto& edge : graph.getInEdges(u)) {
+                if (const int v = edge.u; remainingVertices.contains(v)) {
+                    feedbackArcs.emplace(edge.id);
                 }
             }
         }

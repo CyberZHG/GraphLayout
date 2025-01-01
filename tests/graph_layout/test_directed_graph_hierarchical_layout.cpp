@@ -102,6 +102,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
         }
     }
     DirectedGraphHierarchicalLayout layout;
+    layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
     layout.graphAttributes().bgcolor.set("white");
     layout.graphAttributes().rank = GraphAttributes::Rank::LeftToRight;
     layout.setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");

@@ -30,6 +30,11 @@ namespace graph_layout {
         [[nodiscard]] EdgeAttributes edgeAttributes(int u) const;
         void setEdgeAttributes(int u, const std::string& key, const std::string& value);
 
+        void setFeedbackArcsMethod(FeedbackArcsMethod method);
+        void setLayerAssignmentMethod(LayerAssignmentMethod method);
+        void setCrossMinimizationMethod(CrossMinimizationMethod method);
+        void setVertexPositioningMethod(VertexPositioningMethod method);
+
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
         /** Add numeric vertex labels.
          *

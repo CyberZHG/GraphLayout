@@ -60,6 +60,22 @@ void DirectedGraphHierarchicalLayout::setEdgeAttributes(int u, const std::string
     _edgeAttributes[u][key] = value;
 }
 
+void DirectedGraphHierarchicalLayout::setFeedbackArcsMethod(const FeedbackArcsMethod method) {
+    _feedbackArcsFinder.setMethod(method);
+}
+
+void DirectedGraphHierarchicalLayout::setLayerAssignmentMethod(const LayerAssignmentMethod method) {
+    _layerAssignment.setMethod(method);
+}
+
+void DirectedGraphHierarchicalLayout::setCrossMinimizationMethod(const CrossMinimizationMethod method) {
+    _crossMinimization.setMethod(method);
+}
+
+void DirectedGraphHierarchicalLayout::setVertexPositioningMethod(const VertexPositioningMethod method) {
+    _vertexPositioning.setMethod(method);
+}
+
 std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);

@@ -18,6 +18,8 @@ namespace graph_layout {
         explicit VertexPositioning(VertexPositioningMethod method = VertexPositioningMethod::BRANDES_KOPF);
         ~VertexPositioning() = default;
 
+        void setMethod(VertexPositioningMethod method);
+
         using RootVec = std::vector<int>;
         using AlignVec = std::vector<int>;
 

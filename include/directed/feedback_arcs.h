@@ -11,6 +11,7 @@ namespace graph_layout {
         // A fast and effective heuristic for the feedback arc set problem.
         // Information processing letters, 47(6), 319-323.
         EADES_93,
+        MIN_ID,
     };
 
     /** Find the feedback arcs from a directed graph. */
@@ -18,6 +19,8 @@ namespace graph_layout {
     public:
         explicit FeedbackArcsFinder(FeedbackArcsMethod method = FeedbackArcsMethod::EADES_93);
         ~FeedbackArcsFinder() = default;
+
+        void setMethod(FeedbackArcsMethod method);
 
         /** Find the feedback arcs from a directed graph.
          *
@@ -29,6 +32,7 @@ namespace graph_layout {
         FeedbackArcsMethod _method;
 
         static std::unordered_set<int> findFeedbackArcsEades93(SPDirectedGraph& graph) ;
+        static std::unordered_set<int> findFeedbackArcsMinID(SPDirectedGraph& graph) ;
     };
 
 }

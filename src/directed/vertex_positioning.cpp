@@ -7,6 +7,10 @@ using namespace graph_layout;
 VertexPositioning::VertexPositioning(const VertexPositioningMethod method) : _method(method) {
 }
 
+void VertexPositioning::setMethod(const VertexPositioningMethod method) {
+    _method = method;
+}
+
 void VertexPositioning::setVertexMargin(const double margin) {
     _vertexMargin = margin;
 }
