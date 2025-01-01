@@ -35,7 +35,10 @@ namespace graph_layout {
         std::vector<int> rankVerticesNetworkSimplex(SimpleDirectedGraph &) const;
 
     protected:
-        std::vector<int> networkSimplexInitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
+        static constexpr int NO_PARENT = -1;
+
+        std::pair<int, std::vector<int>> networkSimplexInitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
+        std::vector<int> networkSimplexComputeCutValues(SimpleDirectedGraph &, int root, const std::vector<int> &parents) const;
     };
 }
 

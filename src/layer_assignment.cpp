@@ -82,12 +82,12 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &gra
         return {0};
     }
     auto ranks = rankVerticesTopological(graph);
-    auto results = networkSimplexInitFeasibleTree(graph, ranks);
+    auto [root, parents] = networkSimplexInitFeasibleTree(graph, ranks);
+    auto cuts = networkSimplexComputeCutValues(graph, root, parents);
     return ranks;
 }
 
-/**
- * Find an initial spanning tree based on the given initial ranks.
+/** Find an initial spanning tree based on the given initial ranks.
  *
  * The spanning tree should be "tight", i.e., for every edge in the tree, slack(e) = 0.
  * The "slack" of an edge is defined as its length minus the minimum length of that edge.
@@ -99,31 +99,31 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &gra
  * @param graph A DAG.
  * @param ranks Initial ranks, which could be the result of the topological solution,
  *      are also used to store the updated ranks.
- * @return A parent vector that represents the spanning tree.
+ * @return The root and a parent vector that represents the spanning tree.
  */
-std::vector<int> LayerAssignment::networkSimplexInitFeasibleTree(SimpleDirectedGraph &graph,
-                                                                 std::vector<int> &ranks) const {
+pair<int, vector<int>> LayerAssignment::networkSimplexInitFeasibleTree(SimpleDirectedGraph &graph,
+                                                                       std::vector<int> &ranks) const {
     const size_t n = graph.numVertices();
     const size_t m = graph.numEdges();
     unordered_map<int, int> slacks;  // slack(e) = rank(e.v) - rank(e.u) - minEdgeLength(e)
-    vector parents(n, -1);
+    vector parents(n, NO_PARENT);
     set<pair<int, int>> incidentEdges;
-    int source = -1;
+    int root = -1;
     auto calcSlack = [&](const SimpleEdge &edge) {
         return slacks[edge.id] = ranks[edge.v] - ranks[edge.u] - minEdgeLength(edge.id);
     };
     for (int u = 0; u < n; ++u) {
         if (ranks[u] == 0) {
-            source = u;
+            root = u;
             for (const auto &edge : graph.getOutEdges(u)) {
                 incidentEdges.insert(make_pair(calcSlack(edge), edge.id));
             }
             break;
         }
     }
-    unordered_set verticesInTree({source});
+    unordered_set verticesInTree({root});
     auto inTree = [&](const int u) {
-        return u == source || parents[u] != -1;
+        return u == root || parents[u] != -1;
     };
     vector<int> slacksToUpdate(m);
     while (!incidentEdges.empty()) {
@@ -171,5 +171,62 @@ std::vector<int> LayerAssignment::networkSimplexInitFeasibleTree(SimpleDirectedG
             incidentEdges.insert(make_pair(calcSlack(newEdge), newEdge.id));
         }
     }
-    return parents;
+    return {root, parents};
+}
+
+/** Compute all cut values of the spanning tree.
+ *
+ * Removing an edge from the spanning tree results in two connected components.
+ * The cut value is defined as the number of edges going from the tail component to the head component,
+ * minus the number of edges going from the head component to the tail component.
+ *
+ * @param graph A DAG.
+ * @param root The root of the spanning tree.
+ * @param parents The edge ids for finding the parent vertex.
+ * @return The cut values.
+ */
+vector<int> LayerAssignment::networkSimplexComputeCutValues(SimpleDirectedGraph &graph, const int root, const std::vector<int> &parents) const {
+    const size_t n = graph.numVertices();
+    SimpleDirectedGraph tree(n);
+    for (const auto id : parents) {
+        if (id != NO_PARENT) {
+            const auto &edge = graph.getEdge(id);
+            tree.addEdge(edge);
+        }
+    }
+    stack<int> forward, backward;
+    forward.push(root);
+    while (!forward.empty()) {
+        const int u = forward.top();
+        forward.pop();
+        backward.push(u);
+        for (const auto &edge : tree.getInEdges(u)) {
+            if (const int v = edge.u; parents[v] == edge.id) {
+                forward.push(v);
+            }
+        }
+        for (const auto &edge : tree.getOutEdges(u)) {
+            if (const int v = edge.v; parents[v] == edge.id) {
+                forward.push(v);
+            }
+        }
+    }
+    vector<int> delta(n);
+    for (int u = 0; u < n; ++u) {
+        delta[u] = graph.getInDegrees()[u] - graph.getOutDegrees()[u];
+    }
+    vector<int> cuts(n);
+    while (backward.size() > 1) {
+        const auto v = backward.top();
+        backward.pop();
+        const auto &edge = graph.getEdge(parents[v]);
+        cuts[v] = delta[v];
+        if (edge.u == v) {
+            delta[edge.v] += delta[v];
+        } else {
+            cuts[v] = -cuts[v];
+            delta[edge.u] += delta[v];
+        }
+    }
+    return cuts;
 }

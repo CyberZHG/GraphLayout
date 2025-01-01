@@ -59,7 +59,7 @@ std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const Simp
     return _graphs;
 }
 
-SimpleDirectedGraph GraphComponentSplitter::mergeBack() {
+SimpleDirectedGraph GraphComponentSplitter::mergeBack() const {
     size_t n = 0;
     for (const auto &graph : _graphs) {
         n += graph.numVertices();

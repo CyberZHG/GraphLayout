@@ -11,6 +11,8 @@ class TestLayerAssignment : public LayerAssignment {
 public:
     using LayerAssignment::LayerAssignment;
     using LayerAssignment::networkSimplexInitFeasibleTree;
+    using LayerAssignment::networkSimplexComputeCutValues;
+    using LayerAssignment::NO_PARENT;
 };
 
 TEST(TestLayerAssignmentNetworkSimplex, EmptyGraph) {
@@ -36,7 +38,7 @@ void testInitialFeasibleTree(SimpleDirectedGraph &graph,
     int noParentCount = 0;
     SimpleDirectedGraph newGraph(n);
     for (const auto id : parents) {
-        if (id == -1) {
+        if (id == TestLayerAssignment::NO_PARENT) {
             noParentCount++;
             continue;
         }
@@ -69,7 +71,7 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase1) {
     graph.addEdge(0, 3);
     const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto parents = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
@@ -82,11 +84,61 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase2) {
     graph.addEdge(3, 3);
     const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto parents = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
-TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, Random) {
+void testCutValues(SimpleDirectedGraph &graph, const vector<int> &parents, const vector<int> &cuts) {
+    const size_t n = graph.numVertices();
+    vector<int> p(n);
+    function<int(int)> find = [&](const int u) {
+        return u == p[u] ? u : (p[u] = find(p[u]));
+    };
+    auto combine = [&](const int u, const int v) {
+        p[find(u)] = find(v);
+    };
+    for (int i = 0; i < n; ++i) {
+        const auto cutId = parents[i];
+        if (cutId == TestLayerAssignment::NO_PARENT) {
+            continue;
+        }
+        for (int u = 0; u < n; ++u) {
+            p[u] = u;
+        }
+        for (const auto id : parents) {
+            if (id != TestLayerAssignment::NO_PARENT && id != cutId) {
+                const auto &edge = graph.getEdge(id);
+                combine(edge.u, edge.v);
+            }
+        }
+        const auto &cutEdge = graph.getEdge(cutId);
+        int expectedCutValue = 0;
+        for (const auto &edge : graph.edges()) {
+            if (find(edge.u) == find(cutEdge.u) && find(edge.v) == find(cutEdge.v)) {
+                --expectedCutValue;
+            } else if (find(edge.u) == find(cutEdge.v) && find(edge.v) == find(cutEdge.u)) {
+                ++expectedCutValue;
+            }
+        }
+        EXPECT_EQ(cuts[i], expectedCutValue);
+    }
+}
+
+TEST(TestLayerAssignmentNetworkSimplexComputeCutValues, SpecialCase100) {
+    SimpleDirectedGraph graph(4);
+    graph.addEdge(2, 0);
+    graph.addEdge(0, 1);
+    graph.addEdge(3, 1);
+    graph.addEdge(0, 3);
+    const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
+    auto ranks = layerAssignment.rankVertices(graph);
+    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
+    const auto cuts = layerAssignment.networkSimplexComputeCutValues(graph, root, parents);
+    testCutValues(graph, parents, cuts);
+}
+
+TEST(TestLayerAssignmentNetworkSimplexComputeCutValues, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
@@ -102,8 +154,10 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, Random) {
             auto ranks = layerAssignment.rankVertices(subGraph);
             auto minEdgeLengths = genRandomEdgeMinLengths(subGraph);
             layerAssignment.setMinimumEdgeLengths(std::move(minEdgeLengths));
-            const auto parents = layerAssignment.networkSimplexInitFeasibleTree(subGraph, ranks);
+            const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(subGraph, ranks);
             testInitialFeasibleTree(subGraph, layerAssignment, ranks, parents);
+            const auto cuts = layerAssignment.networkSimplexComputeCutValues(subGraph, root, parents);
+            testCutValues(subGraph, parents, cuts);
             layerAssignment.cleanMinimumEdgeLengths();
         }
     }

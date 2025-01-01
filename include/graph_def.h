@@ -117,7 +117,7 @@ namespace graph_layout {
     class GraphComponentSplitter {
     public:
         std::vector<SimpleDirectedGraph> &splitGraph(const SimpleDirectedGraph &graph);
-        SimpleDirectedGraph mergeBack();
+        [[nodiscard]] SimpleDirectedGraph mergeBack() const;
     private:
         std::vector<SimpleDirectedGraph> _graphs;
         std::vector<std::vector<int>> _groups;
