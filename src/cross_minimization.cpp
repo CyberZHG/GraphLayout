@@ -102,7 +102,7 @@ pair<SPLayering, vector<SPVirtualEdge>> CrossMinimization::addVirtualEdges(SPDir
  * this edge crosses all edges for which `position[v']` < `position[v]` (the prefix sum of existing edges).
  * We use a binary indexed tree to maintain the prefix sums.
  *
- * @param graph A DAG graph.
+ * @param graph A DAG.
  * @param bit An initialized binary indexed tree.
  * @param order1 Orders in the first layer.
  * @param order2 Orders in the second layer.
@@ -172,7 +172,7 @@ long long CrossMinimization::computeNumCross(SPDirectedGraph& graph, const SPLay
  * During each optimization, the order of the previous layer is fixed,
  * and heuristic methods are used to optimize the ordering of the current layer.
  *
- * @param graph A DAG graph.
+ * @param graph A DAG.
  * @param layering A cross minimization result.
  * @param weighting A weighting function.
  */
@@ -262,7 +262,7 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(
  * The Barycenter is the average of the positions of all vertices in the previous layer
  * that are connected to the current vertex.
  *
- * @param graph A DAG graph.
+ * @param graph A DAG.
  * @param layering A cross minimization result.
  */
 void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayering& layering) {
@@ -288,7 +288,7 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& g
  *
  * The median positions of all vertices in the previous layer that are connected to the current vertex.
  *
- * @param graph A DAG graph.
+ * @param graph A DAG.
  * @param layering A cross minimization result.
  */
 void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph, SPLayering& layering) {
@@ -324,7 +324,7 @@ void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph
  *
  * Equivalent to counting inversions, which is solved here using merge sort.
  *
- * @param graph A DAG graph.
+ * @param graph A DAG.
  * @param positions Mapping from a vertex ID to its index in the corresponding layer.
  * @param adjPositionsU All positions of the vertices connected to the first vertex.
  * @param adjPositionsV All positions of the vertices connected to the second vertex.
@@ -371,7 +371,7 @@ long long CrossMinimization::computeNumCross(SPDirectedGraph& graph,
  *
  * Equivalent to counting inversions, which is solved here using merge sort.
  *
- * @param graph A DAG graph.
+ * @param graph A DAG.
  * @param positions Mapping from a vertex ID to its index in the corresponding layer.
  * @param adjPositionsU All positions of the vertices connected to the first vertex.
  * @param adjPositionsV All positions of the vertices connected to the second vertex.

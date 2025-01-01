@@ -25,20 +25,40 @@ namespace graph_layout {
         static constexpr double DEFAULT_LAYER_MARGIN = 1.0;
         static constexpr double DEFAULT_VERTEX_SIZE = 1.0;
 
+        /** Set the minimum margin between two vertices that are in the same layer.
+         *
+         * @param margin Vertex margin.
+         */
         void setVertexMargin(double margin);
         [[nodiscard]] double vertexMargin() const;
+
+        /** Set the minimum margin between two adjacent layers.
+         *
+         * @param margin Layer margin.
+         */
         void setLayerMargin(double margin);
+
+        /** Set the size for all vertices.
+         *
+         * @param size Vertex size.
+         */
         void setVertexSizes(double size);
-        void setVertexSizes(std::vector<double> &&sizes);
+        void setVertexSizes(std::vector<double>&& sizes);
         [[nodiscard]] double vertexSizeAt(int index) const;
 
-        [[nodiscard]] std::pair<std::vector<double>, std::vector<double>> assignCoordinates(SPDirectedGraph &, SPLayering &) const;
+        /** Assign each vertex a position that satisfies the margin constraints.
+         *
+         * @param graph A connected DAG.
+         * @param layering  The ordering of the vertices in each layer.
+         * @return X and Y positions.
+         */
+        [[nodiscard]] std::pair<std::vector<double>, std::vector<double>> assignCoordinates(SPDirectedGraph& graph, SPLayering& layering) const;
 
     protected:
-        static void sortIncidentEdges(SPDirectedGraph &, SPLayering &);
-        std::vector<double> assignYCoordinates(SPDirectedGraph &, SPLayering &) const;
-        static std::pair<RootVec, AlignVec> verticalAlignment(SPDirectedGraph &, SPLayering &, bool forward, bool leftToRight);
-        std::vector<double> horizontalCompaction(const SPDirectedGraph &, SPLayering &, const RootVec &, const AlignVec &, bool leftToRight) const;
+        static void sortIncidentEdges(SPDirectedGraph& graph, SPLayering& layering);
+        std::vector<double> assignYCoordinates(SPDirectedGraph& graph, SPLayering& layering) const;
+        static std::pair<RootVec, AlignVec> verticalAlignment(SPDirectedGraph& graph, SPLayering& layering, bool forward, bool leftToRight);
+        std::vector<double> horizontalCompaction(const SPDirectedGraph& graph, SPLayering& layering, const RootVec& roots, const AlignVec& aligns, bool leftToRight) const;
 
     private:
         VertexPositioningMethod _method;
@@ -48,8 +68,9 @@ namespace graph_layout {
         double _vertexSize = DEFAULT_VERTEX_SIZE;
         std::vector<double> _vertexSizes;
 
-        std::vector<double> assignCoordinatesBrandesKopf(SPDirectedGraph &, SPLayering &) const;
+        std::vector<double> assignCoordinatesBrandesKopf(SPDirectedGraph& graph, SPLayering& layering) const;
     };
+
 }
 
 #endif //GRAPHLAYOUT_VERTEX_POSITIONING_H

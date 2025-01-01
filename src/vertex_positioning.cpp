@@ -30,10 +30,15 @@ void VertexPositioning::setVertexSizes(std::vector<double> &&sizes) {
     }
 }
 
-void VertexPositioning::sortIncidentEdges(SPDirectedGraph &graph, SPLayering &layering) {
+/** Sort the incident edges of all vertices based on the current ordering within each layer.
+ *
+ * @param graph A connected DAG.
+ * @param layering  The ordering of the vertices in each layer.
+ */
+void VertexPositioning::sortIncidentEdges(SPDirectedGraph& graph, SPLayering& layering) {
     const size_t numLayers = layering.orders.size();
-    auto &inEdgeIds = graph.getInEdgeIdsRef();
-    auto &outEdgeIds = graph.getOutEdgeIdsRef();
+    auto& inEdgeIds = graph.getInEdgeIdsRef();
+    auto& outEdgeIds = graph.getOutEdgeIdsRef();
     for (int i = 0; i < numLayers; i++) {
         for (const auto u : layering.orders[i]) {
             ranges::sort(inEdgeIds[u], [&](const int a, const int b) {
@@ -46,14 +51,20 @@ void VertexPositioning::sortIncidentEdges(SPDirectedGraph &graph, SPLayering &la
     }
 }
 
-std::vector<double> VertexPositioning::assignYCoordinates(SPDirectedGraph &graph, SPLayering &layering) const {
+/** Assign y coordinates for each vertex based on the layer margin.
+ *
+ * @param graph A connected DAG.
+ * @param layering  The ordering of the vertices in each layer.
+ * @return Y coordinates.
+ */
+std::vector<double> VertexPositioning::assignYCoordinates(SPDirectedGraph& graph, SPLayering& layering) const {
     const int n = static_cast<int>(graph.numVertices());
     const int numLayers = static_cast<int>(layering.orders.size());
     vector<double> heights(numLayers);
     for (int layerIndex = 1; layerIndex < numLayers; layerIndex++) {
         double vertexMargin = 0.0;
         for (const auto u : layering.orders[layerIndex]) {
-            for (const auto &edge : graph.getInEdges(u)) {
+            for (const auto& edge : graph.getInEdges(u)) {
                 const int v = edge.u;
                 double margin = (vertexSizeAt(u) + vertexSizeAt(v)) / 2.0;
                 vertexMargin = max(vertexMargin, margin);
@@ -68,8 +79,18 @@ std::vector<double> VertexPositioning::assignYCoordinates(SPDirectedGraph &graph
     return positions;
 }
 
+/** Align a vertex as closely as possible to the median position of the vertices it is connected to in the previous layer.
+ *
+ * @param graph A connected DAG.
+ * @param layering The ordering of the vertices in each layer.
+ * @param forward Whether it is from low rank to high rank.
+ * @param leftToRight Whether it is from left to right.
+ * @return A roots vector and an aligns vector.
+ * The root is the ID of the first vertex in the uninterrupted sequence of vertices sharing the same X coordinate,
+ * and align is a circular linked list pointing to the next vertex with the same X coordinate.
+ */
 std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositioning::verticalAlignment(
-    SPDirectedGraph &graph, SPLayering &layering, const bool forward, const bool leftToRight) {
+    SPDirectedGraph& graph, SPLayering& layering, const bool forward, const bool leftToRight) {
     const int n = static_cast<int>(graph.numVertices());
     if (n == 0) {
         return {{}, {}};
@@ -91,16 +112,16 @@ std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositio
             leftToRight ? vertexIndex < numVertices : vertexIndex >= 0;
             leftToRight ? ++vertexIndex : --vertexIndex) {
             const int u = layering.orders[layerIndex][vertexIndex];
-            const auto &edgeIds = (forward ? graph.getInEdgeIds() : graph.getOutEdgeIds())[u];
+            const auto& edgeIds = (forward ? graph.getInEdgeIds() : graph.getOutEdgeIds())[u];
             if (const int numEdges = static_cast<int>(edgeIds.size()); numEdges == 0) {
                 continue;
             } else if (numEdges % 2 == 1) {
-                const auto &edge = graph.getEdge(edgeIds[numEdges / 2]);
+                const auto& edge = graph.getEdge(edgeIds[numEdges / 2]);
                 candidates[0] = forward ? edge.u : edge.v;
                 candidates[1] = -1;
             } else {
-                const auto &edge1 = graph.getEdge(edgeIds[(numEdges - 1) / 2]);
-                const auto &edge2 = graph.getEdge(edgeIds[numEdges / 2]);
+                const auto& edge1 = graph.getEdge(edgeIds[(numEdges - 1) / 2]);
+                const auto& edge2 = graph.getEdge(edgeIds[numEdges / 2]);
                 candidates[0] = forward ? edge1.u : edge1.v;
                 candidates[1] = forward ? edge2.u : edge2.v;
                 if (!leftToRight) {
@@ -124,10 +145,19 @@ std::pair<VertexPositioning::RootVec, VertexPositioning::AlignVec> VertexPositio
     return {roots, aligns};
 }
 
-std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGraph &graph,
-    SPLayering &layering,
-    const RootVec &roots, const AlignVec &aligns,
-    const bool leftToRight) const {
+/** Assign the x coordinates for each block.
+ *
+ * @param graph A DAG.
+ * @param layering The ordering of the vertices in each layer.
+ * @param roots First vertex that has the same X coordinate as the current vertex.
+ * @param aligns Next vertex that has the same X coordinate as the current vertex.
+ * @param leftToRight Whether it is from left to right.
+ * @return X coordinates.
+ */
+std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGraph& graph,
+                                                            SPLayering& layering,
+                                                            const RootVec& roots, const AlignVec& aligns,
+                                                            const bool leftToRight) const {
     const int n = static_cast<int>(graph.numVertices());
     if (n == 0) {
         return {};
@@ -146,7 +176,7 @@ std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGrap
         const int root = u;
         do {
             const int layerIndex = layering.idToLayer[u];
-            const auto &orders = layering.orders[layerIndex];
+            const auto& orders = layering.orders[layerIndex];
             const int posU = layering.positions[layerIndex][u];
             if (leftToRight ? posU > 0 : posU + 1 < orders.size()) {
                 const int posV = leftToRight ? posU - 1 : posU + 1;
@@ -185,13 +215,13 @@ std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGrap
         }
     }
     const double minPosition = ranges::min(positions);
-    for (auto &position : positions) {
+    for (auto& position : positions) {
         position -= minPosition;
     }
     return positions;
 }
 
-std::pair<std::vector<double>, std::vector<double>> VertexPositioning::assignCoordinates(SPDirectedGraph &graph, SPLayering &layering) const {
+std::pair<std::vector<double>, std::vector<double>> VertexPositioning::assignCoordinates(SPDirectedGraph& graph, SPLayering& layering) const {
     vector<double> xs;
     switch (_method) {
         case VertexPositioningMethod::BRANDES_KOPF:
@@ -208,7 +238,13 @@ double VertexPositioning::vertexSizeAt(const int index) const {
     return _vertexSizes[index];
 }
 
-std::vector<double> VertexPositioning::assignCoordinatesBrandesKopf(SPDirectedGraph &graph, SPLayering &layering) const {
+/** Assign X coordinates for all the vertices using the Brandes & Köpf algorithm.
+ *
+ * @param graph A DAG.
+ * @param layering The ordering of the vertices in each layer.
+ * @return X coordinates.
+ */
+std::vector<double> VertexPositioning::assignCoordinatesBrandesKopf(SPDirectedGraph& graph, SPLayering& layering) const {
     const int n = static_cast<int>(graph.numVertices());
     sortIncidentEdges(graph, layering);
     const vector forwardOptions = {true, false};

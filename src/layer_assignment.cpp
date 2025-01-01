@@ -1,10 +1,11 @@
+#include "layer_assignment.h"
+
 #include <queue>
 #include <set>
 #include <utility>
 #include <iostream>
 #include <ostream>
 #include <ranges>
-#include "layer_assignment.h"
 using namespace std;
 using namespace graph_layout;
 
