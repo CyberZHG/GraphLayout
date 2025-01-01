@@ -35,7 +35,7 @@ vector<int> LayerAssignment::rankVertices(SimpleDirectedGraph &graph) const {
         case LayerAssignmentMethod::TOPOLOGICAL:
         case LayerAssignmentMethod::MIN_NUM_OF_LAYERS:
             return rankVerticesTopological(graph);
-        case LayerAssignmentMethod::NETWORK_SIMPLEX:
+        case LayerAssignmentMethod::GANSNER_93:
         case LayerAssignmentMethod::MIN_TOTAL_EDGE_LENGTH:
             return rankVerticesNetworkSimplex(graph);
     }
@@ -85,11 +85,11 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &gra
         return {0};
     }
     auto ranks = rankVerticesTopological(graph);
-    auto [root, parents] = networkSimplexInitFeasibleTree(graph, ranks);
+    auto [root, parents] = gansner93InitFeasibleTree(graph, ranks);
     auto tree = graph.buildSpanningTree(parents);
     // No optimization.
     while (true) {
-        auto [minCutIndex, cuts] = networkSimplexComputeCutValues(graph, tree, root, parents);
+        auto [minCutIndex, cuts] = gansner93ComputeCutValues(graph, tree, root, parents);
         if (cuts[minCutIndex] >= 0) {
             break;
         }
@@ -171,7 +171,7 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &gra
  * are also used to store the updated ranks.
  * @return The root and a parent vector that represents the spanning tree.
  */
-pair<int, vector<int>> LayerAssignment::networkSimplexInitFeasibleTree(SimpleDirectedGraph &graph,
+pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SimpleDirectedGraph &graph,
                                                                        std::vector<int> &ranks) const {
     const size_t n = graph.numVertices();
     const size_t m = graph.numEdges();
@@ -257,7 +257,7 @@ pair<int, vector<int>> LayerAssignment::networkSimplexInitFeasibleTree(SimpleDir
  * @param parents The edge ids for finding the parent vertex.
  * @return Minimum cut index and the cut values.
  */
-pair<int, vector<int>> LayerAssignment::networkSimplexComputeCutValues(
+pair<int, vector<int>> LayerAssignment::gansner93ComputeCutValues(
     SimpleDirectedGraph &graph,
     SimpleDirectedGraph &tree,
     const int root,

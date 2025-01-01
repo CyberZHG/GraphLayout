@@ -37,7 +37,7 @@ add_executable(runTests
         tests/feedback_arcs/test_eades_93.cpp
         tests/layer_assignment/test_topological.cpp
         tests/graph_def/test_component_splitter.cpp
-        tests/layer_assignment/test_network_simplex.cpp
+        tests/layer_assignment/test_gansner_93.cpp
 )
 
 target_link_libraries(runTests

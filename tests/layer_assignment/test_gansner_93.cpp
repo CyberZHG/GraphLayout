@@ -10,21 +10,21 @@ using namespace graph_layout;
 class TestLayerAssignment : public LayerAssignment {
 public:
     using LayerAssignment::LayerAssignment;
-    using LayerAssignment::networkSimplexInitFeasibleTree;
-    using LayerAssignment::networkSimplexComputeCutValues;
+    using LayerAssignment::gansner93InitFeasibleTree;
+    using LayerAssignment::gansner93ComputeCutValues;
     using LayerAssignment::NO_PARENT;
 };
 
-TEST(TestLayerAssignmentNetworkSimplex, EmptyGraph) {
+TEST(TestLayerAssignmentGansner93, EmptyGraph) {
     SimpleDirectedGraph graph(0);
-    const LayerAssignment layerAssignment(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector<int>());
 }
 
-TEST(TestLayerAssignmentNetworkSimplex, SingleNodeNoEdge) {
+TEST(TestLayerAssignmentGansner93, SingleNodeNoEdge) {
     SimpleDirectedGraph graph(1);
-    const LayerAssignment layerAssignment(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0}));
 }
@@ -63,7 +63,7 @@ unordered_map<int, int> genRandomEdgeMinLengths(const SimpleDirectedGraph &graph
     return minEdgeLengths;
 }
 
-TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase1) {
+TEST(TestLayerAssignmentGansner93InitialFeasibleTree, SpecialCase1) {
     SimpleDirectedGraph graph(4);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
@@ -71,11 +71,11 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase1) {
     graph.addEdge(0, 3);
     const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
-TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase2) {
+TEST(TestLayerAssignmentGansner93InitialFeasibleTree, SpecialCase2) {
     SimpleDirectedGraph graph(5);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
@@ -84,7 +84,7 @@ TEST(TestLayerAssignmentNetworkSimplexInitialFeasibleTree, SpecialCase2) {
     graph.addEdge(4, 3);
     const TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
@@ -124,7 +124,7 @@ void testCutValues(SimpleDirectedGraph &graph, const vector<int> &parents, const
     }
 }
 
-TEST(TestLayerAssignmentNetworkSimplex, SpecialCase100) {
+TEST(TestLayerAssignmentGansner93, SpecialCase100) {
     SimpleDirectedGraph graph(4);
     graph.addEdge(2, 0);
     graph.addEdge(0, 1);
@@ -132,17 +132,17 @@ TEST(TestLayerAssignmentNetworkSimplex, SpecialCase100) {
     graph.addEdge(0, 3);
     TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
     auto tree = graph.buildSpanningTree(parents);
-    const auto [minCutIndex, cuts] = layerAssignment.networkSimplexComputeCutValues(graph, tree, root, parents);
+    const auto [minCutIndex, cuts] = layerAssignment.gansner93ComputeCutValues(graph, tree, root, parents);
     testCutValues(graph, parents, cuts);
-    layerAssignment.setMethod(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    layerAssignment.setMethod(LayerAssignmentMethod::GANSNER_93);
     ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({1, 3, 0, 2}));
 }
 
-TEST(TestLayerAssignmentNetworkSimplex, SpecialCase101) {
+TEST(TestLayerAssignmentGansner93, SpecialCase101) {
     SimpleDirectedGraph graph(6);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
@@ -153,22 +153,22 @@ TEST(TestLayerAssignmentNetworkSimplex, SpecialCase101) {
     graph.addEdge(4, 5);
     TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
     auto tree = graph.buildSpanningTree(parents);
-    const auto [minCutIndex, cuts] = layerAssignment.networkSimplexComputeCutValues(graph, tree, root, parents);
+    const auto [minCutIndex, cuts] = layerAssignment.gansner93ComputeCutValues(graph, tree, root, parents);
     testCutValues(graph, parents, cuts);
     auto parents2 = vector({-1, 0, 1, 2, 4, 5});
     auto ranks2 = vector({-1, 0, 1, 2, 1, 2});
     auto tree2 = graph.buildSpanningTree(parents2);
-    const auto [minCutIndex2, cuts2] = layerAssignment.networkSimplexComputeCutValues(graph, tree2, root, parents2);
+    const auto [minCutIndex2, cuts2] = layerAssignment.gansner93ComputeCutValues(graph, tree2, root, parents2);
     testCutValues(graph, parents, cuts);
-    layerAssignment.setMethod(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    layerAssignment.setMethod(LayerAssignmentMethod::GANSNER_93);
     ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 1, 2, 3, 2, 3}));
 }
 
-TEST(TestLayerAssignmentNetworkSimplex, SpecialCase102) {
+TEST(TestLayerAssignmentGansner93, SpecialCase102) {
     SimpleDirectedGraph graph(6);
     graph.addEdge(4, 0);
     graph.addEdge(0, 1);
@@ -181,17 +181,17 @@ TEST(TestLayerAssignmentNetworkSimplex, SpecialCase102) {
     TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     layerAssignment.setMinEdgeLengths(std::move(minEdgeLengths));
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
     auto tree = graph.buildSpanningTree(parents);
-    const auto [minCutIndex, cuts] = layerAssignment.networkSimplexComputeCutValues(graph, tree, root, parents);
+    const auto [minCutIndex, cuts] = layerAssignment.gansner93ComputeCutValues(graph, tree, root, parents);
     testCutValues(graph, parents, cuts);
-    layerAssignment.setMethod(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    layerAssignment.setMethod(LayerAssignmentMethod::GANSNER_93);
     ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({4, 5, 3, 4, 0, 0}));
 }
 
-TEST(TestLayerAssignmentNetworkSimplex, SpecialCase103) {
+TEST(TestLayerAssignmentGansner93, SpecialCase103) {
     SimpleDirectedGraph graph(6);
     graph.addEdge(0, 4); graph.addEdge(2, 1); graph.addEdge(2, 1); graph.addEdge(0, 2); graph.addEdge(1, 5);
     graph.addEdge(0, 3); graph.addEdge(4, 5); graph.addEdge(0, 5); graph.addEdge(4, 5); graph.addEdge(1, 5);
@@ -204,17 +204,17 @@ TEST(TestLayerAssignmentNetworkSimplex, SpecialCase103) {
     TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     layerAssignment.setMinEdgeLengths(std::move(minEdgeLengths));
     auto ranks = layerAssignment.rankVertices(graph);
-    const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(graph, ranks);
+    const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(graph, ranks);
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
     auto tree = graph.buildSpanningTree(parents);
-    const auto [minCutIndex, cuts] = layerAssignment.networkSimplexComputeCutValues(graph, tree, root, parents);
+    const auto [minCutIndex, cuts] = layerAssignment.gansner93ComputeCutValues(graph, tree, root, parents);
     testCutValues(graph, parents, cuts);
-    layerAssignment.setMethod(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    layerAssignment.setMethod(LayerAssignmentMethod::GANSNER_93);
     ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0, 10, 6, 5, 9, 14}));
 }
 
-TEST(TestLayerAssignmentNetworkSimplex, SpecialCase104) {
+TEST(TestLayerAssignmentGansner93, SpecialCase104) {
     SimpleDirectedGraph graph(5);
     graph.addEdge(1, 0); graph.addEdge(4, 3); graph.addEdge(2, 4); graph.addEdge(1, 2);
     graph.addEdge(0, 3); graph.addEdge(2, 3); graph.addEdge(1, 4); graph.addEdge(2, 0);
@@ -223,13 +223,13 @@ TEST(TestLayerAssignmentNetworkSimplex, SpecialCase104) {
         {4, 2}, {5, 1}, {6, 4}, {7, 1},
     });
     testCutValues(graph, {7, -1, 3, 1, 6}, {1, 0, -1, 3, 4});
-    TestLayerAssignment layerAssignment(LayerAssignmentMethod::NETWORK_SIMPLEX);
+    TestLayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
     layerAssignment.setMinEdgeLengths(std::move(minEdgeLengths));
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({4, 0, 3, 9, 4}));
 }
 
-TEST(TestLayerAssignmentNetworkSimplexComputeCutValues, Random) {
+TEST(TestLayerAssignmentGansner93ComputeCutValues, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     TestLayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
@@ -247,12 +247,12 @@ TEST(TestLayerAssignmentNetworkSimplexComputeCutValues, Random) {
             layerAssignment.setMethod(LayerAssignmentMethod::TOPOLOGICAL);
             auto ranks = layerAssignment.rankVertices(subGraph);
             const long long initialTotalEdgeLength = LayerAssignment::calcTotalEdgeLength(subGraph, ranks);
-            const auto [root, parents] = layerAssignment.networkSimplexInitFeasibleTree(subGraph, ranks);
+            const auto [root, parents] = layerAssignment.gansner93InitFeasibleTree(subGraph, ranks);
             testInitialFeasibleTree(subGraph, layerAssignment, ranks, parents);
             auto tree = subGraph.buildSpanningTree(parents);
-            const auto [minCutIndex, cuts] = layerAssignment.networkSimplexComputeCutValues(subGraph, tree, root, parents);
+            const auto [minCutIndex, cuts] = layerAssignment.gansner93ComputeCutValues(subGraph, tree, root, parents);
             testCutValues(subGraph, parents, cuts);
-            layerAssignment.setMethod(LayerAssignmentMethod::NETWORK_SIMPLEX);
+            layerAssignment.setMethod(LayerAssignmentMethod::GANSNER_93);
             ranks = layerAssignment.rankVertices(subGraph);
             const long long finalTotalEdgeLength = LayerAssignment::calcTotalEdgeLength(subGraph, ranks);
             EXPECT_LE(finalTotalEdgeLength, initialTotalEdgeLength);

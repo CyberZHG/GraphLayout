@@ -10,13 +10,13 @@ namespace graph_layout {
         MIN_NUM_OF_LAYERS,
         // Gansner, E. R., Koutsofios, E., North, S. C., & Vo, K. P. (2003, May).
         // A Technique for Drawing Directed Graphs.
-        NETWORK_SIMPLEX,
+        GANSNER_93,
         MIN_TOTAL_EDGE_LENGTH,
     };
 
     class LayerAssignment {
     public:
-        explicit LayerAssignment(LayerAssignmentMethod method = LayerAssignmentMethod::TOPOLOGICAL);
+        explicit LayerAssignment(LayerAssignmentMethod method = LayerAssignmentMethod::MIN_TOTAL_EDGE_LENGTH);
         ~LayerAssignment() = default;
 
         void setMethod(LayerAssignmentMethod method);
@@ -39,8 +39,8 @@ namespace graph_layout {
     protected:
         static constexpr int NO_PARENT = -1;
 
-        std::pair<int, std::vector<int>> networkSimplexInitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
-        std::pair<int, std::vector<int>> networkSimplexComputeCutValues(
+        std::pair<int, std::vector<int>> gansner93InitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
+        std::pair<int, std::vector<int>> gansner93ComputeCutValues(
             SimpleDirectedGraph &,
             SimpleDirectedGraph &,
             int root,

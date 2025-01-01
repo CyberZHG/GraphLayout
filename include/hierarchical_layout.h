@@ -8,7 +8,7 @@ namespace graph_layout {
 
     struct HierarchicalLayoutConfig {
         FeedbackArcsMethod feedbackArcsMethod = FeedbackArcsMethod::EADES_93;
-        LayerAssignmentMethod layerAssignmentMethod = LayerAssignmentMethod::NETWORK_SIMPLEX;
+        LayerAssignmentMethod layerAssignmentMethod = LayerAssignmentMethod::GANSNER_93;
     };
 }
 
