@@ -24,6 +24,10 @@ GraphAttributes& DirectedGraphHierarchicalLayout::graphAttributes() {
     return _graphAttributes;
 }
 
+VertexAttributes& DirectedGraphHierarchicalLayout::vertexAttributes() {
+    return _vertexGlobalAttributes;
+}
+
 VertexAttributes DirectedGraphHierarchicalLayout::vertexAttributes(const int u) const {
     if (u >= _vertexAttributes.size()) {
         return _vertexGlobalAttributes;
@@ -36,6 +40,24 @@ void DirectedGraphHierarchicalLayout::setVertexAttributes(const int u, const std
         _vertexAttributes.resize(u + 1);
     }
     _vertexAttributes[u][key] = value;
+}
+
+EdgeAttributes& DirectedGraphHierarchicalLayout::edgeAttributes() {
+    return _edgeGlobalAttributes;
+}
+
+EdgeAttributes DirectedGraphHierarchicalLayout::edgeAttributes(const int u) const {
+    if (u >= _edgeAttributes.size()) {
+        return _edgeGlobalAttributes;
+    }
+    return EdgeAttributes::stringMappingToAttributes(_edgeAttributes[u], _edgeGlobalAttributes);
+}
+
+void DirectedGraphHierarchicalLayout::setEdgeAttributes(int u, const std::string &key, const std::string &value) {
+    if (u >= _edgeAttributes.size()) {
+        _edgeAttributes.resize(u + 1);
+    }
+    _edgeAttributes[u][key] = value;
 }
 
 std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {

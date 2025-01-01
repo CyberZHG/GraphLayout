@@ -25,8 +25,10 @@ void SPDirectedGraph::addEdge(const SPEdge& edge) {
     resetInitialization();
 }
 
-void SPDirectedGraph::addEdge(const int u, const int v) {
-    addEdge(SPEdge(static_cast<int>(_edges.size()), u, v));
+int SPDirectedGraph::addEdge(const int u, const int v) {
+    const int id = static_cast<int>(_edges.size());
+    addEdge(SPEdge(id, u, v));
+    return id;
 }
 
 void SPDirectedGraph::addOutEdges(const int u, const vector<int>& vertices) {

@@ -22,8 +22,13 @@ namespace graph_layout {
 
         GraphAttributes& graphAttributes();
 
+        VertexAttributes& vertexAttributes();
         [[nodiscard]] VertexAttributes vertexAttributes(int u) const;
         void setVertexAttributes(int u, const std::string& key, const std::string& value);
+
+        EdgeAttributes& edgeAttributes();
+        [[nodiscard]] EdgeAttributes edgeAttributes(int u) const;
+        void setEdgeAttributes(int u, const std::string& key, const std::string& value);
 
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
         /** Add numeric vertex labels.
@@ -43,6 +48,8 @@ namespace graph_layout {
         GraphAttributes _graphAttributes;
         VertexAttributes _vertexGlobalAttributes;
         std::vector<std::unordered_map<std::string, std::string>> _vertexAttributes;
+        EdgeAttributes _edgeGlobalAttributes;
+        std::vector<std::unordered_map<std::string, std::string>> _edgeAttributes;
 
         FeedbackArcsFinder _feedbackArcsFinder;
         LayerAssignment _layerAssignment;

@@ -28,9 +28,10 @@ namespace graph_layout {
         [[nodiscard]] size_t numVertices() const { return _numVertices; }
         [[nodiscard]] size_t numEdges() const { return _edges.size(); }
         [[nodiscard]] const std::vector<SPEdge>& edges() const { return _edges; }
+        std::vector<SPEdge>& edges() { return _edges;}
 
         void addEdge(const SPEdge& edge);
-        void addEdge(int u, int v);
+        int addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int>& vertices);
         SPEdge& getEdge(int id);
         void removeEdge(int id);

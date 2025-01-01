@@ -42,6 +42,9 @@ namespace graph_layout {
 
     struct EdgeAttributes {
         std::string label;
+
+        static EdgeAttributes stringMappingToAttributes(const std::unordered_map<std::string, std::string>& mapping);
+        static EdgeAttributes stringMappingToAttributes(const std::unordered_map<std::string, std::string>& mapping, const EdgeAttributes& defaultAttributes);
     };
 
 }

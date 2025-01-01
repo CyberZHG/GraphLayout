@@ -65,3 +65,20 @@ VertexAttributes VertexAttributes::stringMappingToAttributes(const unordered_map
     }
     return attributes;
 }
+
+EdgeAttributes EdgeAttributes::stringMappingToAttributes(const unordered_map<string, string>& mapping) {
+    const EdgeAttributes attributes;
+    return stringMappingToAttributes(mapping, attributes);
+}
+
+EdgeAttributes EdgeAttributes::stringMappingToAttributes(const unordered_map<string, string> &mapping, const EdgeAttributes& defaultAttributes) {
+    EdgeAttributes attributes = defaultAttributes;
+    std::unordered_map<std::string, function<void(string)>> processors;
+    processors[ATTRIBUTE_KEY_LABEL] = [&attributes](const string& raw) {
+        attributes.label = raw;
+    };
+    for (const auto& [key, value] : mapping) {
+        processors[key](value);
+    }
+    return attributes;
+}

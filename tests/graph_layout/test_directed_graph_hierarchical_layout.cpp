@@ -110,6 +110,15 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
     }
     layout.setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, "none");
     layout.setVertexAttributes(11, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+    layout.edgeAttributes().label = "ϵ";
+    for (const auto& [id, u, v] : graph->edges()) {
+        if (u == 5 && v == 6) {
+            layout.setEdgeAttributes(id, ATTRIBUTE_KEY_LABEL, "a");
+        }
+        if (u == 8 && v == 9) {
+            layout.setEdgeAttributes(id, ATTRIBUTE_KEY_LABEL, "b");
+        }
+    }
     layout.setGraph(graph);
     layout.layoutGraph();
     layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_3.svg");
