@@ -5,12 +5,13 @@
 #include <unordered_set>
 
 namespace graph_layout {
+
     class EdgeIterationWithIDs;
 
     struct SPEdge {
         int id, u, v;
 
-        bool operator==(const SPEdge &) const;
+        bool operator==(const SPEdge&) const;
     };
 
     struct SPVirtualEdge {
@@ -26,38 +27,38 @@ namespace graph_layout {
         void updateNumVertices(size_t num_vertices);
         [[nodiscard]] size_t numVertices() const { return _numVertices; }
         [[nodiscard]] size_t numEdges() const { return _edges.size(); }
-        [[nodiscard]] const std::vector<SPEdge> &edges() const { return _edges; }
+        [[nodiscard]] const std::vector<SPEdge>& edges() const { return _edges; }
 
-        void addEdge(const SPEdge &edge);
+        void addEdge(const SPEdge& edge);
         void addEdge(int u, int v);
-        void addOutEdges(int u, const std::vector<int> &vertices);
-        SPEdge &getEdge(int id);
+        void addOutEdges(int u, const std::vector<int>& vertices);
+        SPEdge& getEdge(int id);
         void removeEdge(int id);
 
-        bool operator==(const SPDirectedGraph &other) const;
+        bool operator==(const SPDirectedGraph& other) const;
 
         void disableSelfCycleEdges();
         void enableSelfCycleEdges();
 
-        void reverseEdges(const std::unordered_set<int> &ids);
+        void reverseEdges(const std::unordered_set<int>& ids);
         void reverseEdgesBack();
         [[nodiscard]] bool isReverseEdge(int id) const;
 
         void sortEdgesById();
-        const std::unordered_map<int, size_t> &getEdgeIdToIndexMap();
-        const std::vector<int> &getInDegrees();
-        const std::vector<int> &getOutDegrees();
-        const std::vector<std::vector<int>> &getInVertices();
-        const std::vector<std::vector<int>> &getOutVertices();
-        std::vector<std::vector<int>> &getInEdgeIdsRef();
-        std::vector<std::vector<int>> &getOutEdgeIdsRef();
-        const std::vector<std::vector<int>> &getInEdgeIds();
-        const std::vector<std::vector<int>> &getOutEdgeIds();
+        const std::unordered_map<int, size_t>& getEdgeIdToIndexMap();
+        const std::vector<int>& getInDegrees();
+        const std::vector<int>& getOutDegrees();
+        const std::vector<std::vector<int>>& getInVertices();
+        const std::vector<std::vector<int>>& getOutVertices();
+        std::vector<std::vector<int>>& getInEdgeIdsRef();
+        std::vector<std::vector<int>>& getOutEdgeIdsRef();
+        const std::vector<std::vector<int>>& getInEdgeIds();
+        const std::vector<std::vector<int>>& getOutEdgeIds();
         EdgeIterationWithIDs getInEdges(int v);
         EdgeIterationWithIDs getOutEdges(int u);
         bool hasCycle();
 
-        [[nodiscard]] SPDirectedGraph buildSpanningTree(const std::vector<int> &parents);
+        [[nodiscard]] SPDirectedGraph buildSpanningTree(const std::vector<int>& parents);
 
     private:
         size_t _numVertices{};
@@ -86,25 +87,25 @@ namespace graph_layout {
         std::unordered_set<int> _reverseIds;
 
         void resetInitialization();
-        void initDegrees();
-        void initInOutVertices();
-        void initInOutEdges();
-        void initHasCycle();
+        void initializeDegrees();
+        void initializeInOutVertices();
+        void initializeInOutEdges();
+        void initializeHasCycle();
     };
 
     class EdgeIterationWithIDs {
     public:
-        EdgeIterationWithIDs(SPDirectedGraph &graph, const std::vector<int>& ids) : _graph(graph), _ids(ids) {}
+        EdgeIterationWithIDs(SPDirectedGraph& graph, const std::vector<int>& ids) : _graph(graph), _ids(ids) {}
 
         class iterator {
         public:
-            explicit iterator(SPDirectedGraph &graph, const std::vector<int>& ids, const int index) : _graph(graph), _ids(ids), _index(index) {}
+            explicit iterator(SPDirectedGraph& graph, const std::vector<int>& ids, const int index) : _graph(graph), _ids(ids), _index(index) {}
             const SPEdge &operator*() const;
             iterator& operator++() { ++_index; return *this; }
             bool operator!=(const iterator& other) const { return _index != other._index; }
         private:
-            SPDirectedGraph &_graph;
-            const std::vector<int> &_ids;
+            SPDirectedGraph& _graph;
+            const std::vector<int>& _ids;
             int _index;
         };
 
@@ -129,8 +130,8 @@ namespace graph_layout {
 
     class GraphComponentSplitter {
     public:
-        static std::vector<int> getConnectedComponents(const SPDirectedGraph &graph);
-        std::vector<SPDirectedGraph> &splitGraph(const SPDirectedGraph &graph);
+        static std::vector<int> getConnectedComponents(const SPDirectedGraph& graph);
+        std::vector<SPDirectedGraph> &splitGraph(const SPDirectedGraph& graph);
         [[nodiscard]] SPDirectedGraph mergeBack() const;
         [[nodiscard]] int originalVertexId(int groupIndex, int u) const;
 
@@ -138,6 +139,7 @@ namespace graph_layout {
         std::vector<SPDirectedGraph> _graphs;
         std::vector<std::vector<int>> _groups;
     };
+
 }
 
 #endif //GRAPHLAYOUT_GRAPH_DEF_H
