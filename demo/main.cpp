@@ -13,7 +13,7 @@ int main() {
     DirectedGraphHierarchicalLayout layout;
     layout.setGraph(graph);
     layout.layoutGraph();
-    layout.initializeVertexLabelsWithNumericalValues(0);
+    layout.initVertexLabelsWithNumericalValues(0);
     layout.drawSVG("demo.svg");
     return 0;
 }

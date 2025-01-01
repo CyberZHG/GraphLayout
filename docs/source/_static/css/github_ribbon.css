@@ -1,0 +1,12 @@
+@media (max-width: 768px) {
+    .github_ribbon {
+        display: none;
+    }
+}
+
+.github_ribbon {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+}

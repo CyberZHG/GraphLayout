@@ -17,7 +17,7 @@ namespace graph_layout {
     /** Find the feedback arcs from a directed graph. */
     class FeedbackArcsFinder {
     public:
-        explicit FeedbackArcsFinder(FeedbackArcsMethod method = FeedbackArcsMethod::EADES_93);
+        explicit FeedbackArcsFinder(FeedbackArcsMethod method = FeedbackArcsMethod::MIN_ID);
         ~FeedbackArcsFinder() = default;
 
         void setMethod(FeedbackArcsMethod method);

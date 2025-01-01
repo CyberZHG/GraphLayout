@@ -1,4 +1,5 @@
 #include "graph_layout.h"
+#include "common/compare_svg.h"
 #include <memory>
 #include <emscripten/bind.h>
 using namespace std;
@@ -6,6 +7,7 @@ using namespace emscripten;
 using namespace graph_layout;
 
 EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
+    emscripten::function("_compareSVG", &_compareSVG);
     enum_<FeedbackArcsMethod>("FeedbackArcsMethod")
         .value("EADES_93", FeedbackArcsMethod::EADES_93)
         .value("MIN_ID", FeedbackArcsMethod::MIN_ID)
@@ -63,7 +65,7 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .function("setCrossMinimizationMethod", &DirectedGraphHierarchicalLayout::setCrossMinimizationMethod)
         .function("setVertexPositioningMethod", &DirectedGraphHierarchicalLayout::setVertexPositioningMethod)
         .function("setVertexLabels", &DirectedGraphHierarchicalLayout::setVertexLabels)
-        .function("initVertexLabelsWithNumericalValues", select_overload<void(int)>(&DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues))
+        .function("initVertexLabelsWithNumericalValues", select_overload<void(int)>(&DirectedGraphHierarchicalLayout::initVertexLabelsWithNumericalValues))
         .function("attributes", &DirectedGraphHierarchicalLayout::attributes, return_value_policy::reference())
         .function("layoutGraph", &DirectedGraphHierarchicalLayout::layoutGraph)
         .function("render", select_overload<string()const>(&DirectedGraphHierarchicalLayout::render))

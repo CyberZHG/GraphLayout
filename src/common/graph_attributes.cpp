@@ -19,14 +19,14 @@ const string AttributeShape::RECT = "rect";
 
 unordered_map<string, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
     {ATTRIBUTE_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
-    {ATTRIBUTE_KEY_BG_COLOR, ""},
+    {ATTRIBUTE_KEY_BG_COLOR, "none"},
     {ATTRIBUTE_KEY_FONT_NAME, "Times,serif"},
     {ATTRIBUTE_KEY_FONT_SIZE, "14"},
 };
 
 unordered_map<string, string> Attributes::DEFAULT_VERTEX_ATTRIBUTE_VALUES = {
     {ATTRIBUTE_KEY_LABEL, ""},
-    {ATTRIBUTE_KEY_SHAPE, AttributeShape::ELLIPSE},
+    {ATTRIBUTE_KEY_SHAPE, AttributeShape::CIRCLE},
 };
 
 unordered_map<string, string> Attributes::DEFAULT_EDGE_ATTRIBUTE_VALUES = {

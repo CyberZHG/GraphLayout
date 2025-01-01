@@ -66,6 +66,8 @@ add_library(GraphLayout STATIC
         src/directed/vertex_positioning.cpp
         include/common/graph_attributes.h
         src/common/graph_attributes.cpp
+        include/common/compare_svg.h
+        src/common/compare_svg.cpp
 )
 
 target_include_directories(GraphLayout
@@ -100,6 +102,7 @@ if(GRAPH_LAYOUT_ENABLE_TESTS)
             tests/vertex_positioning/test_brandes_kopf.cpp
             tests/graph_layout/test_directed_graph_hierarchical_layout.cpp
             tests/feedback_arcs/test_min_id.cpp
+            tests/docs/test_basic.cpp
     )
 
     target_link_libraries(runTests

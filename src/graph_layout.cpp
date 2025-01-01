@@ -14,6 +14,7 @@ using namespace graph_layout;
 DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
 
 shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::createGraph(const size_t numVertices) {
+    _initialNumVertices = static_cast<int>(numVertices);
     _graph = make_shared<SPDirectedGraph>(numVertices);
     return _graph;
 }
@@ -231,7 +232,7 @@ void DirectedGraphHierarchicalLayout::render(const string& filePath) const {
     file.close();
 }
 
-void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(const int start) {
+void DirectedGraphHierarchicalLayout::initVertexLabelsWithNumericalValues(const int start) {
     const int n = _initialNumVertices;
     for (int i = 0; i < n; ++i) {
         _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, format("{}", start + i));

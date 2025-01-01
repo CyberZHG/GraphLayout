@@ -1,4 +1,5 @@
 declare module 'sp-graph-layout' {
+    function _compareSVG(a: string, b: string): boolean
 
     export const enum FeedbackArcsMethod {
         EADES_93,
@@ -25,6 +26,7 @@ declare module 'sp-graph-layout' {
     export class SPDirectedGraph {
         constructor(numVertices: number)
         addEdge(from: number, to: number): number
+        addEdges(edges: number[][]): void
         delete(): void
     }
 

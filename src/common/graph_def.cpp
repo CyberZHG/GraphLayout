@@ -33,6 +33,12 @@ int SPDirectedGraph::addEdge(const int u, const int v) {
     return id;
 }
 
+void SPDirectedGraph::addEdges(const vector<pair<int, int>>& edges) {
+    for (const auto& [u, v]: edges) {
+        addEdge(u, v);
+    }
+}
+
 void SPDirectedGraph::addOutEdges(const int u, const vector<int>& vertices) {
     for (const auto& v: vertices) {
         addEdge(u, v);

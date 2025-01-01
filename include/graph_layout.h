@@ -34,7 +34,7 @@ namespace graph_layout {
          *
          * @param start The start index.
          */
-        void initializeVertexLabelsWithNumericalValues(int start = 1);
+        void initVertexLabelsWithNumericalValues(int start = 1);
         void setVertexLabels(const std::vector<std::string> &vertexLabels);
 
         [[nodiscard]] std::string render() const;

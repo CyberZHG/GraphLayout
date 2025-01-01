@@ -1,13 +1,16 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <string>
 #include <memory>
 #include "graph_layout.h"
+#include "common/compare_svg.h"
 using namespace std;
 using namespace graph_layout;
 
 namespace py = pybind11;
 
 PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
+    m.def("_compare_svg", &_compareSVG);
     py::enum_<FeedbackArcsMethod>(m, "FeedbackArcsMethod")
         .value("EADES_93", FeedbackArcsMethod::EADES_93)
         .value("MIN_ID", FeedbackArcsMethod::MIN_ID)
@@ -32,7 +35,8 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
     ;
     py::class_<SPDirectedGraph, shared_ptr<SPDirectedGraph>>(m, "SPDirectedGraph")
         .def(py::init<size_t>(), py::arg("num_vertices"))
-        .def("add_edge", py::overload_cast<int, int>(&SPDirectedGraph::addEdge), py::arg("x_margin"), py::arg("y_margin"))
+        .def("add_edge", py::overload_cast<int, int>(&SPDirectedGraph::addEdge), py::arg("u"), py::arg("v"))
+        .def("add_edges", &SPDirectedGraph::addEdges, py::arg("edges"))
     ;
     py::class_<Attribute>(m, "Attribute")
         .def(py::init<>())
@@ -68,7 +72,7 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def("set_cross_minimization_method", &DirectedGraphHierarchicalLayout::setCrossMinimizationMethod, py::arg("method"))
         .def("set_vertex_positioning_method", &DirectedGraphHierarchicalLayout::setVertexPositioningMethod, py::arg("method"))
         .def("set_vertex_labels", &DirectedGraphHierarchicalLayout::setVertexLabels, py::arg("labels"))
-        .def("init_vertex_labels_with_numerical_values", py::overload_cast<int>(&DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues), py::arg("start") = 1)
+        .def("init_vertex_labels_with_numerical_values", py::overload_cast<int>(&DirectedGraphHierarchicalLayout::initVertexLabelsWithNumericalValues), py::arg("start") = 1)
         .def("attributes", &DirectedGraphHierarchicalLayout::attributes, py::return_value_policy::reference_internal)
         .def("layout_graph", &DirectedGraphHierarchicalLayout::layoutGraph)
         .def("render", py::overload_cast<>(&DirectedGraphHierarchicalLayout::render, py::const_))

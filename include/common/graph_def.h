@@ -34,6 +34,7 @@ namespace graph_layout {
 
         void addEdge(const SPEdge& edge);
         int addEdge(int u, int v);
+        void addEdges(const std::vector<std::pair<int ,int>>& edges);
         void addOutEdges(int u, const std::vector<int>& vertices);
         SPEdge& getEdge(int id);
         void removeEdge(int id);
