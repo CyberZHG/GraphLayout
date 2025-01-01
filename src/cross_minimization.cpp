@@ -12,26 +12,26 @@ void CrossMinimization::setMethod(CrossMinimizationMethod method) {
     _method = method;
 }
 
-std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::reduceNumCross(SPDirectedGraph &graph, std::vector<int> &ranks) const {
-    auto [layeredOrder, virtualEdges] = addVirtualEdges(graph, ranks);
+std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::reduceNumCross(SPDirectedGraph &graph, std::vector<int> &ranks) const {
+    auto [layering, virtualEdges] = addVirtualEdges(graph, ranks);
     switch (_method) {
         case CrossMinimizationMethod::BARYCENTER:
-            reduceNumCrossWithBaryCenterHeuristic(graph, layeredOrder);
+            reduceNumCrossWithBaryCenterHeuristic(graph, layering);
             break;
         case CrossMinimizationMethod::MEDIAN:
-            reduceNumCrossWithMedianHeuristic(graph, layeredOrder);
+            reduceNumCrossWithMedianHeuristic(graph, layering);
             break;
         case CrossMinimizationMethod::PAIRWISE_SWITCH:
-            reduceNumCrossWithPairwiseSwitchHeuristic(graph, layeredOrder);
+            reduceNumCrossWithPairwiseSwitchHeuristic(graph, layering);
             break;
     }
-    return {layeredOrder, virtualEdges};
+    return {layering, virtualEdges};
 }
 
-std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::addVirtualEdges(SPDirectedGraph &graph, vector<int> &ranks) {
-    SPLayeredOrder layeredOrder;
-    auto &discreteRanks = layeredOrder.layerRanks;
-    auto &orders = layeredOrder.orders;
+std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::addVirtualEdges(SPDirectedGraph &graph, vector<int> &ranks) {
+    SPLayering layering;
+    auto &discreteRanks = layering.layerRanks;
+    auto &orders = layering.orders;
     discreteRanks = vector(ranks);
     ranges::sort(discreteRanks);
     discreteRanks.erase(ranges::unique(discreteRanks).begin(), discreteRanks.end());
@@ -73,11 +73,11 @@ std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> CrossMinimization::addVirt
         virtualEdgeIds.emplace_back(edgeId++);
     }
 
-    layeredOrder.width = 0;
+    layering.width = 0;
     for (const auto &order : orders) {
-        layeredOrder.width = max(layeredOrder.width, order.size());
+        layering.width = max(layering.width, order.size());
     }
-    return {layeredOrder, virtualEdges};
+    return {layering, virtualEdges};
 }
 
 long long CrossMinimization::computeNumCross(
@@ -126,9 +126,9 @@ long long CrossMinimization::computeNumCross(
     return numCross;
 }
 
-long long CrossMinimization::computeNumCross(SPDirectedGraph &graph, const SPLayeredOrder &layeredOrder) {
-    const auto &orders = layeredOrder.orders;
-    BinaryIndexedTree bit(layeredOrder.width);
+long long CrossMinimization::computeNumCross(SPDirectedGraph &graph, const SPLayering &layering) {
+    const auto &orders = layering.orders;
+    BinaryIndexedTree bit(layering.width);
     long long numCross = 0;
     for (size_t i = 1; i < orders.size(); ++i) {
         numCross += computeNumCross(graph, bit, orders[i - 1], orders[i], true);
@@ -137,17 +137,17 @@ long long CrossMinimization::computeNumCross(SPDirectedGraph &graph, const SPLay
 }
 
 void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &graph,
-                                                             SPLayeredOrder &layeredOrder,
+                                                             SPLayering &layering,
                                                              const std::function<double(SPDirectedGraph&, const unordered_map<int, int>&, int, bool)> &weighting) {
     constexpr int NUM_REPEAT = 2;
 
-    auto &orders = layeredOrder.orders;
+    auto &orders = layering.orders;
     const int numLayers = static_cast<int>(orders.size());
 
-    vector<pair<double, pair<int, int>>> weights(layeredOrder.width);
+    vector<pair<double, pair<int, int>>> weights(layering.width);
 
-    SPLayeredOrder bestLayeredOrder(layeredOrder);
-    long long bestNumCross = computeNumCross(graph, layeredOrder);
+    SPLayering bestLayeredOrder(layering);
+    long long bestNumCross = computeNumCross(graph, layering);
     bool lastIsBest = false, hasUpdate = false;
     unordered_map<int, int> positions;
     for (int repeatIndex = 0; repeatIndex < NUM_REPEAT; ++repeatIndex) {
@@ -171,8 +171,8 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &gr
                 orders[layerIndex][i] = v;
             }
         }
-        if (const long long numCross = computeNumCross(graph, layeredOrder); numCross < bestNumCross) {
-            bestLayeredOrder = layeredOrder;
+        if (const long long numCross = computeNumCross(graph, layering); numCross < bestNumCross) {
+            bestLayeredOrder = layering;
             bestNumCross = numCross;
         }
 
@@ -203,20 +203,20 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &gr
             }
         }
         lastIsBest = false;
-        if (const long long numCross = computeNumCross(graph, layeredOrder); numCross < bestNumCross) {
+        if (const long long numCross = computeNumCross(graph, layering); numCross < bestNumCross) {
             if (repeatIndex + 1 != NUM_REPEAT) {
-                bestLayeredOrder = layeredOrder;
+                bestLayeredOrder = layering;
             }
             bestNumCross = numCross;
             lastIsBest = true;
         }
     }
     if (bestLayeredOrder.width > 0 && !lastIsBest) {
-        layeredOrder = bestLayeredOrder;
+        layering = bestLayeredOrder;
     }
 }
 
-void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &graph, SPLayeredOrder &layeredOrder) {
+void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &graph, SPLayering &layering) {
     auto weighting = [](SPDirectedGraph &_graph, const unordered_map<int, int> &positions, const int u, const bool forward) {
         double weight = 0.0;
         if (forward) {
@@ -232,10 +232,10 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &g
         }
         return weight;
     };
-    reduceNumCrossWithWeightingHeuristic(graph, layeredOrder, weighting);
+    reduceNumCrossWithWeightingHeuristic(graph, layering, weighting);
 }
 
-void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph, SPLayeredOrder &layeredOrder) {
+void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph, SPLayering &layering) {
     auto weighting = [](SPDirectedGraph &_graph, const unordered_map<int, int> &positions, const int u, const bool forward) {
         vector<int> adjPositions;
         if (forward) {
@@ -261,7 +261,7 @@ void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph
         }
         return weight;
     };
-    reduceNumCrossWithWeightingHeuristic(graph, layeredOrder, weighting);
+    reduceNumCrossWithWeightingHeuristic(graph, layering, weighting);
 }
 
 long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
@@ -308,10 +308,10 @@ long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
 }
 
 void CrossMinimization::
-reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph &graph, SPLayeredOrder &layeredOrder) {
+reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph &graph, SPLayering &layering) {
     constexpr int NUM_REPEAT = 2;
 
-    auto &orders = layeredOrder.orders;
+    auto &orders = layering.orders;
     const int numLayers = static_cast<int>(orders.size());
 
     vector<unordered_map<int, int>> positions(numLayers);

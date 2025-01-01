@@ -11,7 +11,7 @@ namespace graph_layout {
         PAIRWISE_SWITCH,
     };
 
-    struct SPLayeredOrder {
+    struct SPLayering {
         std::vector<int> layerRanks;
         std::vector<std::vector<int>> orders;
         size_t width;
@@ -26,10 +26,10 @@ namespace graph_layout {
 
         void setMethod(CrossMinimizationMethod method);
 
-        std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> reduceNumCross(SPDirectedGraph &, std::vector<int>& ranks) const;
+        std::pair<SPLayering, std::vector<SPVirtualEdge>> reduceNumCross(SPDirectedGraph &, std::vector<int>& ranks) const;
 
-        static std::pair<SPLayeredOrder, std::vector<SPVirtualEdge>> addVirtualEdges(SPDirectedGraph& graph, std::vector<int>& ranks);
-        static long long computeNumCross(SPDirectedGraph& graph, const SPLayeredOrder& layeredOrder);
+        static std::pair<SPLayering, std::vector<SPVirtualEdge>> addVirtualEdges(SPDirectedGraph& graph, std::vector<int>& ranks);
+        static long long computeNumCross(SPDirectedGraph& graph, const SPLayering& layering);
 
     private:
         CrossMinimizationMethod _method;
@@ -51,11 +51,11 @@ namespace graph_layout {
             std::vector<int> &adjPositionsV,
             int layerIndex, int u, int v);
 
-        static void reduceNumCrossWithWeightingHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder,
+        static void reduceNumCrossWithWeightingHeuristic(SPDirectedGraph& graph, SPLayering& layering,
             const std::function<double(SPDirectedGraph&, const std::unordered_map<int, int>&, int, bool)> &weighting);
-        static void reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
-        static void reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
-        static void reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph& graph, SPLayeredOrder& layeredOrder);
+        static void reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayering& layering);
+        static void reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph, SPLayering& layering);
+        static void reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph& graph, SPLayering& layering);
     };
 }
 

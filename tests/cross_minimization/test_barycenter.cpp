@@ -15,10 +15,10 @@ TEST(TestCrossMinimizationBaryCenter, TwoEdgesCross) {
     graph.addEdge(1, 2);
     auto ranks = vector({0, 0, 1, 1});
     const CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
-    auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder), 1);
-    auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
-    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 0);
+    auto [initLayering, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayering), 1);
+    auto [layering, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layering), 0);
 }
 
 TEST(TestCrossMinimizationBaryCenter, SpecialCase1) {
@@ -28,10 +28,10 @@ TEST(TestCrossMinimizationBaryCenter, SpecialCase1) {
     graph.addEdge(2, 3);
     auto ranks = vector({0, 0, 0, 1, 1});
     const CrossMinimization crossMinimization(CrossMinimizationMethod::BARYCENTER);
-    auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
-    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayeredOrder),2);
-    auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
-    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layeredOrder), 0);
+    auto [initLayering, initVirtualEdges] = CrossMinimization::addVirtualEdges(graph, ranks);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, initLayering),2);
+    auto [layering, virtualEdges] = crossMinimization.reduceNumCross(graph, ranks);
+    EXPECT_EQ(CrossMinimization::computeNumCross(graph, layering), 0);
 }
 
 TEST(TestCrossMinimizationBaryCenter, RandomBaryCenter) {
@@ -49,10 +49,10 @@ TEST(TestCrossMinimizationBaryCenter, RandomBaryCenter) {
         }
         for (auto subGraphs = splitter.splitGraph(graph); auto &subGraph : subGraphs) {
             auto ranks = layerAssignment.rankVertices(subGraph);
-            auto [initLayeredOrder, initVirtualEdges] = CrossMinimization::addVirtualEdges(subGraph, ranks);
-            auto [layeredOrder, virtualEdges] = crossMinimization.reduceNumCross(subGraph, ranks);
-            const auto initNumCross = CrossMinimization::computeNumCross(subGraph, initLayeredOrder);
-            const auto numCross = CrossMinimization::computeNumCross(subGraph, layeredOrder);
+            auto [initLayering, initVirtualEdges] = CrossMinimization::addVirtualEdges(subGraph, ranks);
+            auto [layering, virtualEdges] = crossMinimization.reduceNumCross(subGraph, ranks);
+            const auto initNumCross = CrossMinimization::computeNumCross(subGraph, initLayering);
+            const auto numCross = CrossMinimization::computeNumCross(subGraph, layering);
             EXPECT_GE(initNumCross, numCross);
         }
     }
