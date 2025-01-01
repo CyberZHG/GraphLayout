@@ -103,6 +103,7 @@ if(GRAPH_LAYOUT_ENABLE_TESTS)
             tests/graph_layout/test_directed_graph_hierarchical_layout.cpp
             tests/feedback_arcs/test_min_id.cpp
             tests/docs/test_basic.cpp
+            tests/docs/test_graph_attr.cpp
     )
 
     target_link_libraries(runTests

@@ -58,6 +58,7 @@ void DirectedGraphHierarchicalLayout::layoutGraph() {
     }
     computeVertexSizes();
     const size_t n = _graph->numVertices();
+    const auto rankDir = _attributes.rankDir();
     int newVertexIndex = static_cast<int>(n);
     int edgeIndex = CrossMinimization::VIRTUAL_EDGE_ID_OFFSET;
     _graph->disableSelfCycleEdges();
@@ -66,6 +67,7 @@ void DirectedGraphHierarchicalLayout::layoutGraph() {
     _graph->reverseEdges(feedbackArcs);
     _xs.resize(n);
     _ys.resize(n);
+    _virtualEdges.clear();
     double subGraphShift = 0.0;
     auto subGraphs = splitter.splitGraph(*_graph);
     for (int groupIndex = 0; groupIndex < static_cast<int>(subGraphs.size()); ++groupIndex) {
@@ -87,7 +89,6 @@ void DirectedGraphHierarchicalLayout::layoutGraph() {
         if (groupIndex > 0) {
             subGraphShift += maxLeftVertexSize * 0.5;
         }
-        _virtualEdges.clear();
         for (const auto& virtualEdge : virtualEdges) {
             SPVirtualEdge newVirtualEdge;
             const auto& originalEdge = virtualEdge.originalEdge;
@@ -111,8 +112,12 @@ void DirectedGraphHierarchicalLayout::layoutGraph() {
                         _graph->addEdge({edgeIndex++, newVertexIndex, lastVertex});
                     }
                     _xs.push_back(subXs[inEdge.v] + subGraphShift);
-                    _ys.push_back(subYs[inEdge.v] + subGraphShift);
+                    _ys.push_back(subYs[inEdge.v]);
                     lastVertex = newVertexIndex++;
+                    if (subXs[inEdge.v] >= maxX) {
+                        maxX = subXs[inEdge.v];
+                        maxRightVertexSize = max(maxRightVertexSize, _vertexPositioning.vertexSizeAt(inEdge.v));
+                    }
                 }
             }
             if (removeOriginalEdge) {
@@ -133,7 +138,7 @@ void DirectedGraphHierarchicalLayout::layoutGraph() {
         }
         for (int u = 0; u < subN; ++u) {
             _xs[splitter.originalVertexId(groupIndex, u)] = subXs[u] + subGraphShift;
-            _ys[splitter.originalVertexId(groupIndex, u)] = subYs[u] + subGraphShift;
+            _ys[splitter.originalVertexId(groupIndex, u)] = subYs[u];
         }
         subGraphShift += maxX + maxRightVertexSize * 0.5;
     }
@@ -243,6 +248,10 @@ void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vert
     for (int i = 0; i < static_cast<int>(vertexLabels.size()); ++i) {
         _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, vertexLabels[i]);
     }
+}
+
+void DirectedGraphHierarchicalLayout::setEdgeLabel(const int edgeId, const string& label) {
+    _attributes.setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, label);
 }
 
 /** A vertex is virtual if the vertex ID is greater than the maximum vertex ID in the beginning graph.

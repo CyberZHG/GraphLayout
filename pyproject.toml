@@ -46,3 +46,6 @@ test = [
     "isort",
     "flake8",
 ]
+
+[tool.isort]
+profile = "black"

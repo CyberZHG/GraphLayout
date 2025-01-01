@@ -35,7 +35,8 @@ namespace graph_layout {
          * @param start The start index.
          */
         void initVertexLabelsWithNumericalValues(int start = 1);
-        void setVertexLabels(const std::vector<std::string> &vertexLabels);
+        void setVertexLabels(const std::vector<std::string>& vertexLabels);
+        void setEdgeLabel(int edgeId, const std::string& label);
 
         [[nodiscard]] std::string render() const;
         void render(const std::string& filePath) const;

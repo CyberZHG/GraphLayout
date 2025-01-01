@@ -9,4 +9,5 @@ A library for visualizing directed graphs. There are no plans to support multipl
 
 install
 basic
+graph_attr
 ```
