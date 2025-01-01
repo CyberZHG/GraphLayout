@@ -7,6 +7,7 @@ using namespace emscripten;
 using namespace graph_layout;
 
 EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
+    register_vector<string>("VectorString");
     emscripten::function("_compareSVG", &_compareSVG);
     enum_<FeedbackArcsMethod>("FeedbackArcsMethod")
         .value("EADES_93", FeedbackArcsMethod::EADES_93)

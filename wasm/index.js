@@ -2,6 +2,16 @@ import GraphLayoutWASMModule from './wasm/GraphLayoutWASM.js';
 
 const GraphLayoutWASM = await GraphLayoutWASMModule();
 
+const VectorString = GraphLayoutWASM.VectorString;
+
+function buildVectorString(strings) {
+    const vector = new VectorString();
+    for (const str of strings) {
+        vector.push_back(str);
+    }
+    return vector;
+}
+
 const _compareSVG = GraphLayoutWASM._compareSVG;
 const FeedbackArcsMethod = GraphLayoutWASM.FeedbackArcsMethod;
 const LayerAssignmentMethod = GraphLayoutWASM.LayerAssignmentMethod;
@@ -22,6 +32,7 @@ SPDirectedGraph.prototype.addEdges = function (edges) {
 
 export {
     _compareSVG,
+    buildVectorString,
     FeedbackArcsMethod,
     LayerAssignmentMethod,
     CrossMinimizationMethod,

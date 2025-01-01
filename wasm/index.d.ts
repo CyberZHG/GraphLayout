@@ -1,6 +1,21 @@
 declare module 'sp-graph-layout' {
     function _compareSVG(a: string, b: string): boolean
 
+    export class VectorString {
+        constructor();
+
+        size(): number;
+        get(index: number): string;
+
+        push_back(value: string): void;
+        resize(size: number): void;
+        clear(): void;
+
+        delete(): void;
+    }
+
+    export function buildVectorString(strings: string[]): VectorString
+
     export const enum FeedbackArcsMethod {
         EADES_93,
         MIN_ID,

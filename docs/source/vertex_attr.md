@@ -13,9 +13,18 @@ from sp_graph_layout import DirectedGraphHierarchicalLayout
 ````
 ````{tab-item} JavaScript
 ```javascript
-import { DirectedGraphHierarchicalLayout } from 'sp-graph-layout';
+import {DirectedGraphHierarchicalLayout, AttributeRankDir, AttributeShape, buildVectorString} from 'sp-graph-layout';
 
-
+const layout = new DirectedGraphHierarchicalLayout();
+const graph = layout.createGraph(3);
+graph.addEdges([[0, 1], [1, 2], [2, 0]]);
+layout.attributes().setVertexShape(0, AttributeShape.DOUBLE_CIRCLE);
+layout.attributes().setVertexShape(1, AttributeShape.RECT);
+layout.attributes().setVertexShape(2, AttributeShape.ELLIPSE);
+layout.attributes().setRankDir(AttributeRankDir.LEFT_TO_RIGHT);
+layout.initVertexLabelsWithNumericalValues(0);
+layout.layoutGraph();
+const svg = layout.render();
 ````
 
 ````{tab-item} C++
@@ -55,9 +64,18 @@ from sp_graph_layout import DirectedGraphHierarchicalLayout
 ````
 ````{tab-item} JavaScript
 ```javascript
-import { DirectedGraphHierarchicalLayout } from 'sp-graph-layout';
+import {DirectedGraphHierarchicalLayout, AttributeRankDir, AttributeShape, buildVectorString} from 'sp-graph-layout';
 
-
+const layout = new DirectedGraphHierarchicalLayout();
+const graph = layout.createGraph(3);
+graph.addEdges([[0, 1], [1, 2], [2, 0]]);
+layout.setVertexLabels(buildVectorString(["Eat", "Sleep", "Play"]));
+for (let u = 0; u < 3; ++u) {
+    layout.attributes().setVertexShape(u, AttributeShape.ELLIPSE);
+}
+layout.attributes().setRankDir(AttributeRankDir.LEFT_TO_RIGHT);
+layout.layoutGraph();
+const svg = layout.render();
 ````
 
 ````{tab-item} C++
