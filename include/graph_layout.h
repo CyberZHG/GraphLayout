@@ -29,6 +29,7 @@ namespace graph_layout {
         EdgeAttributes& edgeAttributes();
         [[nodiscard]] EdgeAttributes edgeAttributes(int u) const;
         void setEdgeAttributes(int u, const std::string& key, const std::string& value);
+        void setEdgeAttributes(int u, const std::unordered_map<std::string, std::string>& mapping);
 
         void setFeedbackArcsMethod(FeedbackArcsMethod method);
         void setLayerAssignmentMethod(LayerAssignmentMethod method);
@@ -52,9 +53,9 @@ namespace graph_layout {
 
         GraphAttributes _graphAttributes;
         VertexAttributes _vertexGlobalAttributes;
-        std::vector<std::unordered_map<std::string, std::string>> _vertexAttributes;
+        std::unordered_map<int, std::unordered_map<std::string, std::string>> _vertexAttributes;
         EdgeAttributes _edgeGlobalAttributes;
-        std::vector<std::unordered_map<std::string, std::string>> _edgeAttributes;
+        std::unordered_map<int, std::unordered_map<std::string, std::string>> _edgeAttributes;
 
         FeedbackArcsFinder _feedbackArcsFinder;
         LayerAssignment _layerAssignment;

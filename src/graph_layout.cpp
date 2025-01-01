@@ -29,16 +29,13 @@ VertexAttributes& DirectedGraphHierarchicalLayout::vertexAttributes() {
 }
 
 VertexAttributes DirectedGraphHierarchicalLayout::vertexAttributes(const int u) const {
-    if (u >= _vertexAttributes.size()) {
-        return _vertexGlobalAttributes;
+    if (const auto it = _vertexAttributes.find(u); it != _vertexAttributes.end()) {
+        return VertexAttributes::stringMappingToAttributes(it->second, _vertexGlobalAttributes);
     }
-    return VertexAttributes::stringMappingToAttributes(_vertexAttributes[u], _vertexGlobalAttributes);
+    return _vertexGlobalAttributes;
 }
 
 void DirectedGraphHierarchicalLayout::setVertexAttributes(const int u, const std::string &key, const std::string &value) {
-    if (u >= _vertexAttributes.size()) {
-        _vertexAttributes.resize(u + 1);
-    }
     _vertexAttributes[u][key] = value;
 }
 
@@ -47,17 +44,18 @@ EdgeAttributes& DirectedGraphHierarchicalLayout::edgeAttributes() {
 }
 
 EdgeAttributes DirectedGraphHierarchicalLayout::edgeAttributes(const int u) const {
-    if (u >= _edgeAttributes.size()) {
-        return _edgeGlobalAttributes;
+    if (const auto it = _edgeAttributes.find(u); it != _edgeAttributes.end()) {
+        return EdgeAttributes::stringMappingToAttributes(it->second, _edgeGlobalAttributes);
     }
-    return EdgeAttributes::stringMappingToAttributes(_edgeAttributes[u], _edgeGlobalAttributes);
+    return _edgeGlobalAttributes;
 }
 
-void DirectedGraphHierarchicalLayout::setEdgeAttributes(int u, const std::string &key, const std::string &value) {
-    if (u >= _edgeAttributes.size()) {
-        _edgeAttributes.resize(u + 1);
-    }
+void DirectedGraphHierarchicalLayout::setEdgeAttributes(const int u, const std::string &key, const std::string &value) {
     _edgeAttributes[u][key] = value;
+}
+
+void DirectedGraphHierarchicalLayout::setEdgeAttributes(const int u, const unordered_map<string, string>& mapping) {
+    _edgeAttributes[u] = mapping;
 }
 
 void DirectedGraphHierarchicalLayout::setFeedbackArcsMethod(const FeedbackArcsMethod method) {
@@ -113,12 +111,14 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
             bool isReversed = _graph->isReverseEdge(originalEdge.id);
             bool removeOriginalEdge = false;
             int lastVertex = originalEdge.u;
+            vector<int> newEdgeIds;
             for (int i = 0; i + 1 < edgeIds.size(); ++i) {
                 const auto& inEdge = subGraph.getEdge(edgeIds[i]);
                 const auto& outEdge = subGraph.getEdge(edgeIds[i + 1]);
                 if (abs(subXs[inEdge.u] - subXs[inEdge.v]) > 1e-8 || abs(subXs[outEdge.u] - subXs[outEdge.v]) > 1e-8) {
                     removeOriginalEdge = true;
                     _graph->updateNumVertices(newVertexIndex + 1);
+                    newEdgeIds.push_back(edgeIndex);
                     if (!isReversed) {
                         _graph->addEdge({edgeIndex++, lastVertex, newVertexIndex});
                     } else {
@@ -131,10 +131,21 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
             }
             if (removeOriginalEdge) {
                 _graph->removeEdge(originalEdge.id);
+                newEdgeIds.push_back(edgeIndex);
                 if (!isReversed) {
                     _graph->addEdge({edgeIndex++, lastVertex, originalEdge.v});
                 } else {
                     _graph->addEdge({edgeIndex++, originalEdge.v, lastVertex});
+                }
+                const int midId = newEdgeIds[newEdgeIds.size() / 2];
+                for (const auto& edgeId : newEdgeIds) {
+                    if (edgeId == midId) {
+                        if (_edgeAttributes.contains(originalEdge.id)) {
+                            _edgeAttributes[midId] = _edgeAttributes[originalEdge.id];
+                        }
+                    } else {
+                        setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, "");
+                    }
                 }
             }
         }
@@ -182,10 +193,13 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
             svg.drawCircle(x, y, r);
             svg.drawCircle(x, y, r * 0.8);
         }
-        svg.drawText(x, y, attributes.label);
+        if (!attributes.label.empty()) {
+            svg.drawText(x, y, attributes.label);
+        }
     }
 
     for (const auto& edge : _graph->edges()) {
+        const EdgeAttributes attributes = edgeAttributes(edge.id);
         const double edgeLen = sqrt((_xs[edge.u] - _xs[edge.v]) * (_xs[edge.u] - _xs[edge.v]) + (_ys[edge.u] - _ys[edge.v]) * (_ys[edge.u] - _ys[edge.v]));
         double x1, y1, x2, y2;
         if (isVirtualVertex(edge.u)) {
@@ -207,6 +221,18 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         x2 = x2 * scale + shiftX;
         y2 = y2 * scale + shiftY;
         svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
+        if (!attributes.label.empty()) {
+            const double dx = x2 - x1;
+            const double dy = y2 - y1;
+            const double len = sqrt(dx * dx + dy * dy);
+            const double nx = -dy / len;
+            const double ny = dx / len;
+            const double midX = (x1 + x2) / 2;
+            const double midY = (y1 + y2) / 2;
+            const double x = midX + nx * 10.0;
+            const double y = midY + ny * 10.0;
+            svg.drawText(x, y, attributes.label);
+        }
     }
 }
 #endif
