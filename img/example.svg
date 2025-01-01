@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="660" viewBox="0 0 480 660">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="black">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+  <circle id="0" cx="180" cy="60" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="0" x="180" y="60" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">1</text>
+  <circle id="1" cx="390" cy="60" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="1" x="390" y="60" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">2</text>
+  <circle id="2" cx="360" cy="120" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="2" x="360" y="120" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">3</text>
+  <circle id="3" cx="240" cy="180" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="3" x="240" y="180" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">4</text>
+  <circle id="4" cx="360" cy="180" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="4" x="360" y="180" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">5</text>
+  <circle id="5" cx="240" cy="240" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="5" x="240" y="240" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">6</text>
+  <circle id="6" cx="360" cy="240" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="6" x="360" y="240" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">7</text>
+  <circle id="7" cx="180" cy="300" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="7" x="180" y="300" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">8</text>
+  <circle id="8" cx="360" cy="300" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="8" x="360" y="300" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">9</text>
+  <circle id="9" cx="120" cy="360" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="9" x="120" y="360" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">10</text>
+  <circle id="10" cx="180" cy="360" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="10" x="180" y="360" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">11</text>
+  <circle id="11" cx="360" cy="360" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="11" x="360" y="360" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">12</text>
+  <circle id="12" cx="60" cy="420" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="12" x="60" y="420" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">13</text>
+  <circle id="13" cx="120" cy="420" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="13" x="120" y="420" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">14</text>
+  <circle id="14" cx="180" cy="420" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="14" x="180" y="420" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">15</text>
+  <circle id="15" cx="240" cy="420" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="15" x="240" y="420" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">16</text>
+  <circle id="16" cx="60" cy="480" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="16" x="60" y="480" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">17</text>
+  <circle id="17" cx="120" cy="480" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="17" x="120" y="480" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">18</text>
+  <circle id="18" cx="240" cy="480" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="18" x="240" y="480" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">19</text>
+  <circle id="19" cx="360" cy="480" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="19" x="360" y="480" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">20</text>
+  <circle id="20" cx="120" cy="540" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="20" x="120" y="540" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">21</text>
+  <circle id="21" cx="240" cy="540" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="21" x="240" y="540" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">22</text>
+  <circle id="22" cx="240" cy="600" r="15" fill="none" stroke="black" stroke-width="1"/>
+  <text id="22" x="240" y="600" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="black">23</text>
+  <line id="0->2" x1="194.23024947075768" y1="64.74341649025257" x2="345.7697505292423" y2="115.25658350974743" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="0->23" x1="190.6066017177982" y1="70.60660171779821" x2="240" y2="120" stroke="black" stroke-width="1" />
+  <line id="0->24" x1="169.3933982822018" y1="70.60660171779821" x2="120" y2="120" stroke="black" stroke-width="1" />
+  <line id="0->25" x1="166.58359213500125" y1="66.70820393249937" x2="60" y2="120" stroke="black" stroke-width="1" />
+  <line id="1->2" x1="383.2917960675006" y1="73.41640786499873" x2="366.7082039324994" y2="106.58359213500127" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="26->27" x1="420" y1="120" x2="420" y2="420" stroke="black" stroke-width="1" />
+  <line id="2->3" x1="346.58359213500125" y1="126.70820393249937" x2="253.41640786499875" y2="173.29179606750063" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="2->4" x1="360" y1="135" x2="360" y2="165" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="3->5" x1="240" y1="195" x2="240" y2="225" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="4->6" x1="360" y1="195" x2="360" y2="225" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="5->7" x1="229.3933982822018" y1="250.6066017177982" x2="190.6066017177982" y2="289.39339828220176" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="5->15" x1="240" y1="255" x2="240" y2="405" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="28->29" x1="300" y1="300" x2="300" y2="540" stroke="black" stroke-width="1" />
+  <line id="6->8" x1="360" y1="255" x2="360" y2="285" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="7->9" x1="169.3933982822018" y1="310.6066017177982" x2="130.6066017177982" y2="349.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="7->10" x1="180" y1="315" x2="180" y2="345" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="8->11" x1="360" y1="315" x2="360" y2="345" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="9->12" x1="109.39339828220179" y1="370.6066017177982" x2="70.60660171779821" y2="409.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="9->13" x1="120" y1="375" x2="120" y2="405" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="9->14" x1="130.6066017177982" y1="370.6066017177982" x2="169.3933982822018" y2="409.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="10->14" x1="180" y1="375" x2="180" y2="405" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="10->15" x1="190.6066017177982" y1="370.6066017177982" x2="229.3933982822018" y2="409.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="11->19" x1="360" y1="375" x2="360" y2="465" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="12->16" x1="60" y1="435" x2="60" y2="465" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="13->16" x1="109.39339828220179" y1="430.6066017177982" x2="70.60660171779821" y2="469.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="13->17" x1="120" y1="435" x2="120" y2="465" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="15->17" x1="226.58359213500125" y1="426.7082039324994" x2="133.41640786499875" y2="473.2917960675006" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="15->18" x1="240" y1="435" x2="240" y2="465" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="15->19" x1="253.41640786499875" y1="426.7082039324994" x2="346.58359213500125" y2="473.2917960675006" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="17->20" x1="120" y1="495" x2="120" y2="525" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="18->21" x1="240" y1="495" x2="240" y2="525" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="20->22" x1="133.41640786499875" y1="546.7082039324994" x2="226.58359213500125" y2="593.2917960675006" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="21->22" x1="240" y1="555" x2="240" y2="585" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="23->3" x1="240" y1="120" x2="240" y2="165" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="24->9" x1="120" y1="120" x2="120" y2="345" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="25->12" x1="60" y1="120" x2="60" y2="405" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="1->26" x1="396.7082039324994" y1="73.41640786499873" x2="420" y2="120" stroke="black" stroke-width="1" />
+  <line id="27->19" x1="420" y1="420" x2="370.6066017177982" y2="469.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+  <line id="5->28" x1="250.6066017177982" y1="250.6066017177982" x2="300" y2="300" stroke="black" stroke-width="1" />
+  <line id="29->22" x1="300" y1="540" x2="250.6066017177982" y2="589.3933982822018" stroke="black" stroke-width="1" marker-end="url(#arrowhead)" />
+</svg>
