@@ -173,6 +173,25 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u));
         maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u));
     }
+    for (const auto& edge : _graph->edges()) {
+        if (edge.u == edge.v) {
+            const int u = edge.u;
+            switch (_graphAttributes.rank) {
+                case GraphAttributes::Rank::TopToBottom:
+                    minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
+                    break;
+                case GraphAttributes::Rank::BottomToTop:
+                    maxX = max(maxX, _xs[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
+                    break;
+                case GraphAttributes::Rank::LeftToRight:
+                    maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
+                    break;
+                case GraphAttributes::Rank::RightToLeft:
+                    minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
+                    break;
+            }
+        }
+    }
     const double width = (maxX - minX + margin * 2) * scale;
     const double height = (maxY - minY + margin * 2) * scale;
     const double shiftX = (margin + abs(minX)) * scale;
@@ -200,38 +219,82 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
 
     for (const auto& edge : _graph->edges()) {
         const EdgeAttributes attributes = edgeAttributes(edge.id);
-        const double edgeLen = sqrt((_xs[edge.u] - _xs[edge.v]) * (_xs[edge.u] - _xs[edge.v]) + (_ys[edge.u] - _ys[edge.v]) * (_ys[edge.u] - _ys[edge.v]));
-        double x1, y1, x2, y2;
-        if (isVirtualVertex(edge.u)) {
-            x1 = _xs[edge.u];
-            y1 = _ys[edge.u];
+        if (edge.u != edge.v) {
+            const double edgeLen = sqrt((_xs[edge.u] - _xs[edge.v]) * (_xs[edge.u] - _xs[edge.v]) + (_ys[edge.u] - _ys[edge.v]) * (_ys[edge.u] - _ys[edge.v]));
+            double x1, y1, x2, y2;
+            if (isVirtualVertex(edge.u)) {
+                x1 = _xs[edge.u];
+                y1 = _ys[edge.u];
+            } else {
+                x1 = _xs[edge.u] + (_xs[edge.v] - _xs[edge.u]) * _vertexPositioning.vertexSizeAt(edge.u) * 0.5 / edgeLen;
+                y1 = _ys[edge.u] + (_ys[edge.v] - _ys[edge.u]) * _vertexPositioning.vertexSizeAt(edge.u) * 0.5 / edgeLen;
+            }
+            if (isVirtualVertex(edge.v)) {
+                x2 = _xs[edge.v];
+                y2 = _ys[edge.v];
+            } else {
+                x2 = _xs[edge.v] + (_xs[edge.u] - _xs[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
+                y2 = _ys[edge.v] + (_ys[edge.u] - _ys[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
+            }
+            x1 = x1 * scale + shiftX;
+            y1 = y1 * scale + shiftY;
+            x2 = x2 * scale + shiftX;
+            y2 = y2 * scale + shiftY;
+            svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
+            if (!attributes.label.empty()) {
+                const double dx = x2 - x1;
+                const double dy = y2 - y1;
+                const double len = sqrt(dx * dx + dy * dy);
+                const double nx = -dy / len;
+                const double ny = dx / len;
+                const double midX = (x1 + x2) / 2;
+                const double midY = (y1 + y2) / 2;
+                const double x = midX + nx * 15.0;
+                const double y = midY + ny * 15.0;
+                svg.drawText(x, y, attributes.label);
+            }
         } else {
-            x1 = _xs[edge.u] + (_xs[edge.v] - _xs[edge.u]) * _vertexPositioning.vertexSizeAt(edge.u) * 0.5 / edgeLen;
-            y1 = _ys[edge.u] + (_ys[edge.v] - _ys[edge.u]) * _vertexPositioning.vertexSizeAt(edge.u) * 0.5 / edgeLen;
-        }
-        if (isVirtualVertex(edge.v)) {
-            x2 = _xs[edge.v];
-            y2 = _ys[edge.v];
-        } else {
-            x2 = _xs[edge.v] + (_xs[edge.u] - _xs[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
-            y2 = _ys[edge.v] + (_ys[edge.u] - _ys[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
-        }
-        x1 = x1 * scale + shiftX;
-        y1 = y1 * scale + shiftY;
-        x2 = x2 * scale + shiftX;
-        y2 = y2 * scale + shiftY;
-        svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
-        if (!attributes.label.empty()) {
-            const double dx = x2 - x1;
-            const double dy = y2 - y1;
-            const double len = sqrt(dx * dx + dy * dy);
-            const double nx = -dy / len;
-            const double ny = dx / len;
-            const double midX = (x1 + x2) / 2;
-            const double midY = (y1 + y2) / 2;
-            const double x = midX + nx * 15.0;
-            const double y = midY + ny * 15.0;
-            svg.drawText(x, y, attributes.label);
+            double dx = 0, dy = 0;
+            switch (_graphAttributes.rank) {
+            case GraphAttributes::Rank::TopToBottom:
+                dy = 1.0;
+                break;
+            case GraphAttributes::Rank::BottomToTop:
+                dy = -1.0;
+                break;
+            case GraphAttributes::Rank::LeftToRight:
+                dx = 1.0;
+                break;
+            case GraphAttributes::Rank::RightToLeft:
+                dx = -1.0;
+                break;
+            }
+            const double nx = -dy, ny = dx;
+            const double x = _xs[edge.u] * scale + shiftX, y = _ys[edge.u] * scale + shiftY;
+            const double dir3 = atan2(ny, nx);
+            const double rotate = 3.14 / 6.0;
+            const double dir12 = dir3 + rotate;
+            const double dir45 = dir3 - rotate;
+            const double radius = _vertexPositioning.vertexSizeAt(edge.u) * 0.5 * scale;
+            const double x1 = x + cos(dir12) * radius;
+            const double y1 = y + sin(dir12) * radius;
+            const double x2 = x + cos(dir12) * radius * 2.5;
+            const double y2 = y + sin(dir12) * radius * 2.5;
+            const double x3 = x + cos(dir3) * radius * 3;
+            const double y3 = y + sin(dir3) * radius * 3;
+            const double x4 = x + cos(dir45) * radius * 2.5;
+            const double y4 = y + sin(dir45) * radius * 2.5;
+            const double x5 = x + cos(dir45) * radius;
+            const double y5 = y + sin(dir45) * radius;
+            svg.drawLine(x1, y1, x2, y2);
+            svg.drawLine(x2, y2, x3, y3);
+            svg.drawLine(x3, y3, x4, y4);
+            svg.drawLine(x4, y4, x5, y5, true);
+            const double xt = x + cos(dir3) * (radius * 3 + 15.0);
+            const double yt = y + sin(dir3) * (radius * 3 + 15.0);
+            if (!attributes.label.empty()) {
+                svg.drawText(xt, yt, attributes.label);
+            }
         }
     }
 }

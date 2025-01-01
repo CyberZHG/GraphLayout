@@ -130,6 +130,41 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
     layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_3.svg");
 }
 
+TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
+    auto test = [](const GraphAttributes::Rank rank) {
+        const auto graph = make_shared<SPDirectedGraph>(5);
+        graph->addEdge(0, 1);
+        graph->addEdge(1, 1); graph->addEdge(1, 2);
+        graph->addEdge(2, 2); graph->addEdge(2, 3);
+        graph->addEdge(3, 2); graph->addEdge(3, 4);
+        graph->addEdge(4, 4);
+        DirectedGraphHierarchicalLayout layout;
+        layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
+        layout.graphAttributes().bgcolor.set("white");
+        layout.graphAttributes().rank = rank;
+        layout.setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
+        for (int u = 1; u <= 4; ++u) {
+            layout.setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u));
+        }
+        layout.setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, "none");
+        layout.setVertexAttributes(4, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+        layout.setEdgeAttributes(1, ATTRIBUTE_KEY_LABEL, "b");
+        layout.setEdgeAttributes(2, ATTRIBUTE_KEY_LABEL, "a");
+        layout.setEdgeAttributes(3, ATTRIBUTE_KEY_LABEL, "a");
+        layout.setEdgeAttributes(4, ATTRIBUTE_KEY_LABEL, "b");
+        layout.setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "a");
+        layout.setEdgeAttributes(6, ATTRIBUTE_KEY_LABEL, "b");
+        layout.setEdgeAttributes(7, ATTRIBUTE_KEY_LABEL, "a,b");
+        layout.setGraph(graph);
+        layout.layoutGraph();
+        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", static_cast<int>(rank)));
+    };
+    test(GraphAttributes::Rank::TopToBottom);
+    test(GraphAttributes::Rank::BottomToTop);
+    test(GraphAttributes::Rank::LeftToRight);
+    test(GraphAttributes::Rank::RightToLeft);
+}
+
 TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
