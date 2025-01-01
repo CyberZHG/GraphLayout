@@ -61,7 +61,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
-    auto test = [](const GraphAttributes::RankDirection rank) {
+    auto test = [](const string& rankDir) {
         const auto graph = make_shared<SPDirectedGraph>(23);
         const vector<vector<int>> edges = {
             {3, 4, 10, 13}, {3, 20}, {4, 5}, {6}, {7},
@@ -76,8 +76,8 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
             }
         }
         DirectedGraphHierarchicalLayout layout;
-        layout.attributes().graphAttributes().backgroundColor.set("white");
-        layout.attributes().graphAttributes().rankDirection = rank;
+        layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
+        layout.attributes().setRankDir(rankDir);
         layout.attributes().setVertexAttributes(14, ATTRIBUTE_KEY_SHAPE, "doublecircle");
         layout.attributes().setVertexAttributes(16, ATTRIBUTE_KEY_SHAPE, "doublecircle");
         layout.attributes().setVertexAttributes(19, ATTRIBUTE_KEY_SHAPE, "doublecircle");
@@ -86,12 +86,12 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
         layout.setGraph(graph);
         layout.layoutGraph();
         layout.initializeVertexLabelsWithNumericalValues();
-        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_2__{}.svg", static_cast<int>(rank)));
+        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_2__{}.svg", rankDir));
     };
-    test(GraphAttributes::RankDirection::TopToBottom);
-    test(GraphAttributes::RankDirection::BottomToTop);
-    test(GraphAttributes::RankDirection::LeftToRight);
-    test(GraphAttributes::RankDirection::RightToLeft);
+    test(AttributeRankDir::TOP_TO_BOTTOM);
+    test(AttributeRankDir::BOTTOM_TO_TOP);
+    test(AttributeRankDir::LEFT_TO_RIGHT);
+    test(AttributeRankDir::RIGHT_TO_LEFT);
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
@@ -108,15 +108,14 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
     }
     DirectedGraphHierarchicalLayout layout;
     layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
-    layout.attributes().graphAttributes().backgroundColor.set("white");
-    layout.attributes().graphAttributes().rankDirection = GraphAttributes::RankDirection::LeftToRight;
+        layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
+    layout.attributes().setRankDir(AttributeRankDir::LEFT_TO_RIGHT);
     layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
     for (int u = 1; u < 12; ++u) {
         layout.attributes().setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u - 1));
     }
-    layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, "none");
-    layout.attributes().setVertexAttributes(11, ATTRIBUTE_KEY_SHAPE, "doublecircle");
-    layout.attributes().edgeAttributes().label = "ϵ";
+    layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, AttributeShape::NONE);
+    layout.attributes().setVertexAttributes(11, ATTRIBUTE_KEY_SHAPE, AttributeShape::DOUBLE_CIRCLE);
     for (const auto& [id, u, v] : graph->edges()) {
         if (u == 5 && v == 6) {
             layout.attributes().setEdgeAttributes(id, ATTRIBUTE_KEY_LABEL, "a");
@@ -131,7 +130,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
-    auto test = [](const GraphAttributes::RankDirection rank) {
+    auto test = [](const string& rankDir) {
         const auto graph = make_shared<SPDirectedGraph>(5);
         graph->addEdge(0, 1);
         graph->addEdge(1, 1); graph->addEdge(1, 2);
@@ -140,8 +139,8 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         graph->addEdge(4, 4);
         DirectedGraphHierarchicalLayout layout;
         layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
-        layout.attributes().graphAttributes().backgroundColor.set("white");
-        layout.attributes().graphAttributes().rankDirection = rank;
+        layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
+        layout.attributes().setRankDir(rankDir);
         layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "S");
         for (int u = 1; u <= 4; ++u) {
             layout.attributes().setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u));
@@ -158,12 +157,12 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         layout.setLayerMargin(1.5);
         layout.setGraph(graph);
         layout.layoutGraph();
-        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", static_cast<int>(rank)));
+        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", rankDir));
     };
-    test(GraphAttributes::RankDirection::TopToBottom);
-    test(GraphAttributes::RankDirection::BottomToTop);
-    test(GraphAttributes::RankDirection::LeftToRight);
-    test(GraphAttributes::RankDirection::RightToLeft);
+    test(AttributeRankDir::TOP_TO_BOTTOM);
+    test(AttributeRankDir::BOTTOM_TO_TOP);
+    test(AttributeRankDir::LEFT_TO_RIGHT);
+    test(AttributeRankDir::RIGHT_TO_LEFT);
 }
 
 TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {

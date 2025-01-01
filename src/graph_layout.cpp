@@ -110,7 +110,6 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
                 const int midId = newEdgeIds[newEdgeIds.size() / 2];
                 for (const auto& edgeId : newEdgeIds) {
                     if (edgeId == midId) {
-                        const auto originalAttributes = _attributes.edgeAttributes(originalEdge.id);
                         _attributes.transferEdgeAttributes(originalEdge.id, midId);
                     } else {
                         _attributes.setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, "");
@@ -143,22 +142,18 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u));
     }
     unordered_map<int, unordered_set<int>> outEdges;
+    const auto rankDir = _attributes.rankDir();
     for (const auto& [id, u, v] : _graph->edges()) {
         outEdges[u].insert(v);
         if (u == v) {
-            switch (_attributes.graphAttributes().rankDirection) {
-                case GraphAttributes::RankDirection::TopToBottom:
-                    minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
-                    break;
-                case GraphAttributes::RankDirection::BottomToTop:
-                    maxX = max(maxX, _xs[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
-                    break;
-                case GraphAttributes::RankDirection::LeftToRight:
-                    maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
-                    break;
-                case GraphAttributes::RankDirection::RightToLeft:
-                    minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
-                    break;
+            if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
+                minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
+            } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
+                maxX = max(maxX, _xs[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
+            } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
+                maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
+            } else {
+                minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
             }
         }
     }
@@ -167,28 +162,28 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
     const double shiftX = (margin + abs(minX)) * scale;
     const double shiftY = (margin + abs(minY)) * scale;
     const auto svg = DrawSVG(outputFilePath, width, height);
-    if (!_attributes.graphAttributes().backgroundColor.isNone()) {
-        auto [red, green, blue] = _attributes.graphAttributes().backgroundColor.toRGB();
+    const auto backgroundColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR);
+    if (!backgroundColor.empty()) {
+        auto [red, green, blue] = AttributeColor::toRGB(backgroundColor);
         svg.drawBackground(red, green, blue);
     }
     for (int u = 0; u < _initialNumVertices; ++u) {
-        const VertexAttributes attributes = _attributes.vertexAttributes(u);
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
-        if (attributes.shape == VertexAttributes::Shape::Circle) {
+        const auto shape = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE);
+        if (shape == AttributeShape::CIRCLE) {
             svg.drawCircle(x, y, r);
-        } else if (attributes.shape == VertexAttributes::Shape::DoubleCircle) {
+        } else if (shape == AttributeShape::DOUBLE_CIRCLE) {
             svg.drawCircle(x, y, r);
             svg.drawCircle(x, y, r * 0.8);
         }
-        if (!attributes.label.empty()) {
-            svg.drawText(x, y, attributes.label);
-        }
+        const auto label = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL);
+        svg.drawText(x, y, label);
     }
 
     for (const auto& edge : _graph->edges()) {
-        const EdgeAttributes attributes = _attributes.edgeAttributes(edge.id);
+        const auto label = _attributes.edgeAttributes(edge.id, ATTRIBUTE_KEY_LABEL);
         if (edge.u != edge.v) {
             const double edgeLen = sqrt((_xs[edge.u] - _xs[edge.v]) * (_xs[edge.u] - _xs[edge.v]) + (_ys[edge.u] - _ys[edge.v]) * (_ys[edge.u] - _ys[edge.v]));
             double x1, y1, x2, y2;
@@ -234,14 +229,14 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
                 y2 += (y - y2) * radius2 / edgeLen2;
                 svg.drawLine(x1, y1, x, y);
                 svg.drawLine(x, y, x2, y2, !isVirtualVertex(edge.v));
-                if (!attributes.label.empty()) {
+                if (!label.empty()) {
                     const double tx = midX + nx * 30.0;
                     const double ty = midY + ny * 30.0;
-                    svg.drawText(tx, ty, attributes.label);
+                    svg.drawText(tx, ty, label);
                 }
             } else {
                 svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
-                if (!attributes.label.empty()) {
+                if (!label.empty()) {
                     const double dx = x2 - x1;
                     const double dy = y2 - y1;
                     const double len = sqrt(dx * dx + dy * dy);
@@ -251,29 +246,24 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
                     const double midY = (y1 + y2) / 2;
                     const double x = midX + nx * 15.0;
                     const double y = midY + ny * 15.0;
-                    svg.drawText(x, y, attributes.label);
+                    svg.drawText(x, y, label);
                 }
             }
         } else {
             double dx = 0, dy = 0;
-            switch (_attributes.graphAttributes().rankDirection) {
-            case GraphAttributes::RankDirection::TopToBottom:
+            if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
                 dy = 1.0;
-                break;
-            case GraphAttributes::RankDirection::BottomToTop:
+            } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
                 dy = -1.0;
-                break;
-            case GraphAttributes::RankDirection::LeftToRight:
+            } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
                 dx = 1.0;
-                break;
-            case GraphAttributes::RankDirection::RightToLeft:
+            } else {
                 dx = -1.0;
-                break;
             }
             const double nx = -dy, ny = dx;
             const double x = _xs[edge.u] * scale + shiftX, y = _ys[edge.u] * scale + shiftY;
             const double dir3 = atan2(ny, nx);
-            const double rotate = 3.14 / 6.0;
+            constexpr double rotate = 3.14 / 6.0;
             const double dir12 = dir3 + rotate;
             const double dir45 = dir3 - rotate;
             const double radius = _vertexPositioning.vertexSizeAt(edge.u) * 0.5 * scale;
@@ -293,9 +283,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
             svg.drawLine(x4, y4, x5, y5, true);
             const double xt = x + cos(dir3) * (radius * 3 + 15.0);
             const double yt = y + sin(dir3) * (radius * 3 + 15.0);
-            if (!attributes.label.empty()) {
-                svg.drawText(xt, yt, attributes.label);
-            }
+            svg.drawText(xt, yt, label);
         }
     }
 }
@@ -327,17 +315,18 @@ bool DirectedGraphHierarchicalLayout::isVirtualVertex(const int u) const {
  * The default rank is top to bottom.
  */
 void DirectedGraphHierarchicalLayout::adjustCoordinatesByGraphRank() {
-    if (_attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::TopToBottom) {
+    const auto rankDir = _attributes.rankDir();
+    if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
         return;
     }
-    if (_attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::BottomToTop || _attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::RightToLeft) {
+    if (rankDir == AttributeRankDir::BOTTOM_TO_TOP || rankDir == AttributeRankDir::RIGHT_TO_LEFT) {
         const auto yMin = ranges::min(_ys);
         const auto yMax = ranges::max(_ys);
         for (auto& y : _ys) {
             y = yMax - y + yMin;
         }
     }
-    if (_attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::LeftToRight || _attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::RightToLeft) {
+    if (rankDir == AttributeRankDir::LEFT_TO_RIGHT || rankDir == AttributeRankDir::RIGHT_TO_LEFT) {
         swap_ranges(_xs.begin(), _xs.end(), _ys.begin());
     }
 }

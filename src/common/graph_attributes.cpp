@@ -1,123 +1,90 @@
 #include "common/graph_attributes.h"
 
 #include <functional>
+#include <utility>
 using namespace std;
 using namespace graph_layout;
 
-void Color::set(const std::string& color) {
-    raw = color;
+unordered_map<string, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
+    {ATTRIBUTE_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
+    {ATTRIBUTE_KEY_BG_COLOR, ""},
+};
+
+unordered_map<string, string> Attributes::DEFAULT_VERTEX_ATTRIBUTE_VALUES = {
+    {ATTRIBUTE_KEY_LABEL, ""},
+    {ATTRIBUTE_KEY_SHAPE, AttributeShape::CIRCLE},
+};
+
+unordered_map<string, string> Attributes::DEFAULT_EDGE_ATTRIBUTE_VALUES = {
+    {ATTRIBUTE_KEY_LABEL, ""},
+};
+
+Attribute::Attribute() = default;
+
+Attribute::Attribute(const string& value) : _raw(value) {
 }
 
-bool Color::isNone() const {
-    return raw.empty();
+void Attribute::set(const string &value) {
+    _raw = value;
 }
 
-std::tuple<double, double, double> Color::toRGB() const {
+const string& Attribute::value() const {
+    return _raw;
+}
+
+tuple<double, double, double> AttributeColor::toRGB(const string& raw) {
     if (raw == "white") {
         return make_tuple(1.0, 1.0, 1.0);
     }
     return make_tuple(0.0, 0.0, 0.0);
 }
 
-GraphAttributes GraphAttributes::stringMappingToAttributes(const unordered_map<string, string>& mapping) {
-    GraphAttributes attributes;
-    std::unordered_map<std::string, function<void(string)>> processors;
-    processors[ATTRIBUTE_KEY_BG_COLOR] = [&attributes](const string& raw) {
-        attributes.backgroundColor.set(raw);
-    };
-    processors[ATTRIBUTE_KEY_RANK_DIR] = [&attributes](const string& raw) {
-        attributes.rankDirection = RankDirection::TopToBottom;
-        if (raw == "BT") {
-            attributes.rankDirection = RankDirection::BottomToTop;
-        } else if (raw == "LR") {
-            attributes.rankDirection = RankDirection::LeftToRight;
-        } else if (raw == "RL") {
-            attributes.rankDirection = RankDirection::RightToLeft;
+string Attributes::graphAttributes(const string &key) const {
+    if (const auto it = _graphAttributes.find(key); it != _graphAttributes.end()) {
+        return it->second;
+    }
+    return DEFAULT_GRAPH_ATTRIBUTE_VALUES[key];
+}
+
+void Attributes::setGraphAttributes(const string &key, const string &value) {
+    _graphAttributes[key] = value;
+}
+
+string Attributes::vertexAttributes(const int u, const string &key) const {
+    if (const auto vIt = _vertexAttributes.find(u); vIt != _vertexAttributes.end()) {
+        if (const auto it = vIt->second.find(key); it != vIt->second.end()) {
+            return it->second;
         }
-    };
-    for (const auto& [key, value] : mapping) {
-        processors[key](value);
     }
-    return attributes;
-}
-
-VertexAttributes VertexAttributes::stringMappingToAttributes(const unordered_map<string, string>& mapping) {
-    const VertexAttributes attributes;
-    return stringMappingToAttributes(mapping, attributes);
-}
-
-VertexAttributes VertexAttributes::stringMappingToAttributes(const unordered_map<string, string>& mapping, const VertexAttributes& defaultAttributes) {
-    VertexAttributes attributes = defaultAttributes;
-    std::unordered_map<std::string, function<void(string)>> processors;
-    processors[ATTRIBUTE_KEY_LABEL] = [&attributes](const string& raw) {
-        attributes.label = raw;
-    };
-    processors[ATTRIBUTE_KEY_SHAPE] = [&attributes](const string& raw) {
-        attributes.shape = Shape::Circle;
-        if (raw == "none") {
-            attributes.shape = Shape::None;
-        } else if (raw == "doublecircle") {
-            attributes.shape = Shape::DoubleCircle;
-        }
-    };
-    for (const auto& [key, value] : mapping) {
-        processors[key](value);
+    if (const auto it = _vertexGlobalAttributes.find(key); it != _vertexGlobalAttributes.end()) {
+        return it->second;
     }
-    return attributes;
-}
-
-EdgeAttributes EdgeAttributes::stringMappingToAttributes(const unordered_map<string, string>& mapping) {
-    const EdgeAttributes attributes;
-    return stringMappingToAttributes(mapping, attributes);
-}
-
-EdgeAttributes EdgeAttributes::stringMappingToAttributes(const unordered_map<string, string> &mapping, const EdgeAttributes& defaultAttributes) {
-    EdgeAttributes attributes = defaultAttributes;
-    std::unordered_map<std::string, function<void(string)>> processors;
-    processors[ATTRIBUTE_KEY_LABEL] = [&attributes](const string& raw) {
-        attributes.label = raw;
-    };
-    for (const auto& [key, value] : mapping) {
-        processors[key](value);
+    if (const auto it = DEFAULT_VERTEX_ATTRIBUTE_VALUES.find(key); it != DEFAULT_VERTEX_ATTRIBUTE_VALUES.end()) {
+        return it->second;
     }
-    return attributes;
+    return graphAttributes(key);
 }
 
-GraphAttributes& Attributes::graphAttributes() {
-    return _graphAttributes;
-}
-
-const GraphAttributes & Attributes::graphAttributes() const {
-    return _graphAttributes;
-}
-
-VertexAttributes& Attributes::vertexAttributes() {
-    return _vertexGlobalAttributes;
-}
-
-VertexAttributes Attributes::vertexAttributes(const int u) const {
-    if (const auto it = _vertexAttributes.find(u); it != _vertexAttributes.end()) {
-        return VertexAttributes::stringMappingToAttributes(it->second, _vertexGlobalAttributes);
-    }
-    return _vertexGlobalAttributes;
-}
-
-void Attributes::setVertexAttributes(const int u, const std::string &key, const std::string &value) {
+void Attributes::setVertexAttributes(const int u, const string &key, const string &value) {
     _vertexAttributes[u][key] = value;
 }
 
-EdgeAttributes& Attributes::edgeAttributes() {
-    return _edgeGlobalAttributes;
-}
-
-EdgeAttributes Attributes::edgeAttributes(const int u) const {
-    if (const auto it = _edgeAttributes.find(u); it != _edgeAttributes.end()) {
-        return EdgeAttributes::stringMappingToAttributes(it->second, _edgeGlobalAttributes);
+string Attributes::edgeAttributes(const int u, const string &key) const {
+    if (const auto eIt = _edgeAttributes.find(u); eIt != _edgeAttributes.end()) {
+        if (const auto it = eIt->second.find(key); it != eIt->second.end()) {
+            return it->second;
+        }
     }
-    return _edgeGlobalAttributes;
+    if (const auto it = _edgeGlobalAttributes.find(key); it != _edgeGlobalAttributes.end()) {
+        return it->second;
+    }
+    if (const auto it = DEFAULT_EDGE_ATTRIBUTE_VALUES.find(key); it != DEFAULT_EDGE_ATTRIBUTE_VALUES.end()) {
+        return it->second;
+    }
+    return edgeAttributes(u, key);
 }
 
-void Attributes::setEdgeAttributes(const int u, const std::string &key, const std::string &value) {
+void Attributes::setEdgeAttributes(const int u, const string &key, const string &value) {
     _edgeAttributes[u][key] = value;
 }
 
@@ -129,4 +96,12 @@ void Attributes::transferEdgeAttributes(const int u, const int v) {
     if (_edgeAttributes.contains(u)) {
         _edgeAttributes[v] = _edgeAttributes[u];
     }
+}
+
+string Attributes::rankDir() const {
+    return graphAttributes(ATTRIBUTE_KEY_RANK_DIR);
+}
+
+void Attributes::setRankDir(const string &value) {
+    setGraphAttributes(ATTRIBUTE_KEY_RANK_DIR, value);
 }
