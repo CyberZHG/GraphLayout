@@ -15,7 +15,7 @@ int BinaryIndexedTree::next(const int index) {
 
 void BinaryIndexedTree::add(int index, const int val) {
     ++index;
-    while (index < _bit.size()) {
+    while (index < static_cast<int>(_bit.size())) {
         _bit[index] += val;
         index += next(index);
     }

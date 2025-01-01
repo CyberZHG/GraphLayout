@@ -5,8 +5,6 @@
 using namespace std;
 using namespace graph_layout;
 
-constexpr double UNIT_SIZE = VertexPositioning::DEFAULT_VERTEX_SIZE + VertexPositioning::DEFAULT_VERTEX_MARGIN;
-
 TEST(TestDirectedGraphHierarchialLayout, EmptyGraph) {
     const auto graph = make_shared<SPDirectedGraph>(0);
     DirectedGraphHierarchicalLayout layout;
@@ -52,7 +50,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
             {18, 19, 20}, {}, {21}, {22}, {},
             {23}, {23},
         };
-        for (int u = 0; u < edges.size(); ++u) {
+        for (int u = 0; u < static_cast<int>(edges.size()); ++u) {
             for (const auto v : edges[u]) {
                 graph->addEdge(u, v - 1);
             }
@@ -83,7 +81,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
         {5}, {6}, {7, 9},  {8}, {7, 9},
         {1, 10}
     };
-    for (int u = 0; u < edges.size(); ++u) {
+    for (int u = 0; u < static_cast<int>(edges.size()); ++u) {
         for (const auto v : edges[u]) {
             graph->addEdge(u, v + 1);
         }
@@ -146,6 +144,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
     test(AttributeRankDir::RIGHT_TO_LEFT);
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
@@ -158,3 +157,4 @@ TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {
         EXPECT_EQ(ys.size(), graphPtr->numVertices());
     }
 }
+#endif

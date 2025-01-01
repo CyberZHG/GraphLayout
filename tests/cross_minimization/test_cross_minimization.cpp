@@ -18,7 +18,6 @@ TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeNoVirtual) {
 }
 
 TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeGap2) {
-    constexpr int offset = CrossMinimization::VIRTUAL_EDGE_ID_OFFSET;
     SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     auto ranks = vector({0, 2});
@@ -29,7 +28,6 @@ TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeGap2) {
 }
 
 TEST(TestCrossMinimizationAddVirtualEdges, OneEdgeGap3) {
-    constexpr int offset = CrossMinimization::VIRTUAL_EDGE_ID_OFFSET;
     SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     auto ranks = vector({0, 3});
@@ -58,11 +56,11 @@ void testNumCrossing(SPDirectedGraph &graph, const SPLayering &layering) {
     const auto &orders = layering.orders;
     for (size_t i = 0; i + 1 < orders.size(); ++i) {
         unordered_map<int, int> positions;
-        for (int j = 0; j < orders[i + 1].size(); ++j) {
+        for (int j = 0; j < static_cast<int>(orders[i + 1].size()); ++j) {
             positions[orders[i + 1][j]] = j;
         }
-        for (int j = 0; j < orders[i].size(); ++j) {
-            for (int k = j + 1; k < orders[i].size(); ++k) {
+        for (int j = 0; j < static_cast<int>(orders[i].size()); ++j) {
+            for (int k = j + 1; k < static_cast<int>(orders[i].size()); ++k) {
                 for (const auto &edge1 : graph.getOutEdges(orders[i][j])) {
                     for (const auto &edge2 : graph.getOutEdges(orders[i][k])) {
                         if (positions[edge1.v] > positions[edge2.v]) {
@@ -173,6 +171,7 @@ TEST(TestCrossMinimizationNumCross, RandomTwoLayers) {
     }
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestCrossMinimizationNumCross, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(64);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
@@ -192,3 +191,4 @@ TEST(TestCrossMinimizationNumCross, Random) {
         }
     }
 }
+#endif

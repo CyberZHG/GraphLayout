@@ -57,7 +57,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
         bucketUpperBound = max(bucketUpperBound, static_cast<int>(index));
     };
     queue<int> sources, sinks;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < static_cast<int>(n); ++i) {
         if (outDegree[i] == 0) {
             sinks.emplace(i);
         }
@@ -98,7 +98,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
     // and then break cycles by reversing all incoming edges of the node
     // with the largest outdegree minus indegree.
     unordered_set<int> feedbackArcs;
-    while (numPoppedVertices < n) {
+    while (numPoppedVertices < static_cast<int>(n)) {
         while (!sinks.empty()) {
             removeNode(sinks.front());
             sinks.pop();
@@ -107,7 +107,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
             removeNode(sources.front());
             sources.pop();
         }
-        if (numPoppedVertices < n) {
+        if (numPoppedVertices < static_cast<int>(n)) {
             while (bucketUpperBound >= 0) {
                 if (differenceBuckets[bucketUpperBound].empty()) {
                     --bucketUpperBound;
@@ -129,12 +129,11 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph& 
 
 std::unordered_set<int> FeedbackArcsFinder::findFeedbackArcsMinID(SPDirectedGraph& graph) {
     const auto n = graph.numVertices();
-    const auto& edges = graph.edges();
     vector inDegree(graph.getInDegrees());
     vector outDegree(graph.getOutDegrees());
     set<int> remainingVertices;
     queue<int> sources, sinks;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < static_cast<int>(n); ++i) {
         remainingVertices.emplace(i);
         if (outDegree[i] == 0) {
             sinks.emplace(i);

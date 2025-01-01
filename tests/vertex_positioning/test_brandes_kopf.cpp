@@ -86,7 +86,7 @@ pair<SPDirectedGraph, SPLayering> createTestGraphSpecialCase102() {
         {18, 19, 20}, {}, {21}, {22}, {},
         {23}, {23},
     };
-    for (int u = 0; u < edges.size(); ++u) {
+    for (int u = 0; u < static_cast<int>(edges.size()); ++u) {
         for (const auto v : edges[u]) {
             graph.addEdge(u, v - 1);
         }
@@ -168,6 +168,7 @@ TEST(TestVertexPositioningHorizontalCompaction, SpecialCase104) {
     checkMargins(layering, vertexPositioning, positions);
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestVertexPositioningHorizontalCompaction, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
@@ -220,3 +221,4 @@ TEST(TestVertexPositioningBrandesKopf, RandomNoCheck) {
         }
     }
 }
+#endif

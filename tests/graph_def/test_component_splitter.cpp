@@ -33,6 +33,7 @@ TEST(TestGraphComponentSplitter, SpecialCase1) {
     EXPECT_EQ(newGraph, graph);
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestGraphComponentSplitter, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     GraphComponentSplitter splitter;
@@ -43,3 +44,4 @@ TEST(TestGraphComponentSplitter, Random) {
         EXPECT_EQ(newGraph, graph);
     }
 }
+#endif

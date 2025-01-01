@@ -6,11 +6,11 @@ using namespace std;
 using namespace graph_layout;
 
 void SPLayering::initializeMapping() {
-    const size_t numLayers = orders.size();
+    const int numLayers = static_cast<int>(orders.size());
     positions.resize(numLayers);
     idToLayer.clear();
     for (int i = 0; i < numLayers; i++) {
-        for (int j = 0; j < orders[i].size(); ++j) {
+        for (int j = 0; j < static_cast<int>(orders[i].size()); ++j) {
             positions[i][orders[i][j]] = j;
             idToLayer[orders[i][j]] = i;
         }
@@ -50,11 +50,11 @@ pair<SPLayering, vector<SPVirtualEdge>> CrossMinimization::addVirtualEdges(SPDir
     ranges::sort(discreteRanks);
     discreteRanks.erase(ranges::unique(discreteRanks).begin(), discreteRanks.end());
     unordered_map<int, int> rankToIndex;
-    for (int i = 0; i < discreteRanks.size(); i++) {
+    for (int i = 0; i < static_cast<int>(discreteRanks.size()); i++) {
         rankToIndex[discreteRanks[i]] = i;
     }
     orders.resize(discreteRanks.size());
-    for (int i = 0; i < ranks.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(ranks.size()); ++i) {
         orders[rankToIndex[ranks[i]]].emplace_back(i);
     }
 
@@ -117,7 +117,7 @@ long long CrossMinimization::computeNumCross(
     const bool forward) {
     bit.clear(order1.size());
     unordered_map<int, int> positions;
-    for (int i = 0; i < order1.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(order1.size()); ++i) {
         positions[order1[i]] = i;
     }
     long long numCross = 0;
@@ -195,7 +195,7 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(
         hasUpdate = false;
         for (int layerIndex = 1; layerIndex < numLayers; ++layerIndex) {
             positions.clear();
-            for (int i = 0; i < orders[layerIndex - 1].size(); ++i) {
+            for (int i = 0; i < static_cast<int>(orders[layerIndex - 1].size()); ++i) {
                 positions[orders[layerIndex - 1][i]] = i;
             }
             const int n = static_cast<int>(orders[layerIndex].size());
@@ -219,7 +219,7 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(
 
         for (int layerIndex = numLayers - 2; layerIndex >= 0; --layerIndex) {
             positions.clear();
-            for (int i = 0; i < orders[layerIndex + 1].size(); ++i) {
+            for (int i = 0; i < static_cast<int>(orders[layerIndex + 1].size()); ++i) {
                 positions[orders[layerIndex + 1][i]] = i;
             }
             const int n = static_cast<int>(orders[layerIndex].size());
@@ -403,7 +403,7 @@ void CrossMinimization::reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGrap
 
     vector<unordered_map<int, int>> positions(numLayers);
     for (int layerIndex = 0; layerIndex < numLayers; layerIndex++) {
-        for (int i = 0; i < orders[layerIndex].size(); i++) {
+        for (int i = 0; i < static_cast<int>(orders[layerIndex].size()); i++) {
             positions[layerIndex][orders[layerIndex][i]] = i;
         }
     }
@@ -432,7 +432,7 @@ void CrossMinimization::reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGrap
     for (int repeatIndex = 0; repeatIndex < NUM_REPEAT; ++repeatIndex) {
         hasUpdate = false;
         for (int layerIndex = 0; layerIndex < numLayers; ++layerIndex) {
-            for (int i = 0; i + 1 < orders[layerIndex].size(); ++i) {
+            for (int i = 0; i + 1 < static_cast<int>(orders[layerIndex].size()); ++i) {
                 swapIfLessNumCross(layerIndex, i);
             }
         }
@@ -442,7 +442,7 @@ void CrossMinimization::reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGrap
 
         hasUpdate = false;
         for (int layerIndex = numLayers - 1; layerIndex >= 0; --layerIndex) {
-            for (int i = 0; i + 1 < orders[layerIndex].size(); ++i) {
+            for (int i = 0; i + 1 < static_cast<int>(orders[layerIndex].size()); ++i) {
                 swapIfLessNumCross(layerIndex, i);
             }
         }

@@ -94,7 +94,7 @@ vector<int> LayerAssignment::rankVerticesTopological(SPDirectedGraph& graph) con
  * @return The layers that each vertex belongs to.
  */
 vector<int> LayerAssignment::rankVerticesGansner93(SPDirectedGraph& graph) const {
-    const size_t n = graph.numVertices();
+    const int n = static_cast<int>(graph.numVertices());
     if (n == 0) {
         return {};
     }
@@ -188,8 +188,8 @@ vector<int> LayerAssignment::rankVerticesGansner93(SPDirectedGraph& graph) const
  * @return The root and a parent vector that represents the spanning tree.
  */
 pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGraph& graph, std::vector<int>& ranks) const {
-    const size_t n = graph.numVertices();
-    const size_t m = graph.numEdges();
+    const int n = static_cast<int>(graph.numVertices());
+    const int m = static_cast<int>(graph.numEdges());
     unordered_map<int, int> slacks;  // slack(e) = rank(e.v) - rank(e.u) - minEdgeLength(e)
     vector parents(n, NO_PARENT);
     set<pair<int, int>> incidentEdges;
@@ -277,7 +277,7 @@ pair<int, vector<int>> LayerAssignment::gansner93ComputeCutValues(
     SPDirectedGraph& tree,
     const int root,
     const std::vector<int>& parents) const {
-    const size_t n = graph.numVertices();
+    const int n = static_cast<int>(graph.numVertices());
     stack<int> forward, backward;
     forward.push(root);
     while (!forward.empty()) {

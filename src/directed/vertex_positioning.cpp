@@ -40,7 +40,7 @@ void VertexPositioning::setVertexSizes(std::vector<double> &&sizes) {
  * @param layering  The ordering of the vertices in each layer.
  */
 void VertexPositioning::sortIncidentEdges(SPDirectedGraph& graph, SPLayering& layering) {
-    const size_t numLayers = layering.orders.size();
+    const int numLayers = static_cast<int>(layering.orders.size());
     auto& inEdgeIds = graph.getInEdgeIdsRef();
     auto& outEdgeIds = graph.getOutEdgeIdsRef();
     for (int i = 0; i < numLayers; i++) {
@@ -182,7 +182,7 @@ std::vector<double> VertexPositioning::horizontalCompaction(const SPDirectedGrap
             const int layerIndex = layering.idToLayer[u];
             const auto& orders = layering.orders[layerIndex];
             const int posU = layering.positions[layerIndex][u];
-            if (leftToRight ? posU > 0 : posU + 1 < orders.size()) {
+            if (leftToRight ? posU > 0 : posU + 1 < static_cast<int>(orders.size())) {
                 const int posV = leftToRight ? posU - 1 : posU + 1;
                 const int v = roots[orders[posV]];
                 placeBlock(v);
@@ -236,7 +236,7 @@ std::pair<std::vector<double>, std::vector<double>> VertexPositioning::assignCoo
 }
 
 double VertexPositioning::vertexSizeAt(const int index) const {
-    if (index >= _vertexSizes.size()) {
+    if (index >= static_cast<int>(_vertexSizes.size())) {
         return _vertexSize;
     }
     return _vertexSizes[index];

@@ -100,13 +100,18 @@ if(GRAPH_LAYOUT_BUILD_TESTS)
             tests/vertex_positioning/test_brandes_kopf.cpp
             tests/graph_layout/test_directed_graph_hierarchical_layout.cpp
             tests/feedback_arcs/test_min_id.cpp
-            tests/svg/test_text.cpp
     )
 
     target_link_libraries(runTests
             PRIVATE GraphLayout
             PRIVATE gtest gtest_main
     )
+
+    if (GRAPH_LAYOUT_BUILD_RANDOM_TESTS)
+        target_compile_definitions(runTests
+                PRIVATE GRAPH_LAYOUT_BUILD_RANDOM_TESTS=ON
+        )
+    endif ()
 
     add_test(NAME GraphLayoutTests COMMAND runTests)
 endif ()

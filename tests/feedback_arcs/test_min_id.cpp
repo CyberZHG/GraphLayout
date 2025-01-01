@@ -62,6 +62,7 @@ TEST(TestFeedbackArcsMinID, ParallelEdges) {
     EXPECT_EQ(feedbackArcs, unordered_set({2, 3}));
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestFeedbackArcsMinID, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::MIN_ID);
@@ -79,3 +80,4 @@ TEST(TestFeedbackArcsMinID, Random) {
         }
     }
 }
+#endif

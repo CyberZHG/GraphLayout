@@ -7,7 +7,7 @@ using namespace graph_layout;
 std::vector<int> GraphComponentSplitter::getConnectedComponents(const SPDirectedGraph &graph) {
     const size_t n = graph.numVertices();
     vector<int> parent(n);
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < static_cast<int>(n); ++i) {
         parent[i] = i;
     }
     std::function<int(int)> find = [&] (const int x) {
@@ -22,7 +22,7 @@ std::vector<int> GraphComponentSplitter::getConnectedComponents(const SPDirected
     for (const auto &edge : graph.edges()) {
         combine(edge.u, edge.v);
     }
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < static_cast<int>(n); ++i) {
         parent[i] = find(i);
     }
     return parent;
@@ -32,7 +32,7 @@ std::vector<SPDirectedGraph>& GraphComponentSplitter::splitGraph(const SPDirecte
     const size_t n = graph.numVertices();
     const auto parent = getConnectedComponents(graph);
     unordered_map<int, vector<int>> groupsMap;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < static_cast<int>(n); ++i) {
         groupsMap[parent[i]].emplace_back(i);
     }
     _groups.clear();
@@ -46,7 +46,7 @@ std::vector<SPDirectedGraph>& GraphComponentSplitter::splitGraph(const SPDirecte
     vector<size_t> groupIndices(n);
     vector<unordered_map<int, int>> newVertexIndices(_groups.size());
     for (size_t g = 0; g < _groups.size(); ++g) {
-        for (int i = 0; i < _groups[g].size(); ++i) {
+        for (int i = 0; i < static_cast<int>(_groups[g].size()); ++i) {
             newVertexIndices[g][_groups[g][i]] = i;
             groupIndices[_groups[g][i]] = g;
         }

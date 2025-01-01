@@ -113,6 +113,7 @@ TEST(TestLayerAssignmentTopological, SpecialCase3) {
     EXPECT_EQ(layerAssignment.computeTotalEdgeLength(graph, ranks), 12);
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestLayerAssignmentTopological, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
@@ -131,3 +132,4 @@ TEST(TestLayerAssignmentTopological, Random) {
         }
     }
 }
+#endif

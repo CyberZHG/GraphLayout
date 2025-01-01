@@ -19,8 +19,8 @@ void SPDirectedGraph::updateNumVertices(size_t num_vertices) {
 }
 
 void SPDirectedGraph::addEdge(const SPEdge& edge) {
-    assert(0 <= edge.u && edge.u < _numVertices);
-    assert(0 <= edge.v && edge.v < _numVertices);
+    assert(0 <= edge.u && edge.u < static_cast<int>(_numVertices));
+    assert(0 <= edge.v && edge.v < static_cast<int>(_numVertices));
     _edges.emplace_back(edge);
     resetInitialization();
 }

@@ -96,12 +96,12 @@ void testCutValues(SPDirectedGraph &graph, const vector<int> &parents, const vec
     auto combine = [&](const int u, const int v) {
         p[find(u)] = find(v);
     };
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < static_cast<int>(n); ++i) {
         const auto cutId = parents[i];
         if (cutId == TestLayerAssignment::NO_PARENT) {
             continue;
         }
-        for (int u = 0; u < n; ++u) {
+        for (int u = 0; u < static_cast<int>(n); ++u) {
             p[u] = u;
         }
         for (const auto id : parents) {
@@ -228,6 +228,7 @@ TEST(TestLayerAssignmentGansner93, SpecialCase104) {
     EXPECT_EQ(ranks, vector({4, 0, 3, 9, 4}));
 }
 
+#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
 TEST(TestLayerAssignmentGansner93ComputeCutValues, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
@@ -259,3 +260,4 @@ TEST(TestLayerAssignmentGansner93ComputeCutValues, Random) {
         }
     }
 }
+#endif

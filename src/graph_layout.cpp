@@ -56,9 +56,9 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
     _ys.resize(n);
     double subGraphShift = 0.0;
     auto subGraphs = splitter.splitGraph(*_graph);
-    for (int groupIndex = 0; groupIndex < subGraphs.size(); ++groupIndex) {
+    for (int groupIndex = 0; groupIndex < static_cast<int>(subGraphs.size()); ++groupIndex) {
         auto& subGraph = subGraphs[groupIndex];
-        const size_t subN = subGraph.numVertices();
+        const int subN = static_cast<int>(subGraph.numVertices());
         auto ranks = _layerAssignment.rankVertices(subGraph);
         auto [layering, virtualEdges] = _crossMinimization.reduceNumCross(subGraph, ranks);
         auto [subXs, subYs] = _vertexPositioning.assignCoordinates(subGraph, layering);
@@ -85,7 +85,7 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
             bool removeOriginalEdge = false;
             int lastVertex = originalEdge.u;
             vector<int> newEdgeIds;
-            for (int i = 0; i + 1 < edgeIds.size(); ++i) {
+            for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {
                 const auto& inEdge = subGraph.getEdge(edgeIds[i]);
                 const auto& outEdge = subGraph.getEdge(edgeIds[i + 1]);
                 if (abs(subXs[inEdge.u] - subXs[inEdge.v]) > 1e-8 || abs(subXs[outEdge.u] - subXs[outEdge.v]) > 1e-8) {
@@ -221,7 +221,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
         e->setSplines(SVGEdge::SPLINES_LINE);
         e->setArrowHead();
         e->setMargin(2);
-        for (int i = 0; i + 1 < edgeIds.size(); ++i) {
+        for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {
             const auto& edge = _graph->getEdge(edgeIds[i]);
             e->addConnectionPoint(_xs[edge.v], _ys[edge.v]);
         }
@@ -237,7 +237,7 @@ void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(
 }
 
 void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vertexLabels) {
-    for (int i = 0; i < vertexLabels.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(vertexLabels.size()); ++i) {
         _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, vertexLabels[i]);
     }
 }
