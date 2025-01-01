@@ -35,6 +35,7 @@ namespace graph_layout {
         void setLayerAssignmentMethod(LayerAssignmentMethod method);
         void setCrossMinimizationMethod(CrossMinimizationMethod method);
         void setVertexPositioningMethod(VertexPositioningMethod method);
+        void setLayerMargin(double margin);
 
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
         /** Add numeric vertex labels.

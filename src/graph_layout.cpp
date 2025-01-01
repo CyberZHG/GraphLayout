@@ -74,6 +74,10 @@ void DirectedGraphHierarchicalLayout::setVertexPositioningMethod(const VertexPos
     _vertexPositioning.setMethod(method);
 }
 
+void DirectedGraphHierarchicalLayout::setLayerMargin(const double margin) {
+    _vertexPositioning.setLayerMargin(margin);
+}
+
 std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
@@ -173,9 +177,10 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u));
         maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u));
     }
-    for (const auto& edge : _graph->edges()) {
-        if (edge.u == edge.v) {
-            const int u = edge.u;
+    unordered_map<int, unordered_set<int>> outEdges;
+    for (const auto& [id, u, v] : _graph->edges()) {
+        outEdges[u].insert(v);
+        if (u == v) {
             switch (_graphAttributes.rank) {
                 case GraphAttributes::Rank::TopToBottom:
                     minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
@@ -240,8 +245,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
             y1 = y1 * scale + shiftY;
             x2 = x2 * scale + shiftX;
             y2 = y2 * scale + shiftY;
-            svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
-            if (!attributes.label.empty()) {
+            if (outEdges[edge.v].contains(edge.u)) {  // There is a reverse edge
                 const double dx = x2 - x1;
                 const double dy = y2 - y1;
                 const double len = sqrt(dx * dx + dy * dy);
@@ -251,7 +255,39 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
                 const double midY = (y1 + y2) / 2;
                 const double x = midX + nx * 15.0;
                 const double y = midY + ny * 15.0;
-                svg.drawText(x, y, attributes.label);
+                x1 = _xs[edge.u] * scale + shiftX;
+                y1 = _ys[edge.u] * scale + shiftY;
+                x2 = _xs[edge.v] * scale + shiftX;
+                y2 = _ys[edge.v] * scale + shiftY;
+                const double radius1 = _vertexPositioning.vertexSizeAt(edge.u) * 0.5 * scale;
+                const double radius2 = _vertexPositioning.vertexSizeAt(edge.v) * 0.5 * scale;
+                const double edgeLen1 = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
+                const double edgeLen2 = sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
+                x1 += (x - x1) * radius1 / edgeLen1;
+                y1 += (y - y1) * radius1 / edgeLen1;
+                x2 += (x - x2) * radius2 / edgeLen2;
+                y2 += (y - y2) * radius2 / edgeLen2;
+                svg.drawLine(x1, y1, x, y);
+                svg.drawLine(x, y, x2, y2, !isVirtualVertex(edge.v));
+                if (!attributes.label.empty()) {
+                    const double tx = midX + nx * 30.0;
+                    const double ty = midY + ny * 30.0;
+                    svg.drawText(tx, ty, attributes.label);
+                }
+            } else {
+                svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
+                if (!attributes.label.empty()) {
+                    const double dx = x2 - x1;
+                    const double dy = y2 - y1;
+                    const double len = sqrt(dx * dx + dy * dy);
+                    const double nx = -dy / len;
+                    const double ny = dx / len;
+                    const double midX = (x1 + x2) / 2;
+                    const double midY = (y1 + y2) / 2;
+                    const double x = midX + nx * 15.0;
+                    const double y = midY + ny * 15.0;
+                    svg.drawText(x, y, attributes.label);
+                }
             }
         } else {
             double dx = 0, dy = 0;

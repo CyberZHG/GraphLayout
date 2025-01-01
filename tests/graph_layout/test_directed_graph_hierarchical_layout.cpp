@@ -142,7 +142,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
         layout.graphAttributes().bgcolor.set("white");
         layout.graphAttributes().rank = rank;
-        layout.setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
+        layout.setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "S");
         for (int u = 1; u <= 4; ++u) {
             layout.setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u));
         }
@@ -155,6 +155,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         layout.setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "a");
         layout.setEdgeAttributes(6, ATTRIBUTE_KEY_LABEL, "b");
         layout.setEdgeAttributes(7, ATTRIBUTE_KEY_LABEL, "a,b");
+        layout.setLayerMargin(1.5);
         layout.setGraph(graph);
         layout.layoutGraph();
         layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", static_cast<int>(rank)));
