@@ -43,6 +43,7 @@ add_executable(runTests
         tests/graph_def/test_component_splitter.cpp
         tests/layer_assignment/test_gansner_93.cpp
         tests/cross_minimization/test_cross_minimization.cpp
+        tests/cross_minimization/test_barycenter.cpp
 )
 
 target_link_libraries(runTests

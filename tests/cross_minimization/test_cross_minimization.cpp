@@ -83,6 +83,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase1) {
     graph.addEdge(1, 3);
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1}, {3, 2}});
+    layeredOrder.width = 2;
     EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 1);
     testNumCrossing(graph, layeredOrder);
 }
@@ -94,6 +95,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase2) {
     graph.addEdge(2, 4);
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}});
+    layeredOrder.width = 3;
     EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 2);
     testNumCrossing(graph, layeredOrder);
     graph.addEdge(1, 5);
@@ -120,6 +122,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase3) {
     graph.addEdge(5, 6);
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1, 2}, {3, 4, 5}, {6, 7, 8}});
+    layeredOrder.width = 3;
     EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 4);
     testNumCrossing(graph, layeredOrder);
 }
@@ -136,6 +139,7 @@ TEST(TestCrossMinimizationNumCross, SpecialCase4) {
     graph.addEdge(1, 5);
     SPLayeredOrder layeredOrder;
     layeredOrder.orders = vector<vector<int>>({{0, 1, 2, 3}, {4, 5, 6, 7}});
+    layeredOrder.width = 4;
     EXPECT_EQ(CrossMinimization::calcNumCross(graph, layeredOrder), 14);
     testNumCrossing(graph, layeredOrder);
 }
@@ -165,6 +169,7 @@ TEST(TestCrossMinimizationNumCross, RandomTwoLayers) {
         for (int i = n1; i < n1 + n2; ++i) {
             layeredOrder.orders[1].push_back(i);
         }
+        layeredOrder.width = max(layeredOrder.orders[0].size(), layeredOrder.orders[1].size());
         testNumCrossing(graph, layeredOrder);
     }
 }
