@@ -1,8 +1,8 @@
 #ifndef GRAPHLAYOUT_CROSS_MINIMIZATION_H
 #define GRAPHLAYOUT_CROSS_MINIMIZATION_H
 
-#include "graph_def.h"
-#include "binary_indexed_tree.h"
+#include "common/graph_def.h"
+#include "common/binary_indexed_tree.h"
 
 namespace graph_layout {
 

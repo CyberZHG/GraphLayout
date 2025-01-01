@@ -1,8 +1,8 @@
 #ifndef GRAPHLAYOUT_VERTEX_POSITIONING_H
 #define GRAPHLAYOUT_VERTEX_POSITIONING_H
 
-#include "graph_def.h"
-#include "cross_minimization.h"
+#include "common/graph_def.h"
+#include "directed/cross_minimization.h"
 
 namespace graph_layout {
 

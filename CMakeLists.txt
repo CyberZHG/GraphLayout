@@ -6,19 +6,19 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(GraphLayout STATIC
         include/graph_layout.h
         src/graph_layout.cpp
-        include/feedback_arcs.h
-        src/feedback_arcs.cpp
-        include/graph_def.h
-        src/graph_def.cpp
-        include/layer_assignment.h
-        src/layer_assignment.cpp
-        src/graph_def_splitter.cpp
-        include/cross_minimization.h
-        src/cross_minimization.cpp
-        include/binary_indexed_tree.h
-        src/binary_indexed_tree.cpp
-        include/vertex_positioning.h
-        src/vertex_positioning.cpp
+        include/directed/feedback_arcs.h
+        src/directed/feedback_arcs.cpp
+        include/common/graph_def.h
+        src/common/graph_def.cpp
+        include/directed/layer_assignment.h
+        src/directed/layer_assignment.cpp
+        src/common/graph_def_splitter.cpp
+        include/directed/cross_minimization.h
+        src/directed/cross_minimization.cpp
+        include/common/binary_indexed_tree.h
+        src/common/binary_indexed_tree.cpp
+        include/directed/vertex_positioning.h
+        src/directed/vertex_positioning.cpp
 )
 
 target_include_directories(GraphLayout

@@ -2,7 +2,7 @@
 #define GRAPHLAYOUT_LAYER_ASSIGNMENT_H
 
 #include <vector>
-#include "graph_def.h"
+#include "common/graph_def.h"
 
 namespace graph_layout {
 

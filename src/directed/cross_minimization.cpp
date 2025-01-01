@@ -1,4 +1,4 @@
-#include "cross_minimization.h"
+#include "directed/cross_minimization.h"
 
 #include <ranges>
 #include <set>

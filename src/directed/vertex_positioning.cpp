@@ -1,4 +1,4 @@
-#include "vertex_positioning.h"
+#include "directed/vertex_positioning.h"
 
 #include <chrono>
 using namespace std;

@@ -1,8 +1,7 @@
 #include <unordered_set>
 #include <gtest/gtest.h>
-#include "feedback_arcs.h"
-#include "layer_assignment.h"
-#include "graph_def.h"
+#include "directed/feedback_arcs.h"
+#include "directed/layer_assignment.h"
 using namespace std;
 using namespace graph_layout;
 

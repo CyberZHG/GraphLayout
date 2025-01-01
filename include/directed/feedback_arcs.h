@@ -2,7 +2,7 @@
 #define GRAPHLAYOUT_FEEDBACK_ARCS_H
 
 #include <unordered_set>
-#include "graph_def.h"
+#include "common/graph_def.h"
 
 namespace graph_layout {
 

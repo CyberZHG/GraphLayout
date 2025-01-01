@@ -1,4 +1,4 @@
-#include "binary_indexed_tree.h"
+#include "common/binary_indexed_tree.h"
 using namespace std;
 using namespace graph_layout;
 

@@ -2,11 +2,11 @@
 #define GRAPHLAYOUT_GRAPH_LAYOUT_H
 
 #include <vector>
-#include "graph_def.h"
-#include "feedback_arcs.h"
-#include "layer_assignment.h"
-#include "cross_minimization.h"
-#include "vertex_positioning.h"
+#include "common/graph_def.h"
+#include "directed/feedback_arcs.h"
+#include "directed/layer_assignment.h"
+#include "directed/cross_minimization.h"
+#include "directed/vertex_positioning.h"
 
 namespace graph_layout {
 

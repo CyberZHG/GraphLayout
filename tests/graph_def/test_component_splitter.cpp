@@ -1,6 +1,6 @@
 #include <unordered_set>
 #include <gtest/gtest.h>
-#include "graph_def.h"
+#include "common/graph_def.h"
 using namespace std;
 using namespace graph_layout;
 
