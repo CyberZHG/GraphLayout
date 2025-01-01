@@ -29,7 +29,7 @@ TEST(TestVertexPositioningSortIncidentEdges, SpecialCase1) {
     graph.addEdge(1, 4); graph.addEdge(2, 4); graph.addEdge(3, 4);
     SPLayering layering;
     layering.orders = {{0}, {2, 1, 3}, {4}};
-    layering.initMappings();
+    layering.initializeMapping();
     TestVertexPositioning::sortIncidentEdges(graph, layering);
     vector<int> vertices;
     for (const auto& edge : graph.getOutEdges(0)) {
@@ -50,7 +50,7 @@ TEST(TestVertexPositioningHorizontalCompaction, SpecialCase101) {
     SPLayering layering;
     layering.layerRanks = {0, 1, 2};
     layering.orders = {{0}, {1, 2}, {3}};
-    layering.initMappings();
+    layering.initializeMapping();
     TestVertexPositioning vertexPositioning;
     constexpr double UNIT_SIZE = TestVertexPositioning::DEFAULT_VERTEX_SIZE + TestVertexPositioning::DEFAULT_VERTEX_MARGIN;
     const auto [rootsFL, alignsFL] = TestVertexPositioning::verticalAlignment(graph, layering, true, true);
@@ -135,7 +135,7 @@ TEST(TestVertexPositioningHorizontalCompaction, SpecialCase103) {
         {0, 2, 4},
         {1},
     };
-    layering.initMappings();
+    layering.initializeMapping();
     TestVertexPositioning::sortIncidentEdges(graph, layering);
     const TestVertexPositioning vertexPositioning(VertexPositioningMethod::BRANDES_KOPF);
     const auto [roots, aligns] = TestVertexPositioning::verticalAlignment(graph, layering, true, true);
@@ -160,7 +160,7 @@ TEST(TestVertexPositioningHorizontalCompaction, SpecialCase104) {
         {1, 3},
         {2, 0},
     };
-    layering.initMappings();
+    layering.initializeMapping();
     TestVertexPositioning::sortIncidentEdges(graph, layering);
     const TestVertexPositioning vertexPositioning(VertexPositioningMethod::BRANDES_KOPF);
     const auto [roots, aligns] = TestVertexPositioning::verticalAlignment(graph, layering, false, true);

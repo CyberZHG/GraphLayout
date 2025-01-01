@@ -1,10 +1,11 @@
+#include "cross_minimization.h"
+
 #include <ranges>
 #include <set>
-#include "cross_minimization.h"
 using namespace std;
 using namespace graph_layout;
 
-void SPLayering::initMappings() {
+void SPLayering::initializeMapping() {
     const size_t numLayers = orders.size();
     positions.resize(numLayers);
     idToLayer.clear();
@@ -20,11 +21,11 @@ CrossMinimization::CrossMinimization(const CrossMinimizationMethod method) : _me
 }
 
 
-void CrossMinimization::setMethod(CrossMinimizationMethod method) {
+void CrossMinimization::setMethod(const CrossMinimizationMethod method) {
     _method = method;
 }
 
-std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::reduceNumCross(SPDirectedGraph &graph, std::vector<int> &ranks) const {
+pair<SPLayering, vector<SPVirtualEdge>> CrossMinimization::reduceNumCross(SPDirectedGraph& graph, vector<int>& ranks) const {
     auto [layering, virtualEdges] = addVirtualEdges(graph, ranks);
     switch (_method) {
         case CrossMinimizationMethod::BARYCENTER:
@@ -37,14 +38,14 @@ std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::reduceNumCr
             reduceNumCrossWithPairwiseSwitchHeuristic(graph, layering);
             break;
     }
-    layering.initMappings();
+    layering.initializeMapping();
     return {layering, virtualEdges};
 }
 
-std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::addVirtualEdges(SPDirectedGraph &graph, vector<int> &ranks) {
+pair<SPLayering, vector<SPVirtualEdge>> CrossMinimization::addVirtualEdges(SPDirectedGraph& graph, vector<int>& ranks) {
     SPLayering layering;
-    auto &discreteRanks = layering.layerRanks;
-    auto &orders = layering.orders;
+    auto& discreteRanks = layering.layerRanks;
+    auto& orders = layering.orders;
     discreteRanks = vector(ranks);
     ranges::sort(discreteRanks);
     discreteRanks.erase(ranges::unique(discreteRanks).begin(), discreteRanks.end());
@@ -59,19 +60,19 @@ std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::addVirtualE
 
     int n = static_cast<int>(graph.numVertices());
     vector<SPVirtualEdge> virtualEdges;
-    for (const auto &edge : graph.edges()) {
+    for (const auto& edge : graph.edges()) {
         if (rankToIndex[ranks[edge.v]] - rankToIndex[ranks[edge.u]] > 1) {
             virtualEdges.emplace_back(edge);
         }
     }
     int numNewNodes = 0;
-    for (const auto &[edge, edgeId] : virtualEdges) {
+    for (const auto& [edge, edgeId] : virtualEdges) {
         graph.removeEdge(edge.id);
         numNewNodes += rankToIndex[ranks[edge.v]] - rankToIndex[ranks[edge.u]] - 1;
     }
     graph.updateNumVertices(n + numNewNodes);
     int edgeId = VIRTUAL_EDGE_ID_OFFSET;
-    for (auto &[originalEdge, virtualEdgeIds] : virtualEdges) {
+    for (auto& [originalEdge, virtualEdgeIds] : virtualEdges) {
         const int u = originalEdge.u;
         const int v = originalEdge.v;
         int last = u;
@@ -87,18 +88,32 @@ std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::addVirtualE
     }
 
     layering.width = 0;
-    for (const auto &order : orders) {
+    for (const auto& order : orders) {
         layering.width = max(layering.width, order.size());
     }
-    layering.initMappings();
+    layering.initializeMapping();
     return {layering, virtualEdges};
 }
 
+/** Compute the number of crossings between two adjacent layers.
+ *
+ * We iterate over the vertices in the second layer backwards.
+ * Suppose there is an edge connecting u in the second layer to v in the first layer,
+ * this edge crosses all edges for which `position[v']` < `position[v]` (the prefix sum of existing edges).
+ * We use a binary indexed tree to maintain the prefix sums.
+ *
+ * @param graph A DAG graph.
+ * @param bit An initialized binary indexed tree.
+ * @param order1 Orders in the first layer.
+ * @param order2 Orders in the second layer.
+ * @param forward Whether it is from low rank to high rank.
+ * @return Number of crossings.
+ */
 long long CrossMinimization::computeNumCross(
-    SPDirectedGraph &graph,
+    SPDirectedGraph& graph,
     BinaryIndexedTree &bit,
-    const std::vector<int> &order1,
-    const std::vector<int> &order2,
+    const vector<int> &order1,
+    const vector<int> &order2,
     const bool forward) {
     bit.clear(order1.size());
     unordered_map<int, int> positions;
@@ -108,13 +123,13 @@ long long CrossMinimization::computeNumCross(
     long long numCross = 0;
     if (forward) {
         for (const int v : views::reverse(order2)) {
-            for (const auto &edge : graph.getInEdges(v)) {
+            for (const auto& edge : graph.getInEdges(v)) {
                 const int u = edge.u;
                 if (const auto it = positions.find(u); it != positions.end()) {
                     numCross += bit.prefixSum(it->second - 1);
                 }
             }
-            for (const auto &edge : graph.getInEdges(v)) {
+            for (const auto& edge : graph.getInEdges(v)) {
                 const int u = edge.u;
                 if (const auto it = positions.find(u); it != positions.end()) {
                     bit.add(it->second);
@@ -123,13 +138,13 @@ long long CrossMinimization::computeNumCross(
         }
     } else {
         for (const int v : views::reverse(order2)) {
-            for (const auto &edge : graph.getOutEdges(v)) {
+            for (const auto& edge : graph.getOutEdges(v)) {
                 const int u = edge.v;
                 if (const auto it = positions.find(u); it != positions.end()) {
                     numCross += bit.prefixSum(it->second - 1);
                 }
             }
-            for (const auto &edge : graph.getOutEdges(v)) {
+            for (const auto& edge : graph.getOutEdges(v)) {
                 const int u = edge.v;
                 if (const auto it = positions.find(u); it != positions.end()) {
                     bit.add(it->second);
@@ -140,8 +155,8 @@ long long CrossMinimization::computeNumCross(
     return numCross;
 }
 
-long long CrossMinimization::computeNumCross(SPDirectedGraph &graph, const SPLayering &layering) {
-    const auto &orders = layering.orders;
+long long CrossMinimization::computeNumCross(SPDirectedGraph& graph, const SPLayering& layering) {
+    const auto& orders = layering.orders;
     BinaryIndexedTree bit(layering.width);
     long long numCross = 0;
     for (size_t i = 1; i < orders.size(); ++i) {
@@ -150,12 +165,24 @@ long long CrossMinimization::computeNumCross(SPDirectedGraph &graph, const SPLay
     return numCross;
 }
 
-void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &graph,
-                                                             SPLayering &layering,
-                                                             const std::function<double(SPDirectedGraph&, const unordered_map<int, int>&, int, bool)> &weighting) {
+/** Reduce the number of crossings using a weighting heuristic.
+ *
+ * The algorithm goes through several rounds of scanning.
+ * In each round, it first optimizes from lower ranks to higher ranks, then from higher ranks to lower ranks.
+ * During each optimization, the order of the previous layer is fixed,
+ * and heuristic methods are used to optimize the ordering of the current layer.
+ *
+ * @param graph A DAG graph.
+ * @param layering A cross minimization result.
+ * @param weighting A weighting function.
+ */
+void CrossMinimization::reduceNumCrossWithWeightingHeuristic(
+    SPDirectedGraph& graph,
+    SPLayering& layering,
+    const function<double(SPDirectedGraph&, const unordered_map<int, int>&, int, bool)> &weighting) {
     constexpr int NUM_REPEAT = 2;
 
-    auto &orders = layering.orders;
+    auto& orders = layering.orders;
     const int numLayers = static_cast<int>(orders.size());
 
     vector<pair<double, pair<int, int>>> weights(layering.width);
@@ -230,16 +257,24 @@ void CrossMinimization::reduceNumCrossWithWeightingHeuristic(SPDirectedGraph &gr
     }
 }
 
-void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &graph, SPLayering &layering) {
-    auto weighting = [](SPDirectedGraph &_graph, const unordered_map<int, int> &positions, const int u, const bool forward) {
+/** Reduce the number of crossings using the Barycenter heuristic.
+ *
+ * The Barycenter is the average of the positions of all vertices in the previous layer
+ * that are connected to the current vertex.
+ *
+ * @param graph A DAG graph.
+ * @param layering A cross minimization result.
+ */
+void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& graph, SPLayering& layering) {
+    auto weighting = [](SPDirectedGraph& _graph, const unordered_map<int, int>& positions, const int u, const bool forward) {
         double weight = 0.0;
         if (forward) {
-            for (const auto &edge : _graph.getInEdges(u)) {
+            for (const auto& edge : _graph.getInEdges(u)) {
                 weight += positions.find(edge.u)->second;
             }
             weight /= _graph.getInDegrees()[u];
         } else {
-            for (const auto &edge : _graph.getOutEdges(u)) {
+            for (const auto& edge : _graph.getOutEdges(u)) {
                 weight += positions.find(edge.v)->second;
             }
             weight /= _graph.getOutDegrees()[u];
@@ -249,16 +284,23 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph &g
     reduceNumCrossWithWeightingHeuristic(graph, layering, weighting);
 }
 
-void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph, SPLayering &layering) {
-    auto weighting = [](SPDirectedGraph &_graph, const unordered_map<int, int> &positions, const int u, const bool forward) {
+/** Reduce the number of crossings using the median heuristic.
+ *
+ * The median positions of all vertices in the previous layer that are connected to the current vertex.
+ *
+ * @param graph A DAG graph.
+ * @param layering A cross minimization result.
+ */
+void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph, SPLayering& layering) {
+    auto weighting = [](SPDirectedGraph& _graph, const unordered_map<int, int>& positions, const int u, const bool forward) {
         vector<int> adjPositions;
         if (forward) {
-            for (const auto &edge : _graph.getInEdges(u)) {
+            for (const auto& edge : _graph.getInEdges(u)) {
                 adjPositions.emplace_back(positions.find(edge.u)->second);
             }
             ranges::sort(adjPositions);
         } else {
-            for (const auto &edge : _graph.getOutEdges(u)) {
+            for (const auto& edge : _graph.getOutEdges(u)) {
                 adjPositions.emplace_back(positions.find(edge.v)->second);
             }
         }
@@ -278,23 +320,37 @@ void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph &graph
     reduceNumCrossWithWeightingHeuristic(graph, layering, weighting);
 }
 
-long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
-    const std::vector<std::unordered_map<int, int>> &positions,
-    std::vector<int> &adjPositionsU,
-    std::vector<int> &adjPositionsV,
-    const int layerIndex, const int u, const int v, const bool forward) {
+/** Compute the number of crossings between two vertices in one direction.
+ *
+ * Equivalent to counting inversions, which is solved here using merge sort.
+ *
+ * @param graph A DAG graph.
+ * @param positions Mapping from a vertex ID to its index in the corresponding layer.
+ * @param adjPositionsU All positions of the vertices connected to the first vertex.
+ * @param adjPositionsV All positions of the vertices connected to the second vertex.
+ * @param layerIndex Index of the layer that contains the two vertices.
+ * @param u ID of the fist vertex.
+ * @param v ID of the second vertex.
+ * @param forward Whether it is from low rank to high rank.
+ * @return Number of crossings.
+ */
+long long CrossMinimization::computeNumCross(SPDirectedGraph& graph,
+                                             const vector<unordered_map<int, int>>& positions,
+                                             vector<int>& adjPositionsU,
+                                             vector<int>& adjPositionsV,
+                                             const int layerIndex, const int u, const int v, const bool forward) {
     const int numLayers = static_cast<int>(positions.size());
     const int adjLayerIndex = forward ? layerIndex + 1 : layerIndex - 1;
     if (adjLayerIndex < 0 || adjLayerIndex >= numLayers) {
         return 0;
     }
-    const auto &edgesU = forward ? graph.getOutEdges(u) : graph.getInEdges(u);
-    const auto &edgesV = forward ? graph.getOutEdges(v) : graph.getInEdges(v);
+    const auto& edgesU = forward ? graph.getOutEdges(u) : graph.getInEdges(u);
+    const auto& edgesV = forward ? graph.getOutEdges(v) : graph.getInEdges(v);
     int degU = 0, degV = 0;
-    for (const auto &edge : edgesU) {
+    for (const auto& edge : edgesU) {
         adjPositionsU[degU++] = positions[adjLayerIndex].find(edge.u == u ? edge.v : edge.u)->second;
     }
-    for (const auto &edge : edgesV) {
+    for (const auto& edge : edgesV) {
         adjPositionsV[degV++] = positions[adjLayerIndex].find(edge.u == v ? edge.v : edge.u)->second;
     }
     sort(adjPositionsU.begin(), adjPositionsU.begin() + degU);
@@ -311,21 +367,38 @@ long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
     return numCross;
 }
 
-long long CrossMinimization::computeNumCross(SPDirectedGraph &graph,
-    const std::vector<std::unordered_map<int, int>> &positions,
-    std::vector<int> &adjPositionsU,
-    std::vector<int> &adjPositionsV,
-    const int layerIndex, const int u, const int v) {
+/** Compute the number of crossings between two vertices in one direction.
+ *
+ * Equivalent to counting inversions, which is solved here using merge sort.
+ *
+ * @param graph A DAG graph.
+ * @param positions Mapping from a vertex ID to its index in the corresponding layer.
+ * @param adjPositionsU All positions of the vertices connected to the first vertex.
+ * @param adjPositionsV All positions of the vertices connected to the second vertex.
+ * @param layerIndex Index of the layer that contains the two vertices.
+ * @param u ID of the fist vertex.
+ * @param v ID of the second vertex.
+ * @return Number of crossings.
+ */
+long long CrossMinimization::computeNumCross(SPDirectedGraph& graph,
+                                             const vector<unordered_map<int, int>>& positions,
+                                             vector<int>& adjPositionsU,
+                                             vector<int>& adjPositionsV,
+                                             const int layerIndex, const int u, const int v) {
     const long long numCrossForward = computeNumCross(graph, positions, adjPositionsU, adjPositionsV, layerIndex, u, v, true);
     const long long numCrossBackward = computeNumCross(graph, positions, adjPositionsU, adjPositionsV, layerIndex, u, v, false);
     return numCrossForward + numCrossBackward;
 }
 
-void CrossMinimization::
-reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph &graph, SPLayering &layering) {
+/** Reduce the number of crossings by switching the positions of two adjacent vertices.
+ *
+ * @param graph  A connected DAG.
+ * @param layering A cross minimization result.
+ */
+void CrossMinimization::reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph& graph, SPLayering& layering) {
     constexpr int NUM_REPEAT = 2;
 
-    auto &orders = layering.orders;
+    auto& orders = layering.orders;
     const int numLayers = static_cast<int>(orders.size());
 
     vector<unordered_map<int, int>> positions(numLayers);
@@ -336,8 +409,8 @@ reduceNumCrossWithPairwiseSwitchHeuristic(SPDirectedGraph &graph, SPLayering &la
     }
 
     int maxDegree = 0;
-    for (const auto &order : orders) {
-        for (const auto &u : order) {
+    for (const auto& order : orders) {
+        for (const auto& u : order) {
             maxDegree = max(maxDegree, max(graph.getInDegrees()[u], graph.getOutDegrees()[u]));
         }
     }

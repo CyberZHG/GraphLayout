@@ -4,6 +4,7 @@
 #include <vector>
 
 namespace graph_layout {
+
     class BinaryIndexedTree {
     public:
         explicit BinaryIndexedTree(size_t n);
@@ -31,6 +32,7 @@ namespace graph_layout {
 
         static int next(int index);
     };
+
 };
 
 #endif //GRAPHLAYOUT_BINARY_INDEXED_TREE_H
