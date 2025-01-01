@@ -22,10 +22,10 @@ namespace graph_layout {
 
         GraphAttributes& graphAttributes();
 
+        [[nodiscard]] VertexAttributes vertexAttributes(int u) const;
+        void setVertexAttributes(int u, const std::string& key, const std::string& value);
+
         std::pair<std::vector<double>, std::vector<double>> layoutGraph();
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
-        void drawSVG(const std::string& outputFilePath) const;
-#endif
         /** Add numeric vertex labels.
          *
          * @param start The start index.
@@ -33,10 +33,16 @@ namespace graph_layout {
         void initializeVertexLabelsWithNumericalValues(int start = 1);
         void setVertexLabels(const std::vector<std::string> &vertexLabels);
 
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
+        void drawSVG(const std::string& outputFilePath) const;
+#endif
+
     private:
         std::shared_ptr<SPDirectedGraph> _graph = nullptr;
 
         GraphAttributes _graphAttributes;
+        VertexAttributes _vertexGlobalAttributes;
+        std::vector<std::unordered_map<std::string, std::string>> _vertexAttributes;
 
         FeedbackArcsFinder _feedbackArcsFinder;
         LayerAssignment _layerAssignment;
@@ -45,8 +51,6 @@ namespace graph_layout {
 
         int _initialNumVertices = 0;
         std::vector<double> _xs, _ys;
-
-        std::vector<std::string> _vertexLabels;
 
         [[nodiscard]] bool isVirtualVertex(int u) const;
         void adjustCoordinatesByGraphRank();

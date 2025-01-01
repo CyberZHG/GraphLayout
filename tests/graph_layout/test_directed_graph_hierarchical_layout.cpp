@@ -45,13 +45,6 @@ TEST(TestDirectedGraphHierarchialLayout, TwoVerticesCycle) {
     EXPECT_EQ(graph->edges()[1].v, 0);
 }
 
-TEST(TestDirectedGraphHierarchialLayout, SetVertexLabelsRuntimeError) {
-    const auto graph = make_shared<SPDirectedGraph>(3);
-    DirectedGraphHierarchicalLayout layout;
-    layout.setGraph(graph);
-    EXPECT_THROW(layout.setVertexLabels({"A", "B", "C", "D"}), runtime_error);
-}
-
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     const auto graph = make_shared<SPDirectedGraph>(4);
     graph->addEdge(0, 1); graph->addEdge(0, 2); graph->addEdge(0, 3);
@@ -94,6 +87,32 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
     test(GraphAttributes::Rank::BottomToTop);
     test(GraphAttributes::Rank::LeftToRight);
     test(GraphAttributes::Rank::RightToLeft);
+}
+
+TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
+    const auto graph = make_shared<SPDirectedGraph>(12);
+    const vector<vector<int>> edges = {
+        {0}, {1, 10}, {2, 4}, {3}, {6},
+        {5}, {6}, {7, 9},  {8}, {7, 9},
+        {1, 10}
+    };
+    for (int u = 0; u < edges.size(); ++u) {
+        for (const auto v : edges[u]) {
+            graph->addEdge(u, v + 1);
+        }
+    }
+    DirectedGraphHierarchicalLayout layout;
+    layout.graphAttributes().bgcolor.set("white");
+    layout.graphAttributes().rank = GraphAttributes::Rank::LeftToRight;
+    layout.setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
+    for (int u = 1; u < 12; ++u) {
+        layout.setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u - 1));
+    }
+    layout.setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, "none");
+    layout.setVertexAttributes(11, ATTRIBUTE_KEY_SHAPE, "doublecircle");
+    layout.setGraph(graph);
+    layout.layoutGraph();
+    layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_3.svg");
 }
 
 TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {

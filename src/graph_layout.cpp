@@ -24,6 +24,20 @@ GraphAttributes& DirectedGraphHierarchicalLayout::graphAttributes() {
     return _graphAttributes;
 }
 
+VertexAttributes DirectedGraphHierarchicalLayout::vertexAttributes(const int u) const {
+    if (u >= _vertexAttributes.size()) {
+        return _vertexGlobalAttributes;
+    }
+    return VertexAttributes::stringMappingToAttributes(_vertexAttributes[u], _vertexGlobalAttributes);
+}
+
+void DirectedGraphHierarchicalLayout::setVertexAttributes(const int u, const std::string &key, const std::string &value) {
+    if (u >= _vertexAttributes.size()) {
+        _vertexAttributes.resize(u + 1);
+    }
+    _vertexAttributes[u][key] = value;
+}
+
 std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
@@ -120,11 +134,12 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
         svg.drawBackground(red, green, blue);
     }
     for (int u = 0; u < _initialNumVertices; ++u) {
+        const VertexAttributes attributes = vertexAttributes(u);
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
         svg.drawCircle(x, y, r);
-        svg.drawText(x, y, _vertexLabels[u]);
+        svg.drawText(x, y, attributes.label);
     }
 
     for (const auto& edge : _graph->edges()) {
@@ -155,18 +170,15 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
 
 void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(const int start) {
     const int n = _initialNumVertices;
-    _vertexLabels.resize(n);
     for (int i = 0; i < n; ++i) {
-        _vertexLabels[i] = format("{}", start + i);
+        setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, format("{}", start + i));
     }
 }
 
 void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vertexLabels) {
-    if (_initialNumVertices != vertexLabels.size()) {
-        throw runtime_error(format("The length of input vertex labels {} "
-                                   "does not match the number of vertices {}.", vertexLabels.size(), _initialNumVertices));
+    for (int i = 0; i < vertexLabels.size(); ++i) {
+        setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, vertexLabels[i]);
     }
-    _vertexLabels = vertexLabels;
 }
 
 /** A vertex is virtual if the vertex ID is greater than the maximum vertex ID in the beginning graph.
