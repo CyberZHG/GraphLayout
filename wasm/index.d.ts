@@ -83,6 +83,7 @@ declare module 'sp-graph-layout' {
         setCrossMinimizationMethod(method: CrossMinimizationMethod): void
         setVertexPositioningMethod(method: VertexPositioningMethod): void
         setVertexLabels(labels: string[]): void
+        setEdgeLabel(edgeId: number, label: string): void
         initVertexLabelsWithNumericalValues(start: number): void
         attributes(): Attributes
         layoutGraph(): void

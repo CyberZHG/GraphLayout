@@ -66,6 +66,7 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .function("setCrossMinimizationMethod", &DirectedGraphHierarchicalLayout::setCrossMinimizationMethod)
         .function("setVertexPositioningMethod", &DirectedGraphHierarchicalLayout::setVertexPositioningMethod)
         .function("setVertexLabels", &DirectedGraphHierarchicalLayout::setVertexLabels)
+        .function("setEdgeLabel", &DirectedGraphHierarchicalLayout::setEdgeLabel)
         .function("initVertexLabelsWithNumericalValues", select_overload<void(int)>(&DirectedGraphHierarchicalLayout::initVertexLabelsWithNumericalValues))
         .function("attributes", &DirectedGraphHierarchicalLayout::attributes, return_value_policy::reference())
         .function("layoutGraph", &DirectedGraphHierarchicalLayout::layoutGraph)

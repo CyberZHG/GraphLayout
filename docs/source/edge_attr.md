@@ -25,15 +25,15 @@ svg = layout.render()
 ````
 ````{tab-item} JavaScript
 ```javascript
-import {DirectedGraphHierarchicalLayout, AttributeRankDir, AttributeShape, buildVectorString} from 'sp-graph-layout';
+import {DirectedGraphHierarchicalLayout, AttributeRankDir} from 'sp-graph-layout';
 
 const layout = new DirectedGraphHierarchicalLayout();
 const graph = layout.createGraph(3);
-graph.addEdges([[0, 1], [1, 2], [2, 0]]);
-layout.setVertexLabels(buildVectorString(["Eat", "Sleep", "Play"]));
-for (let u = 0; u < 3; ++u) {
-    layout.attributes().setVertexShape(u, AttributeShape.ELLIPSE);
-}
+graph.addEdges([[0, 1], [1, 2], [2, 2]]);
+layout.initVertexLabelsWithNumericalValues(0);
+layout.setEdgeLabel(0, "A");
+layout.setEdgeLabel(1, "B");
+layout.setEdgeLabel(2, "C");
 layout.attributes().setRankDir(AttributeRankDir.LEFT_TO_RIGHT);
 layout.layoutGraph();
 const svg = layout.render();
