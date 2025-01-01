@@ -1,10 +1,12 @@
 {
   "name": "sp-graph-layout",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "index.js",
+    "index.d.js",
     "wasm/GraphLayoutWASM.js",
     "wasm/GraphLayoutWASM.wasm"
   ],
@@ -19,5 +21,7 @@
     "build": "bash build.sh",
     "lint": "npx eslint index.js test/**/*.js",
     "test": "mocha test/**/*.js"
-  }
+  },
+  "homepage": "https://cyberzhg.github.io/GraphLayout/",
+  "repository": "github:CyberZHG/GraphLayout"
 }

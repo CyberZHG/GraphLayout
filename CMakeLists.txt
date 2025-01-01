@@ -105,6 +105,7 @@ if(GRAPH_LAYOUT_ENABLE_TESTS)
             tests/docs/test_basic.cpp
             tests/docs/test_graph_attr.cpp
             tests/docs/test_vertex_attr.cpp
+            tests/docs/test_edge_attr.cpp
     )
 
     target_link_libraries(runTests
