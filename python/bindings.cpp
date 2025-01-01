@@ -72,6 +72,7 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def("set_cross_minimization_method", &DirectedGraphHierarchicalLayout::setCrossMinimizationMethod, py::arg("method"))
         .def("set_vertex_positioning_method", &DirectedGraphHierarchicalLayout::setVertexPositioningMethod, py::arg("method"))
         .def("set_vertex_labels", &DirectedGraphHierarchicalLayout::setVertexLabels, py::arg("labels"))
+        .def("set_edge_label", &DirectedGraphHierarchicalLayout::setEdgeLabel, py::arg("edge_id"), py::arg("label"))
         .def("init_vertex_labels_with_numerical_values", py::overload_cast<int>(&DirectedGraphHierarchicalLayout::initVertexLabelsWithNumericalValues), py::arg("start") = 1)
         .def("attributes", &DirectedGraphHierarchicalLayout::attributes, py::return_value_policy::reference_internal)
         .def("layout_graph", &DirectedGraphHierarchicalLayout::layoutGraph)
