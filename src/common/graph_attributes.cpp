@@ -5,6 +5,15 @@
 using namespace std;
 using namespace graph_layout;
 
+const string AttributeRankDir::TOP_TO_BOTTOM = "tb";
+const string AttributeRankDir::BOTTOM_TO_TOP = "bt";
+const string AttributeRankDir::LEFT_TO_RIGHT = "lr";
+const string AttributeRankDir::RIGHT_TO_LEFT = "rl";
+
+const string AttributeShape::NONE = "none";
+const string AttributeShape::CIRCLE = "circle";
+const string AttributeShape::DOUBLE_CIRCLE = "doublecircle";
+
 unordered_map<string, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
     {ATTRIBUTE_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
     {ATTRIBUTE_KEY_BG_COLOR, ""},
@@ -52,6 +61,10 @@ void Attributes::setGraphAttributes(const string &key, const string &value) {
     _graphAttributes[key] = value;
 }
 
+void Attributes::setGraphAttributes(const unordered_map<string, string>& attributes) {
+    _graphAttributes = attributes;
+}
+
 string Attributes::vertexAttributes(const int u, const string &key) const {
     if (const auto vIt = _vertexAttributes.find(u); vIt != _vertexAttributes.end()) {
         if (const auto it = vIt->second.find(key); it != vIt->second.end()) {
@@ -69,6 +82,10 @@ string Attributes::vertexAttributes(const int u, const string &key) const {
 
 void Attributes::setVertexAttributes(const int u, const string &key, const string &value) {
     _vertexAttributes[u][key] = value;
+}
+
+void Attributes::setVertexAttributes(const int u, const unordered_map<string, string>& attributes) {
+    _vertexAttributes[u] = attributes;
 }
 
 string Attributes::edgeAttributes(const int u, const string &key) const {

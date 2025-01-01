@@ -328,6 +328,7 @@ void DirectedGraphHierarchicalLayout::adjustCoordinatesByGraphRank() {
     }
 }
 
+#ifdef GRAPH_LAYOUT_ENABLE_SVG
 void DirectedGraphHierarchicalLayout::computeVertexSizes() {
     const int n = static_cast<int>(_graph->numVertices());
     const auto rankDir = _attributes.rankDir();
@@ -356,3 +357,4 @@ void DirectedGraphHierarchicalLayout::computeVertexSizes() {
     _vertexPositioning.setVertexMargin(vertexMargin);
     _vertexPositioning.setLayerMargin(layerMargin);
 }
+#endif

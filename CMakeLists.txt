@@ -101,3 +101,21 @@ if(GRAPH_LAYOUT_BUILD_TESTS)
 
     add_test(NAME GraphLayoutTests COMMAND runTests)
 endif ()
+
+option(GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY "Compiling for WebAssembly" OFF)
+
+if (GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY)
+    add_executable(GraphLayoutWASM
+            js/graph_layout_js.cpp)
+
+    target_link_libraries(GraphLayoutWASM
+            PRIVATE GraphLayout
+    )
+
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    target_link_options(GraphLayoutWASM PRIVATE
+            "-s WASM=1"
+            "-s ALLOW_MEMORY_GROWTH=1"
+            "--bind"
+    )
+endif ()

@@ -37,19 +37,19 @@ namespace graph_layout {
     public:
         using Attribute::Attribute;
 
-        static constexpr std::string TOP_TO_BOTTOM = "TB";
-        static constexpr std::string BOTTOM_TO_TOP = "BT";
-        static constexpr std::string LEFT_TO_RIGHT = "LR";
-        static constexpr std::string RIGHT_TO_LEFT = "RL";
+        static const std::string TOP_TO_BOTTOM;
+        static const std::string BOTTOM_TO_TOP;
+        static const std::string LEFT_TO_RIGHT;
+        static const std::string RIGHT_TO_LEFT;
     };
 
     class AttributeShape : public Attribute {
     public:
         using Attribute::Attribute;
 
-        static constexpr std::string NONE = "none";
-        static constexpr std::string CIRCLE = "circle";
-        static constexpr std::string DOUBLE_CIRCLE = "doublecircle";
+        static const std::string NONE;
+        static const std::string CIRCLE;
+        static const std::string DOUBLE_CIRCLE;
     };
 
     class Attributes {
@@ -59,9 +59,11 @@ namespace graph_layout {
 
         [[nodiscard]] std::string graphAttributes(const std::string& key) const;
         void setGraphAttributes(const std::string& key, const std::string& value);
+        void setGraphAttributes(const std::unordered_map<std::string, std::string> &attributes);
 
         [[nodiscard]] std::string vertexAttributes(int u, const std::string& key) const;
         void setVertexAttributes(int u, const std::string& key, const std::string& value);
+        void setVertexAttributes(int u, const std::unordered_map<std::string, std::string> &attributes);
 
         [[nodiscard]] std::string edgeAttributes(int u, const std::string& key) const;
         void setEdgeAttributes(int u, const std::string& key, const std::string& value);
