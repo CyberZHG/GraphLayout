@@ -48,6 +48,8 @@ namespace graph_layout {
         const std::vector<int> &getOutDegrees();
         const std::vector<std::vector<int>> &getInVertices();
         const std::vector<std::vector<int>> &getOutVertices();
+        std::vector<std::vector<int>> &getInEdgeIdsRef();
+        std::vector<std::vector<int>> &getOutEdgeIdsRef();
         const std::vector<std::vector<int>> &getInEdgeIds();
         const std::vector<std::vector<int>> &getOutEdgeIds();
         EdgeIterationWithIDs getInEdges(int v);

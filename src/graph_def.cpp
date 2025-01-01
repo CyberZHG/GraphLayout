@@ -145,18 +145,26 @@ const vector<vector<int>> &SPDirectedGraph::getOutVertices() {
     return _outVertices;
 }
 
-const vector<vector<int>> & SPDirectedGraph::getInEdgeIds() {
+std::vector<std::vector<int>> & SPDirectedGraph::getInEdgeIdsRef() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _inEdges;
 }
 
-const vector<vector<int>> & SPDirectedGraph::getOutEdgeIds() {
+std::vector<std::vector<int>> & SPDirectedGraph::getOutEdgeIdsRef() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _outEdges;
+}
+
+const vector<vector<int>> & SPDirectedGraph::getInEdgeIds() {
+    return getInEdgeIdsRef();
+}
+
+const vector<vector<int>> & SPDirectedGraph::getOutEdgeIds() {
+    return getOutEdgeIdsRef();
 }
 
 EdgeIterationWithIDs SPDirectedGraph::getInEdges(const int v) {

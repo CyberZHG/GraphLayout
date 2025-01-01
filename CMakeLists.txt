@@ -18,6 +18,8 @@ add_library(GraphLayout STATIC
         src/cross_minimization.cpp
         include/binary_indexed_tree.h
         src/binary_indexed_tree.cpp
+        include/vertex_positioning.h
+        src/vertex_positioning.cpp
 )
 
 target_include_directories(GraphLayout
@@ -46,6 +48,7 @@ add_executable(runTests
         tests/cross_minimization/test_barycenter.cpp
         tests/cross_minimization/test_median.cpp
         tests/cross_minimization/test_pairwise_switch.cpp
+        tests/vertex_positioning/test_brandes_kopf.cpp
 )
 
 target_link_libraries(runTests

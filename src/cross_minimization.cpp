@@ -4,6 +4,16 @@
 using namespace std;
 using namespace graph_layout;
 
+void SPLayering::initPositions() {
+    const size_t numLayers = orders.size();
+    positions.resize(numLayers);
+    for (int i = 0; i < numLayers; i++) {
+        for (int j = 0; j < orders[i].size(); ++j) {
+            positions[i][orders[i][j]] = j;
+        }
+    }
+}
+
 CrossMinimization::CrossMinimization(const CrossMinimizationMethod method) : _method(method) {
 }
 
@@ -25,6 +35,7 @@ std::pair<SPLayering, std::vector<SPVirtualEdge>> CrossMinimization::reduceNumCr
             reduceNumCrossWithPairwiseSwitchHeuristic(graph, layering);
             break;
     }
+    layering.initPositions();
     return {layering, virtualEdges};
 }
 

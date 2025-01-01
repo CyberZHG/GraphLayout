@@ -14,7 +14,10 @@ namespace graph_layout {
     struct SPLayering {
         std::vector<int> layerRanks;
         std::vector<std::vector<int>> orders;
+        std::vector<std::unordered_map<int, int>> positions;
         size_t width;
+
+        void initPositions();
     };
 
     class CrossMinimization {
