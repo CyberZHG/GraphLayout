@@ -10,9 +10,7 @@ TEST(TestDirectedGraphHierarchialLayout, EmptyGraph) {
     const auto graph = make_shared<SPDirectedGraph>(0);
     DirectedGraphHierarchicalLayout layout;
     layout.setGraph(graph);
-    const auto [xs, ys] = layout.layoutGraph();
-    EXPECT_EQ(xs, vector<double>({}));
-    EXPECT_EQ(ys, vector<double>({}));
+    layout.layoutGraph();
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SingleVertexSelfCycle) {
@@ -20,9 +18,7 @@ TEST(TestDirectedGraphHierarchialLayout, SingleVertexSelfCycle) {
     graph->addEdge(0, 0);
     DirectedGraphHierarchicalLayout layout;
     layout.setGraph(graph);
-    const auto [xs, ys] = layout.layoutGraph();
-    EXPECT_EQ(xs, vector({0.0}));
-    EXPECT_EQ(ys, vector({0.0}));
+    layout.layoutGraph();
     EXPECT_EQ(graph->numEdges(), 1);
     EXPECT_EQ(graph->edges()[0].u, 0);
     EXPECT_EQ(graph->edges()[0].v, 0);
@@ -36,9 +32,9 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     DirectedGraphHierarchicalLayout layout;
     layout.setGraph(graph);
     layout.setVertexLabels({"A", "BB", "CCC", "DD\nDD"});
-    const auto [xs, ys] = layout.layoutGraph();
+    layout.layoutGraph();
     EXPECT_EQ(graph->numEdges(), 8);
-    layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_1.svg");
+    layout.render("test_directed_graph_hierarchical_layout__special_case_1.svg");
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
@@ -67,7 +63,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
         layout.setGraph(graph);
         layout.initializeVertexLabelsWithNumericalValues();
         layout.layoutGraph();
-        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_2__{}.svg", rankDir));
+        layout.render(format("test_directed_graph_hierarchical_layout__special_case_2__{}.svg", rankDir));
     };
     test(AttributeRankDir::TOP_TO_BOTTOM);
     test(AttributeRankDir::BOTTOM_TO_TOP);
@@ -107,7 +103,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
     }
     layout.setGraph(graph);
     layout.layoutGraph();
-    layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_3.svg");
+    layout.render("test_directed_graph_hierarchical_layout__special_case_3.svg");
 }
 
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
@@ -137,7 +133,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         layout.attributes().setEdgeAttributes(7, ATTRIBUTE_KEY_LABEL, "a,b");
         layout.setGraph(graph);
         layout.layoutGraph();
-        layout.drawSVG(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", rankDir));
+        layout.render(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", rankDir));
     };
     test(AttributeRankDir::TOP_TO_BOTTOM);
     test(AttributeRankDir::BOTTOM_TO_TOP);

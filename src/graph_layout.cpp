@@ -46,7 +46,7 @@ void DirectedGraphHierarchicalLayout::setLayerMargin(const double margin) {
     _vertexPositioning.setLayerMargin(margin);
 }
 
-pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
+void DirectedGraphHierarchicalLayout::layoutGraph() {
     computeVertexSizes();
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
@@ -131,10 +131,9 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
     _graph->reverseEdgesBack();
     _graph->enableSelfCycleEdges();
     adjustCoordinatesByGraphRank();
-    return {_xs, _ys};
 }
 
-void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) const {
+string DirectedGraphHierarchicalLayout::render() const {
     const int n = static_cast<int>(_graph->numVertices());
     SVGDiagram diagram;
     if (const auto bgColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR); !bgColor.empty()) {
@@ -229,7 +228,13 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
             e->addConnectionPoint(_xs[edge.v], _ys[edge.v]);
         }
     }
-    diagram.render(outputFilePath);
+    return diagram.render();
+}
+
+void DirectedGraphHierarchicalLayout::render(const string& filePath) const {
+    ofstream file(filePath);
+    file << render();
+    file.close();
 }
 
 void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(const int start) {

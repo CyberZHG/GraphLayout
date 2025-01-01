@@ -28,7 +28,7 @@ namespace graph_layout {
         void setVertexPositioningMethod(VertexPositioningMethod method);
         void setLayerMargin(double margin);
 
-        std::pair<std::vector<double>, std::vector<double>> layoutGraph();
+        void layoutGraph();
         /** Add numeric vertex labels.
          *
          * @param start The start index.
@@ -36,7 +36,8 @@ namespace graph_layout {
         void initializeVertexLabelsWithNumericalValues(int start = 1);
         void setVertexLabels(const std::vector<std::string> &vertexLabels);
 
-        void drawSVG(const std::string& outputFilePath) const;
+        [[nodiscard]] std::string render() const;
+        void render(const std::string& filePath) const;
 
     private:
         std::shared_ptr<SPDirectedGraph> _graph = nullptr;

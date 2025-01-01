@@ -119,11 +119,10 @@ endif ()
 if (GRAPH_LAYOUT_BIND_ES)
 
     add_executable(GraphLayoutWASM
-            js/graph_layout_js.cpp)
+            wasm/graph_layout_wasm.cpp)
 
     target_link_libraries(GraphLayoutWASM
             PRIVATE GraphLayout
-            PRIVATE SVGDiagram
     )
 
     target_compile_options(GraphLayoutWASM PRIVATE "-O3")

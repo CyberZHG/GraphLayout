@@ -4,6 +4,7 @@
   "type": "module",
   "main": "index.js",
   "files": [
+    "index.js",
     "wasm/GraphLayoutWASM.js",
     "wasm/GraphLayoutWASM.wasm"
   ],
@@ -16,7 +17,7 @@
   },
   "scripts": {
     "build": "bash build.sh",
-    "lint": "npx eslint index.js test/*.js",
-    "test": "mocha"
+    "lint": "npx eslint index.js test/**/*.js",
+    "test": "mocha test/**/*.js"
   }
 }
