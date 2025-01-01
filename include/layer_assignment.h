@@ -16,6 +16,8 @@ namespace graph_layout {
 
         // Input graph must be a DAG.
         [[nodiscard]] std::vector<int> rankVertices(SimpleDirectedGraph &) const;
+
+        static long long calcRankCost(const SimpleDirectedGraph &, const std::vector<int> &) ;
     private:
         LayerAssignmentMethod _method;
 

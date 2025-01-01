@@ -1,8 +1,9 @@
-#include <random>
 #include <unordered_set>
 #include <gtest/gtest.h>
 #include "feedback_arcs.h"
 #include "graph_def.h"
+#include "graph_def_utils.h"
+#include "../include/graph_def_utils.h"
 using namespace std;
 using namespace graph_layout;
 
@@ -95,23 +96,10 @@ TEST(TestFeedbackArcsEades93, SpecialCase2) {
 }
 
 TEST(TestFeedbackArcsEades93, Random) {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> numVerticesDist(2, 128);
+    const RandomGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
-        const size_t n = numVerticesDist(gen);
-        SimpleDirectedGraph graph(n);
-        uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * n));
-        uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
-        const size_t m = numEdgesDist(gen);
-        for (size_t edgeIndex = 0; edgeIndex < m; ++edgeIndex) {
-            const int &u = verticeIndexDist(gen);
-            const int &v = verticeIndexDist(gen);
-            if (u != v) {
-                graph.addEdge(u, v);
-            }
-        }
+        auto graph = graphGen.generateGraph();
         const bool hasCycle = graph.hasCycle();
         const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
         if (hasCycle) {

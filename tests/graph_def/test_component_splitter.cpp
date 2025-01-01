@@ -1,0 +1,53 @@
+#include <unordered_set>
+#include <gtest/gtest.h>
+#include "graph_def.h"
+#include "graph_def_utils.h"
+using namespace std;
+using namespace graph_layout;
+
+TEST(TestGraphComponentSplitter, EmptyGraph) {
+    SimpleDirectedGraph graph(0);
+    GraphComponentSplitter splitter;
+    const auto &graphs = splitter.splitGraph(graph);
+    EXPECT_EQ(graphs.size(), 0);
+}
+
+TEST(TestGraphComponentSplitter, SingleNode) {
+    SimpleDirectedGraph graph(1);
+    GraphComponentSplitter splitter;
+    const auto &graphs = splitter.splitGraph(graph);
+    EXPECT_EQ(graphs.size(), 1);
+}
+
+TEST(TestGraphComponentSplitter, SpecialCase1) {
+    SimpleDirectedGraph graph(4);
+    graph.addEdge(0, 2);
+    graph.addEdge(1, 3);
+    GraphComponentSplitter splitter;
+    const auto &graphs = splitter.splitGraph(graph);
+    EXPECT_EQ(graphs.size(), 2);
+    EXPECT_EQ(graphs[0].numEdges(), 1);
+    EXPECT_EQ(graphs[1].numEdges(), 1);
+    EXPECT_EQ(graphs[0].edges()[0], SimpleEdge({0, 0, 1}));
+    EXPECT_EQ(graphs[1].edges()[0], SimpleEdge({1, 0, 1}));
+    const auto newGraph = splitter.mergeBack();
+    EXPECT_EQ(newGraph.numVertices(), 4);
+    EXPECT_EQ(newGraph.numEdges(), 2);
+    EXPECT_EQ(newGraph.edges()[0], SimpleEdge({0, 0, 2}));
+    EXPECT_EQ(newGraph.edges()[1], SimpleEdge({1, 1, 3}));
+}
+
+TEST(TestGraphComponentSplitter, Random) {
+    const RandomGraphGenerator graphGen(128);
+    GraphComponentSplitter splitter;
+    for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {
+        auto graph = graphGen.generateGraph();
+        splitter.splitGraph(graph);
+        auto newGraph = splitter.mergeBack();
+        EXPECT_EQ(graph.numVertices(), newGraph.numVertices());
+        EXPECT_EQ(graph.numEdges(), newGraph.numEdges());
+        for (size_t i = 0; i < graph.numEdges(); ++i) {
+            EXPECT_EQ(graph.edges()[i], newGraph.edges()[i]);
+        }
+    }
+}

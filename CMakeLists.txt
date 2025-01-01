@@ -13,6 +13,7 @@ add_library(GraphLayout STATIC
         src/graph_def.cpp
         include/layer_assignment.h
         src/layer_assignment.cpp
+        src/graph_def_splitter.cpp
 )
 
 target_include_directories(GraphLayout
@@ -35,11 +36,18 @@ add_executable(runTests
         tests/test_main.cpp
         tests/feedback_arcs/test_eades_93.cpp
         tests/layer_assignment/topological.cpp
+        tests/graph_def/test_component_splitter.cpp
+        tests/graph_def_utils.cpp
+        tests/include/graph_def_utils.h
 )
 
 target_link_libraries(runTests
         PRIVATE GraphLayout
         PRIVATE gtest gtest_main
+)
+
+target_include_directories(runTests
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tests/include
 )
 
 add_test(NAME GraphLayoutTests COMMAND runTests)

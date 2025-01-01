@@ -14,6 +14,14 @@ vector<int> LayerAssignment::rankVertices(SimpleDirectedGraph &graph) const {
     return {};
 }
 
+long long LayerAssignment::calcRankCost(const SimpleDirectedGraph &graph, const std::vector<int> &ranks) {
+    long long cost = 0;
+    for (const auto &edge : graph.edges()) {
+        cost += ranks[edge.v] - ranks[edge.u];
+    }
+    return cost;
+}
+
 std::vector<int> LayerAssignment::rankVerticesTopological(SimpleDirectedGraph &graph) {
     const size_t n = graph.numVertices();
     const auto edges = graph.edges();

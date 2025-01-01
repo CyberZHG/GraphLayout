@@ -1,5 +1,5 @@
-#ifndef GRAPHLAYOUT_CYCLE_BREAK_H
-#define GRAPHLAYOUT_CYCLE_BREAK_H
+#ifndef GRAPHLAYOUT_FEEDBACK_ARCS_H
+#define GRAPHLAYOUT_FEEDBACK_ARCS_H
 
 #include <unordered_set>
 #include "graph_def.h"
@@ -25,4 +25,4 @@ namespace graph_layout {
     };
 }
 
-#endif //GRAPHLAYOUT_CYCLE_BREAK_H
+#endif //GRAPHLAYOUT_FEEDBACK_ARCS_H

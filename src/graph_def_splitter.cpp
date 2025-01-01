@@ -1,0 +1,75 @@
+#include <ranges>
+
+#include "graph_def.h"
+
+using namespace std;
+using namespace graph_layout;
+
+std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const SimpleDirectedGraph &graph) {
+    const size_t n = graph.numVertices();
+    vector<int> parent(n);
+    for (int i = 0; i < n; ++i) {
+        parent[i] = i;
+    }
+    std::function<int(int)> find = [&] (const int x) {
+        if (x == parent[x]) {
+            return x;
+        }
+        return parent[x] = find(parent[x]);
+    };
+    auto combine = [&] (const int x, const int y) {
+        parent[find(x)] = find(y);
+    };
+    for (const auto &edge : graph.edges()) {
+        combine(edge.u, edge.v);
+    }
+
+    unordered_map<int, vector<int>> groupsMap;
+    for (int i = 0; i < n; ++i) {
+        groupsMap[find(i)].emplace_back(i);
+    }
+    _groups.clear();
+    for (auto &val: groupsMap | views::values) {
+        ranges::sort(val);
+        _groups.emplace_back(val);
+    }
+    ranges::sort(_groups, [] (const auto &x, const auto &y) {
+        return x[0] < y[0];
+    });
+    vector<size_t> groupIndices(n);
+    vector<unordered_map<int, int>> newVertexIndices(_groups.size());
+    for (size_t g = 0; g < _groups.size(); ++g) {
+        for (int i = 0; i < _groups[g].size(); ++i) {
+            newVertexIndices[g][_groups[g][i]] = i;
+            groupIndices[_groups[g][i]] = g;
+        }
+    }
+
+    _graphs.clear();
+    for (auto &group: _groups) {
+        SimpleDirectedGraph subGraph(group.size());
+        _graphs.emplace_back(subGraph);
+    }
+    for (const auto &edge : graph.edges()) {
+        const size_t g = groupIndices[edge.u];
+        const int u = newVertexIndices[g][edge.u];
+        const int v = newVertexIndices[g][edge.v];
+        _graphs[g].addEdge({edge.id, u, v});
+    }
+    return _graphs;
+}
+
+SimpleDirectedGraph GraphComponentSplitter::mergeBack() {
+    size_t n = 0;
+    for (const auto &graph : _graphs) {
+        n += graph.numVertices();
+    }
+    SimpleDirectedGraph newGraph(n);
+    for (size_t g = 0; g < _groups.size(); ++g) {
+        for (const auto &edge : _graphs[g].edges()) {
+            newGraph.addEdge({edge.id, _groups[g][edge.u], _groups[g][edge.v]});
+        }
+    }
+    newGraph.sortEdgesById();
+    return newGraph;
+}

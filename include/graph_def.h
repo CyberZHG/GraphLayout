@@ -9,6 +9,8 @@ namespace graph_layout {
 
     struct SimpleEdge {
         int id, u, v;
+
+        bool operator==(const SimpleEdge &) const;
     };
 
     class SimpleDirectedGraph {
@@ -30,6 +32,7 @@ namespace graph_layout {
         void reverseEdges(const std::unordered_set<int> &ids);
         void reverseEdgesBack();
 
+        void sortEdgesById();
         const std::unordered_map<int, size_t> &getEdgeIdToIndexMap();
         const std::vector<int> &getInDegrees();
         const std::vector<int> &getOutDegrees();
@@ -95,6 +98,15 @@ namespace graph_layout {
     private:
         SimpleDirectedGraph &_graph;
         const std::vector<int> &_ids;
+    };
+
+    class GraphComponentSplitter {
+    public:
+        std::vector<SimpleDirectedGraph> &splitGraph(const SimpleDirectedGraph &graph);
+        SimpleDirectedGraph mergeBack();
+    private:
+        std::vector<SimpleDirectedGraph> _graphs;
+        std::vector<std::vector<int>> _groups;
     };
 }
 

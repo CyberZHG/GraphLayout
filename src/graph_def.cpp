@@ -5,6 +5,10 @@
 using namespace std;
 using namespace graph_layout;
 
+bool SimpleEdge::operator==(const SimpleEdge &edge) const {
+    return id == edge.id && u == edge.u && v == edge.v;
+}
+
 SimpleDirectedGraph::SimpleDirectedGraph(const size_t num_vertices) : _numVertices(num_vertices) {
 }
 
@@ -61,6 +65,12 @@ void SimpleDirectedGraph::reverseEdgesBack() {
         }
     }
     _reverseIds.clear();
+}
+
+void SimpleDirectedGraph::sortEdgesById() {
+    ranges::sort(_edges, [] (const SimpleEdge &a, const SimpleEdge &b) {
+        return a.id < b.id;
+    });
 }
 
 const unordered_map<int, size_t> & SimpleDirectedGraph::getEdgeIdToIndexMap() {
