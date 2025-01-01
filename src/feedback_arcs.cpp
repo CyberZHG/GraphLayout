@@ -6,7 +6,7 @@ using namespace graph_layout;
 FeedbackArcsFinder::FeedbackArcsFinder(const FeedbackArcsMethod method) : _method(method) {
 }
 
-unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SimpleDirectedGraph &graph) const {
+unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SPDirectedGraph &graph) const {
     switch (_method) {
     case FeedbackArcsMethod::EADES_93:
         return findFeedbackArcsEades93(graph);
@@ -14,7 +14,7 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcs(SimpleDirectedGraph &gra
     return {};
 }
 
-unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleDirectedGraph &graph) {
+unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SPDirectedGraph &graph) {
     const auto n = graph.numVertices();
     auto &edges = graph.edges();
     const auto m = edges.size();

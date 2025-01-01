@@ -16,27 +16,27 @@ public:
 };
 
 TEST(TestLayerAssignmentGansner93, EmptyGraph) {
-    SimpleDirectedGraph graph(0);
+    SPDirectedGraph graph(0);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector<int>());
 }
 
 TEST(TestLayerAssignmentGansner93, SingleNodeNoEdge) {
-    SimpleDirectedGraph graph(1);
+    SPDirectedGraph graph(1);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::GANSNER_93);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0}));
 }
 
-void testInitialFeasibleTree(SimpleDirectedGraph &graph,
+void testInitialFeasibleTree(SPDirectedGraph &graph,
     const TestLayerAssignment &layerAssignment,
     const vector<int> &ranks, const
     vector<int> &parents) {
     const size_t n = graph.numVertices();
     EXPECT_EQ(parents.size(), n);
     int noParentCount = 0;
-    SimpleDirectedGraph newGraph(n);
+    SPDirectedGraph newGraph(n);
     for (const auto id : parents) {
         if (id == TestLayerAssignment::NO_PARENT) {
             noParentCount++;
@@ -52,7 +52,7 @@ void testInitialFeasibleTree(SimpleDirectedGraph &graph,
     EXPECT_EQ(subGraphs.size(), 1);
 }
 
-unordered_map<int, int> genRandomEdgeMinLengths(const SimpleDirectedGraph &graph) {
+unordered_map<int, int> genRandomEdgeMinLengths(const SPDirectedGraph &graph) {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> lengthDist(1, 5);
@@ -64,7 +64,7 @@ unordered_map<int, int> genRandomEdgeMinLengths(const SimpleDirectedGraph &graph
 }
 
 TEST(TestLayerAssignmentGansner93InitialFeasibleTree, SpecialCase1) {
-    SimpleDirectedGraph graph(4);
+    SPDirectedGraph graph(4);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     graph.addEdge(2, 3);
@@ -76,7 +76,7 @@ TEST(TestLayerAssignmentGansner93InitialFeasibleTree, SpecialCase1) {
 }
 
 TEST(TestLayerAssignmentGansner93InitialFeasibleTree, SpecialCase2) {
-    SimpleDirectedGraph graph(5);
+    SPDirectedGraph graph(5);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     graph.addEdge(2, 3);
@@ -88,7 +88,7 @@ TEST(TestLayerAssignmentGansner93InitialFeasibleTree, SpecialCase2) {
     testInitialFeasibleTree(graph, layerAssignment, ranks, parents);
 }
 
-void testCutValues(SimpleDirectedGraph &graph, const vector<int> &parents, const vector<int> &cuts) {
+void testCutValues(SPDirectedGraph &graph, const vector<int> &parents, const vector<int> &cuts) {
     const size_t n = graph.numVertices();
     vector<int> p(n);
     function<int(int)> find = [&](const int u) {
@@ -125,7 +125,7 @@ void testCutValues(SimpleDirectedGraph &graph, const vector<int> &parents, const
 }
 
 TEST(TestLayerAssignmentGansner93, SpecialCase100) {
-    SimpleDirectedGraph graph(4);
+    SPDirectedGraph graph(4);
     graph.addEdge(2, 0);
     graph.addEdge(0, 1);
     graph.addEdge(3, 1);
@@ -143,7 +143,7 @@ TEST(TestLayerAssignmentGansner93, SpecialCase100) {
 }
 
 TEST(TestLayerAssignmentGansner93, SpecialCase101) {
-    SimpleDirectedGraph graph(6);
+    SPDirectedGraph graph(6);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     graph.addEdge(2, 3);
@@ -169,7 +169,7 @@ TEST(TestLayerAssignmentGansner93, SpecialCase101) {
 }
 
 TEST(TestLayerAssignmentGansner93, SpecialCase102) {
-    SimpleDirectedGraph graph(6);
+    SPDirectedGraph graph(6);
     graph.addEdge(4, 0);
     graph.addEdge(0, 1);
     graph.addEdge(2, 3);
@@ -192,7 +192,7 @@ TEST(TestLayerAssignmentGansner93, SpecialCase102) {
 }
 
 TEST(TestLayerAssignmentGansner93, SpecialCase103) {
-    SimpleDirectedGraph graph(6);
+    SPDirectedGraph graph(6);
     graph.addEdge(0, 4); graph.addEdge(2, 1); graph.addEdge(2, 1); graph.addEdge(0, 2); graph.addEdge(1, 5);
     graph.addEdge(0, 3); graph.addEdge(4, 5); graph.addEdge(0, 5); graph.addEdge(4, 5); graph.addEdge(1, 5);
     graph.addEdge(0, 4); graph.addEdge(0, 3); graph.addEdge(0, 1); graph.addEdge(3, 4); graph.addEdge(2, 5);
@@ -215,7 +215,7 @@ TEST(TestLayerAssignmentGansner93, SpecialCase103) {
 }
 
 TEST(TestLayerAssignmentGansner93, SpecialCase104) {
-    SimpleDirectedGraph graph(5);
+    SPDirectedGraph graph(5);
     graph.addEdge(1, 0); graph.addEdge(4, 3); graph.addEdge(2, 4); graph.addEdge(1, 2);
     graph.addEdge(0, 3); graph.addEdge(2, 3); graph.addEdge(1, 4); graph.addEdge(2, 0);
     unordered_map<int, int> minEdgeLengths({

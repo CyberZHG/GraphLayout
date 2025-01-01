@@ -14,6 +14,8 @@ add_library(GraphLayout STATIC
         include/layer_assignment.h
         src/layer_assignment.cpp
         src/graph_def_splitter.cpp
+        include/cross_minimization.h
+        src/cross_minimization.cpp
 )
 
 target_include_directories(GraphLayout
@@ -38,6 +40,7 @@ add_executable(runTests
         tests/layer_assignment/test_topological.cpp
         tests/graph_def/test_component_splitter.cpp
         tests/layer_assignment/test_gansner_93.cpp
+        tests/cross_minimization/test_cross_minimization.cpp
 )
 
 target_link_libraries(runTests

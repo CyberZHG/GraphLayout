@@ -30,7 +30,7 @@ int LayerAssignment::minEdgeLength(const int id) const {
     return 1;
 }
 
-vector<int> LayerAssignment::rankVertices(SimpleDirectedGraph &graph) const {
+vector<int> LayerAssignment::rankVertices(SPDirectedGraph &graph) const {
     switch (_method) {
         case LayerAssignmentMethod::TOPOLOGICAL:
         case LayerAssignmentMethod::MIN_NUM_OF_LAYERS:
@@ -42,7 +42,7 @@ vector<int> LayerAssignment::rankVertices(SimpleDirectedGraph &graph) const {
     return {};
 }
 
-long long LayerAssignment::calcTotalEdgeLength(const SimpleDirectedGraph &graph, const vector<int> &ranks) {
+long long LayerAssignment::calcTotalEdgeLength(const SPDirectedGraph &graph, const vector<int> &ranks) {
     long long cost = 0;
     for (const auto &edge : graph.edges()) {
         cost += ranks[edge.v] - ranks[edge.u];
@@ -50,7 +50,7 @@ long long LayerAssignment::calcTotalEdgeLength(const SimpleDirectedGraph &graph,
     return cost;
 }
 
-vector<int> LayerAssignment::rankVerticesTopological(SimpleDirectedGraph &graph) const {
+vector<int> LayerAssignment::rankVerticesTopological(SPDirectedGraph &graph) const {
     const size_t n = graph.numVertices();
     const auto edges = graph.edges();
     vector inDegrees(graph.getInDegrees());
@@ -76,7 +76,7 @@ vector<int> LayerAssignment::rankVerticesTopological(SimpleDirectedGraph &graph)
     return ranks;
 }
 
-vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &graph) const {
+vector<int> LayerAssignment::rankVerticesNetworkSimplex(SPDirectedGraph &graph) const {
     const size_t n = graph.numVertices();
     if (n == 0) {
         return {};
@@ -171,7 +171,7 @@ vector<int> LayerAssignment::rankVerticesNetworkSimplex(SimpleDirectedGraph &gra
  * are also used to store the updated ranks.
  * @return The root and a parent vector that represents the spanning tree.
  */
-pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SimpleDirectedGraph &graph,
+pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SPDirectedGraph &graph,
                                                                        std::vector<int> &ranks) const {
     const size_t n = graph.numVertices();
     const size_t m = graph.numEdges();
@@ -179,7 +179,7 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SimpleDirected
     vector parents(n, NO_PARENT);
     set<pair<int, int>> incidentEdges;
     int root = -1;
-    auto calcSlack = [&](const SimpleEdge &edge) {
+    auto calcSlack = [&](const SPEdge &edge) {
         return slacks[edge.id] = ranks[edge.v] - ranks[edge.u] - minEdgeLength(edge.id);
     };
     for (int u = 0; u < n; ++u) {
@@ -258,8 +258,8 @@ pair<int, vector<int>> LayerAssignment::gansner93InitFeasibleTree(SimpleDirected
  * @return Minimum cut index and the cut values.
  */
 pair<int, vector<int>> LayerAssignment::gansner93ComputeCutValues(
-    SimpleDirectedGraph &graph,
-    SimpleDirectedGraph &tree,
+    SPDirectedGraph &graph,
+    SPDirectedGraph &tree,
     const int root,
     const std::vector<int> &parents) const {
     const size_t n = graph.numVertices();

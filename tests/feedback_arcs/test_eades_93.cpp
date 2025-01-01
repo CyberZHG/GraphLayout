@@ -6,7 +6,7 @@ using namespace std;
 using namespace graph_layout;
 
 TEST(TestFeedbackArcsEades93, EmptyGraph) {
-    SimpleDirectedGraph graph(0);
+    SPDirectedGraph graph(0);
     EXPECT_FALSE(graph.hasCycle());
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
@@ -14,7 +14,7 @@ TEST(TestFeedbackArcsEades93, EmptyGraph) {
 }
 
 TEST(TestFeedbackArcsEades93, SingleNodeNoEdge) {
-    SimpleDirectedGraph graph(1);
+    SPDirectedGraph graph(1);
     EXPECT_FALSE(graph.hasCycle());
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
     const auto feedbackArcs = feedbackArcsFinder.findFeedbackArcs(graph);
@@ -22,7 +22,7 @@ TEST(TestFeedbackArcsEades93, SingleNodeNoEdge) {
 }
 
 TEST(TestFeedbackArcsEades93, SingleEdge) {
-    SimpleDirectedGraph graph(2);
+    SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     EXPECT_FALSE(graph.hasCycle());
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);
@@ -31,7 +31,7 @@ TEST(TestFeedbackArcsEades93, SingleEdge) {
 }
 
 TEST(TestFeedbackArcsEades93, TwoNodesCycle) {
-    SimpleDirectedGraph graph(2);
+    SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     graph.addEdge(1, 0);
     EXPECT_TRUE(graph.hasCycle());
@@ -41,7 +41,7 @@ TEST(TestFeedbackArcsEades93, TwoNodesCycle) {
 }
 
 TEST(TestFeedbackArcsEades93, ThreeNodesCycle) {
-    SimpleDirectedGraph graph(3);
+    SPDirectedGraph graph(3);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     graph.addEdge(2, 0);
@@ -52,7 +52,7 @@ TEST(TestFeedbackArcsEades93, ThreeNodesCycle) {
 }
 
 TEST(TestFeedbackArcsEades93, ParallelEdges) {
-    SimpleDirectedGraph graph(2);
+    SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     graph.addEdge(0, 1);
     graph.addEdge(1, 0);
@@ -64,7 +64,7 @@ TEST(TestFeedbackArcsEades93, ParallelEdges) {
 }
 
 TEST(TestFeedbackArcsEades93, SpecialCase1) {
-    SimpleDirectedGraph graph(12);
+    SPDirectedGraph graph(12);
     graph.addOutEdges(0, {1, 2, 7});
     graph.addEdge(1, 3);
     graph.addEdge(2, 3);
@@ -83,7 +83,7 @@ TEST(TestFeedbackArcsEades93, SpecialCase1) {
 }
 
 TEST(TestFeedbackArcsEades93, SpecialCase2) {
-    SimpleDirectedGraph graph(4);
+    SPDirectedGraph graph(4);
     graph.addEdge(2, 2);
     graph.addEdge(2, 1);
     EXPECT_TRUE(graph.hasCycle());

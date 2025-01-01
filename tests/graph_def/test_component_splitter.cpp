@@ -5,21 +5,21 @@ using namespace std;
 using namespace graph_layout;
 
 TEST(TestGraphComponentSplitter, EmptyGraph) {
-    SimpleDirectedGraph graph(0);
+    SPDirectedGraph graph(0);
     GraphComponentSplitter splitter;
     const auto &graphs = splitter.splitGraph(graph);
     EXPECT_EQ(graphs.size(), 0);
 }
 
 TEST(TestGraphComponentSplitter, SingleNode) {
-    SimpleDirectedGraph graph(1);
+    SPDirectedGraph graph(1);
     GraphComponentSplitter splitter;
     const auto &graphs = splitter.splitGraph(graph);
     EXPECT_EQ(graphs.size(), 1);
 }
 
 TEST(TestGraphComponentSplitter, SpecialCase1) {
-    SimpleDirectedGraph graph(4);
+    SPDirectedGraph graph(4);
     graph.addEdge(0, 2);
     graph.addEdge(1, 3);
     GraphComponentSplitter splitter;
@@ -27,8 +27,8 @@ TEST(TestGraphComponentSplitter, SpecialCase1) {
     EXPECT_EQ(graphs.size(), 2);
     EXPECT_EQ(graphs[0].numEdges(), 1);
     EXPECT_EQ(graphs[1].numEdges(), 1);
-    EXPECT_EQ(graphs[0].edges()[0], SimpleEdge({0, 0, 1}));
-    EXPECT_EQ(graphs[1].edges()[0], SimpleEdge({1, 0, 1}));
+    EXPECT_EQ(graphs[0].edges()[0], SPEdge({0, 0, 1}));
+    EXPECT_EQ(graphs[1].edges()[0], SPEdge({1, 0, 1}));
     const auto newGraph = splitter.mergeBack();
     EXPECT_EQ(newGraph, graph);
 }

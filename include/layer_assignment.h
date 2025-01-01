@@ -26,23 +26,23 @@ namespace graph_layout {
         [[nodiscard]] int minEdgeLength(int) const;
 
         // Input graph must be a DAG.
-        [[nodiscard]] std::vector<int> rankVertices(SimpleDirectedGraph &) const;
+        [[nodiscard]] std::vector<int> rankVertices(SPDirectedGraph &) const;
 
-        static long long calcTotalEdgeLength(const SimpleDirectedGraph &, const std::vector<int> &);
+        static long long calcTotalEdgeLength(const SPDirectedGraph &, const std::vector<int> &);
     private:
         LayerAssignmentMethod _method;
         std::unordered_map<int, int> _minEdgeLens;
 
-        std::vector<int> rankVerticesTopological(SimpleDirectedGraph &) const;
-        std::vector<int> rankVerticesNetworkSimplex(SimpleDirectedGraph &) const;
+        std::vector<int> rankVerticesTopological(SPDirectedGraph &) const;
+        std::vector<int> rankVerticesNetworkSimplex(SPDirectedGraph &) const;
 
     protected:
         static constexpr int NO_PARENT = -1;
 
-        std::pair<int, std::vector<int>> gansner93InitFeasibleTree(SimpleDirectedGraph &, std::vector<int> &ranks) const;
+        std::pair<int, std::vector<int>> gansner93InitFeasibleTree(SPDirectedGraph &, std::vector<int> &ranks) const;
         std::pair<int, std::vector<int>> gansner93ComputeCutValues(
-            SimpleDirectedGraph &,
-            SimpleDirectedGraph &,
+            SPDirectedGraph &,
+            SPDirectedGraph &,
             int root,
             const std::vector<int> &parents) const;
     };

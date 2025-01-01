@@ -5,7 +5,7 @@
 using namespace std;
 using namespace graph_layout;
 
-std::vector<int> GraphComponentSplitter::getConnectedComponents(const SimpleDirectedGraph &graph) {
+std::vector<int> GraphComponentSplitter::getConnectedComponents(const SPDirectedGraph &graph) {
     const size_t n = graph.numVertices();
     vector<int> parent(n);
     for (int i = 0; i < n; ++i) {
@@ -29,7 +29,7 @@ std::vector<int> GraphComponentSplitter::getConnectedComponents(const SimpleDire
     return parent;
 }
 
-std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const SimpleDirectedGraph &graph) {
+std::vector<SPDirectedGraph> & GraphComponentSplitter::splitGraph(const SPDirectedGraph &graph) {
     const size_t n = graph.numVertices();
     const auto parent = getConnectedComponents(graph);
     unordered_map<int, vector<int>> groupsMap;
@@ -55,7 +55,7 @@ std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const Simp
 
     _graphs.clear();
     for (auto &group: _groups) {
-        SimpleDirectedGraph subGraph(group.size());
+        SPDirectedGraph subGraph(group.size());
         _graphs.emplace_back(subGraph);
     }
     for (const auto &edge : graph.edges()) {
@@ -67,12 +67,12 @@ std::vector<SimpleDirectedGraph> & GraphComponentSplitter::splitGraph(const Simp
     return _graphs;
 }
 
-SimpleDirectedGraph GraphComponentSplitter::mergeBack() const {
+SPDirectedGraph GraphComponentSplitter::mergeBack() const {
     size_t n = 0;
     for (const auto &graph : _graphs) {
         n += graph.numVertices();
     }
-    SimpleDirectedGraph newGraph(n);
+    SPDirectedGraph newGraph(n);
     for (size_t g = 0; g < _groups.size(); ++g) {
         for (const auto &edge : _graphs[g].edges()) {
             newGraph.addEdge({edge.id, _groups[g][edge.u], _groups[g][edge.v]});

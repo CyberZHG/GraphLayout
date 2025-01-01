@@ -7,43 +7,47 @@
 using namespace std;
 using namespace graph_layout;
 
-bool SimpleEdge::operator==(const SimpleEdge &edge) const {
+bool SPEdge::operator==(const SPEdge &edge) const {
     return id == edge.id && u == edge.u && v == edge.v;
 }
 
-SimpleDirectedGraph::SimpleDirectedGraph(const size_t num_vertices) : _numVertices(num_vertices) {
+SPDirectedGraph::SPDirectedGraph(const size_t num_vertices) : _numVertices(num_vertices) {
 }
 
-void SimpleDirectedGraph::addEdge(const SimpleEdge &edge) {
+void SPDirectedGraph::updateNumVertices(size_t num_vertices) {
+    _numVertices = num_vertices;
+}
+
+void SPDirectedGraph::addEdge(const SPEdge &edge) {
     assert(0 <= edge.u && edge.u < _numVertices);
     assert(0 <= edge.v && edge.v < _numVertices);
     _edges.emplace_back(edge);
     resetInitialization();
 }
 
-void SimpleDirectedGraph::addEdge(const int u, const int v) {
-    addEdge(SimpleEdge(static_cast<int>(_edges.size()), u, v));
+void SPDirectedGraph::addEdge(const int u, const int v) {
+    addEdge(SPEdge(static_cast<int>(_edges.size()), u, v));
 }
 
-void SimpleDirectedGraph::addOutEdges(const int u, const vector<int> &vertices) {
+void SPDirectedGraph::addOutEdges(const int u, const vector<int> &vertices) {
     for (const auto &v: vertices) {
         addEdge(u, v);
     }
 }
 
-SimpleEdge &SimpleDirectedGraph::getEdge(const int id) {
+SPEdge &SPDirectedGraph::getEdge(const int id) {
     const int index = static_cast<int>(getEdgeIdToIndexMap().find(id)->second);
     return _edges[index];
 }
 
-void SimpleDirectedGraph::removeEdge(const int id) {
+void SPDirectedGraph::removeEdge(const int id) {
     resetInitialization();
     const int index = static_cast<int>(getEdgeIdToIndexMap().find(id)->second);
     _edges[index] = _edges[_edges.size() - 1];
     _edges.pop_back();
 }
 
-bool SimpleDirectedGraph::operator==(const SimpleDirectedGraph &other) const {
+bool SPDirectedGraph::operator==(const SPDirectedGraph &other) const {
     if (_numVertices != other._numVertices) {
         return false;
     }
@@ -58,7 +62,7 @@ bool SimpleDirectedGraph::operator==(const SimpleDirectedGraph &other) const {
     return true;
 }
 
-void SimpleDirectedGraph::disableSelfCycleEdges() {
+void SPDirectedGraph::disableSelfCycleEdges() {
     resetInitialization();
     int newNumEdges = 0;
     for (auto & _edge : _edges) {
@@ -71,12 +75,12 @@ void SimpleDirectedGraph::disableSelfCycleEdges() {
     _edges.erase(_edges.begin() + newNumEdges, _edges.end());
 }
 
-void SimpleDirectedGraph::enableSelfCycleEdges() {
+void SPDirectedGraph::enableSelfCycleEdges() {
     resetInitialization();
     _edges.insert(_edges.end(), _selfCycleEdges.begin(), _selfCycleEdges.end());
 }
 
-void SimpleDirectedGraph::reverseEdges(const std::unordered_set<int> &ids) {
+void SPDirectedGraph::reverseEdges(const std::unordered_set<int> &ids) {
     resetInitialization();
     _reverseIds = ids;
     for (auto &edge : _edges) {
@@ -86,7 +90,7 @@ void SimpleDirectedGraph::reverseEdges(const std::unordered_set<int> &ids) {
     }
 }
 
-void SimpleDirectedGraph::reverseEdgesBack() {
+void SPDirectedGraph::reverseEdgesBack() {
     resetInitialization();
     for (auto &edge : _edges) {
         if (_reverseIds.contains(edge.id)) {
@@ -96,13 +100,13 @@ void SimpleDirectedGraph::reverseEdgesBack() {
     _reverseIds.clear();
 }
 
-void SimpleDirectedGraph::sortEdgesById() {
-    ranges::sort(_edges, [] (const SimpleEdge &a, const SimpleEdge &b) {
+void SPDirectedGraph::sortEdgesById() {
+    ranges::sort(_edges, [] (const SPEdge &a, const SPEdge &b) {
         return a.id < b.id;
     });
 }
 
-const unordered_map<int, size_t> & SimpleDirectedGraph::getEdgeIdToIndexMap() {
+const unordered_map<int, size_t> & SPDirectedGraph::getEdgeIdToIndexMap() {
     if (!_edgeIdToIndexMapInitialized) {
         _edgeIdToIndexMap.clear();
         for (size_t i = 0; i < _edges.size(); i++) {
@@ -113,66 +117,66 @@ const unordered_map<int, size_t> & SimpleDirectedGraph::getEdgeIdToIndexMap() {
     return _edgeIdToIndexMap;
 }
 
-const vector<int> &SimpleDirectedGraph::getInDegrees() {
+const vector<int> &SPDirectedGraph::getInDegrees() {
     if (!_degreesInitialized) {
         initDegrees();
     }
     return _inDegrees;
 }
 
-const vector<int> &SimpleDirectedGraph::getOutDegrees() {
+const vector<int> &SPDirectedGraph::getOutDegrees() {
     if (!_degreesInitialized) {
         initDegrees();
     }
     return _outDegrees;
 }
 
-const vector<vector<int>> &SimpleDirectedGraph::getInVertices() {
+const vector<vector<int>> &SPDirectedGraph::getInVertices() {
     if (!_inOutVerticesInitialized) {
         initInOutVertices();
     }
     return _inVertices;
 }
 
-const vector<vector<int>> &SimpleDirectedGraph::getOutVertices() {
+const vector<vector<int>> &SPDirectedGraph::getOutVertices() {
     if (!_inOutVerticesInitialized) {
         initInOutVertices();
     }
     return _outVertices;
 }
 
-const vector<vector<int>> & SimpleDirectedGraph::getInEdgeIds() {
+const vector<vector<int>> & SPDirectedGraph::getInEdgeIds() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _inEdges;
 }
 
-const vector<vector<int>> & SimpleDirectedGraph::getOutEdgeIds() {
+const vector<vector<int>> & SPDirectedGraph::getOutEdgeIds() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _outEdges;
 }
 
-EdgeIterationWithIDs SimpleDirectedGraph::getInEdges(const int v) {
+EdgeIterationWithIDs SPDirectedGraph::getInEdges(const int v) {
     return {*this, getInEdgeIds()[v]};
 }
 
-EdgeIterationWithIDs SimpleDirectedGraph::getOutEdges(const int u) {
+EdgeIterationWithIDs SPDirectedGraph::getOutEdges(const int u) {
     return {*this, getOutEdgeIds()[u]};
 }
 
-bool SimpleDirectedGraph::hasCycle() {
+bool SPDirectedGraph::hasCycle() {
     if (!_hasCycleInitialized) {
         initHasCycle();
     }
     return _hasCycle;
 }
 
-SimpleDirectedGraph SimpleDirectedGraph::buildSpanningTree(const std::vector<int> &parents) {
+SPDirectedGraph SPDirectedGraph::buildSpanningTree(const std::vector<int> &parents) {
     const size_t n = numVertices();
-    SimpleDirectedGraph tree(n);
+    SPDirectedGraph tree(n);
     for (const auto id : parents) {
         if (id >= 0) {
             tree.addEdge(getEdge(id));
@@ -181,7 +185,7 @@ SimpleDirectedGraph SimpleDirectedGraph::buildSpanningTree(const std::vector<int
     return tree;
 }
 
-void SimpleDirectedGraph::resetInitialization() {
+void SPDirectedGraph::resetInitialization() {
     _edgeIdToIndexMapInitialized = false;
     _degreesInitialized = false;
     _inOutVerticesInitialized = false;
@@ -189,7 +193,7 @@ void SimpleDirectedGraph::resetInitialization() {
     _hasCycleInitialized = false;
 }
 
-void SimpleDirectedGraph::initDegrees() {
+void SPDirectedGraph::initDegrees() {
     _inDegrees = vector(_numVertices, 0);
     _outDegrees = vector(_numVertices, 0);
     for (const auto &edge : _edges) {
@@ -199,7 +203,7 @@ void SimpleDirectedGraph::initDegrees() {
     _degreesInitialized = true;
 }
 
-void SimpleDirectedGraph::initInOutVertices() {
+void SPDirectedGraph::initInOutVertices() {
     _inVertices = vector(_numVertices, vector<int>());
     _outVertices = vector(_numVertices, vector<int>());
     for (const auto &edge : _edges) {
@@ -209,7 +213,7 @@ void SimpleDirectedGraph::initInOutVertices() {
     _inOutVerticesInitialized = true;
 }
 
-void SimpleDirectedGraph::initInOutEdges() {
+void SPDirectedGraph::initInOutEdges() {
     _inEdges = vector(_numVertices, vector<int>());
     _outEdges = vector(_numVertices, vector<int>());
     for (const auto &edge : _edges) {
@@ -219,7 +223,7 @@ void SimpleDirectedGraph::initInOutEdges() {
     _inOutEdgesInitialized = true;
 }
 
-void SimpleDirectedGraph::initHasCycle() {
+void SPDirectedGraph::initHasCycle() {
     auto inDegrees = vector(getInDegrees());
     const auto &outEdges = getOutEdgeIds();
     const auto &edgeIdToIndexMap = getEdgeIdToIndexMap();
@@ -244,17 +248,17 @@ void SimpleDirectedGraph::initHasCycle() {
     _hasCycleInitialized = true;
 }
 
-const SimpleEdge & EdgeIterationWithIDs::iterator::operator*() const {
+const SPEdge & EdgeIterationWithIDs::iterator::operator*() const {
     const auto edgeIndex = _graph.getEdgeIdToIndexMap().find(_ids[_index])->second;
     return _graph.edges()[edgeIndex];
 }
 
-SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraph() const {
+SPDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraph() const {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> numVerticesDist(_minNumVertices, _maxNumVertices);
     const size_t n = numVerticesDist(gen);
-    SimpleDirectedGraph graph(n);
+    SPDirectedGraph graph(n);
     uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * min(static_cast<int>(n), 8)));
     // uniform_int_distribution<> numEdgesDist(0, 16);
     uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
@@ -270,12 +274,12 @@ SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraph() co
     return graph;
 }
 
-SimpleDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraphWithoutDuplicateEdge() const {
+SPDirectedGraph RandomSimpleDirectedGraphGenerator::generateRandomGraphWithoutDuplicateEdge() const {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> numVerticesDist(_minNumVertices, _maxNumVertices);
     const size_t n = numVerticesDist(gen);
-    SimpleDirectedGraph graph(n);
+    SPDirectedGraph graph(n);
     uniform_int_distribution<> numEdgesDist(0, static_cast<int>(n * min(static_cast<int>(n), 8)));
     uniform_int_distribution<> verticeIndexDist(0, static_cast<int>(n - 1));
     const size_t m = numEdgesDist(gen);

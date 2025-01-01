@@ -7,7 +7,7 @@ using namespace std;
 using namespace graph_layout;
 
 TEST(TestLayerAssignmentTopological, EmptyGraph) {
-    SimpleDirectedGraph graph(0);
+    SPDirectedGraph graph(0);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector<int>());
@@ -15,7 +15,7 @@ TEST(TestLayerAssignmentTopological, EmptyGraph) {
 }
 
 TEST(TestLayerAssignmentTopological, SingleNodeNoEdge) {
-    SimpleDirectedGraph graph(1);
+    SPDirectedGraph graph(1);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
     EXPECT_EQ(ranks, vector({0}));
@@ -23,7 +23,7 @@ TEST(TestLayerAssignmentTopological, SingleNodeNoEdge) {
 }
 
 TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge1) {
-    SimpleDirectedGraph graph(2);
+    SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
@@ -37,7 +37,7 @@ TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge1) {
 }
 
 TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge2) {
-    SimpleDirectedGraph graph(2);
+    SPDirectedGraph graph(2);
     graph.addEdge(1, 0);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
     const auto ranks = layerAssignment.rankVertices(graph);
@@ -46,7 +46,7 @@ TEST(TestLayerAssignmentTopological, TwoNodesSingleEdge2) {
 }
 
 TEST(TestLayerAssignmentTopological, TwoNodesDuplicateEdge) {
-    SimpleDirectedGraph graph(2);
+    SPDirectedGraph graph(2);
     graph.addEdge(0, 1);
     graph.addEdge(0, 1);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
@@ -56,7 +56,7 @@ TEST(TestLayerAssignmentTopological, TwoNodesDuplicateEdge) {
 }
 
 TEST(TestLayerAssignmentTopological, ThreeNodesLine1) {
-    SimpleDirectedGraph graph(3);
+    SPDirectedGraph graph(3);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     const LayerAssignment layerAssignment(LayerAssignmentMethod::TOPOLOGICAL);
@@ -66,7 +66,7 @@ TEST(TestLayerAssignmentTopological, ThreeNodesLine1) {
 }
 
 TEST(TestLayerAssignmentTopological, SpecialCase1) {
-    SimpleDirectedGraph graph(4);
+    SPDirectedGraph graph(4);
     graph.addEdge(0, 1);
     graph.addEdge(1, 2);
     graph.addEdge(0, 3);
@@ -82,7 +82,7 @@ TEST(TestLayerAssignmentTopological, SpecialCase1) {
 }
 
 TEST(TestLayerAssignmentTopological, SpecialCase2) {
-    SimpleDirectedGraph graph(7);
+    SPDirectedGraph graph(7);
     graph.addEdge(0, 3);
     graph.addEdge(0, 5);
     graph.addEdge(1, 3);
@@ -99,7 +99,7 @@ TEST(TestLayerAssignmentTopological, SpecialCase2) {
 }
 
 TEST(TestLayerAssignmentTopological, SpecialCase3) {
-    SimpleDirectedGraph graph(7);
+    SPDirectedGraph graph(7);
     graph.addEdge(0, 1);
     graph.addEdge(0, 2);
     graph.addEdge(1, 3);

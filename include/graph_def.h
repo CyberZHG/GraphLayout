@@ -7,28 +7,34 @@
 namespace graph_layout {
     class EdgeIterationWithIDs;
 
-    struct SimpleEdge {
+    struct SPEdge {
         int id, u, v;
 
-        bool operator==(const SimpleEdge &) const;
+        bool operator==(const SPEdge &) const;
     };
 
-    class SimpleDirectedGraph {
-    public:
-        explicit SimpleDirectedGraph(size_t num_vertices);
-        ~SimpleDirectedGraph() = default;
+    struct SPVirtualEdge {
+        SPEdge originalEdge;
+        std::vector<int> virtualEdgeIds;
+    };
 
+    class SPDirectedGraph {
+    public:
+        explicit SPDirectedGraph(size_t num_vertices);
+        ~SPDirectedGraph() = default;
+
+        void updateNumVertices(size_t num_vertices);
         [[nodiscard]] size_t numVertices() const { return _numVertices; }
         [[nodiscard]] size_t numEdges() const { return _edges.size(); }
-        [[nodiscard]] const std::vector<SimpleEdge> &edges() const { return _edges; }
+        [[nodiscard]] const std::vector<SPEdge> &edges() const { return _edges; }
 
-        void addEdge(const SimpleEdge &edge);
+        void addEdge(const SPEdge &edge);
         void addEdge(int u, int v);
         void addOutEdges(int u, const std::vector<int> &vertices);
-        SimpleEdge &getEdge(int id);
+        SPEdge &getEdge(int id);
         void removeEdge(int id);
 
-        bool operator==(const SimpleDirectedGraph &other) const;
+        bool operator==(const SPDirectedGraph &other) const;
 
         void disableSelfCycleEdges();
         void enableSelfCycleEdges();
@@ -48,11 +54,11 @@ namespace graph_layout {
         EdgeIterationWithIDs getOutEdges(int u);
         bool hasCycle();
 
-        [[nodiscard]] SimpleDirectedGraph buildSpanningTree(const std::vector<int> &parents);
+        [[nodiscard]] SPDirectedGraph buildSpanningTree(const std::vector<int> &parents);
 
     private:
         size_t _numVertices{};
-        std::vector<SimpleEdge> _edges;
+        std::vector<SPEdge> _edges;
 
         bool _edgeIdToIndexMapInitialized = false;
         std::unordered_map<int, size_t> _edgeIdToIndexMap;
@@ -72,7 +78,7 @@ namespace graph_layout {
         bool _hasCycleInitialized = false;
         bool _hasCycle = false;
 
-        std::vector<SimpleEdge> _selfCycleEdges;
+        std::vector<SPEdge> _selfCycleEdges;
 
         std::unordered_set<int> _reverseIds;
 
@@ -85,16 +91,16 @@ namespace graph_layout {
 
     class EdgeIterationWithIDs {
     public:
-        EdgeIterationWithIDs(SimpleDirectedGraph &graph, const std::vector<int>& ids) : _graph(graph), _ids(ids) {}
+        EdgeIterationWithIDs(SPDirectedGraph &graph, const std::vector<int>& ids) : _graph(graph), _ids(ids) {}
 
         class iterator {
         public:
-            explicit iterator(SimpleDirectedGraph &graph, const std::vector<int>& ids, const int index) : _graph(graph), _ids(ids), _index(index) {}
-            const SimpleEdge &operator*() const;
+            explicit iterator(SPDirectedGraph &graph, const std::vector<int>& ids, const int index) : _graph(graph), _ids(ids), _index(index) {}
+            const SPEdge &operator*() const;
             iterator& operator++() { ++_index; return *this; }
             bool operator!=(const iterator& other) const { return _index != other._index; }
         private:
-            SimpleDirectedGraph &_graph;
+            SPDirectedGraph &_graph;
             const std::vector<int> &_ids;
             int _index;
         };
@@ -102,7 +108,7 @@ namespace graph_layout {
         [[nodiscard]] iterator begin() const { return iterator(_graph, _ids, 0); }
         [[nodiscard]] iterator end() const { return iterator(_graph, _ids, static_cast<int>(_ids.size())); }
     private:
-        SimpleDirectedGraph &_graph;
+        SPDirectedGraph &_graph;
         const std::vector<int> &_ids;
     };
 
@@ -110,8 +116,8 @@ namespace graph_layout {
     public:
         explicit RandomSimpleDirectedGraphGenerator(const int maxNumVertices) : _minNumVertices(1), _maxNumVertices(maxNumVertices), _allowSelfCycle(false) {}
 
-        [[nodiscard]] SimpleDirectedGraph generateRandomGraph() const;
-        [[nodiscard]] SimpleDirectedGraph generateRandomGraphWithoutDuplicateEdge() const;
+        [[nodiscard]] SPDirectedGraph generateRandomGraph() const;
+        [[nodiscard]] SPDirectedGraph generateRandomGraphWithoutDuplicateEdge() const;
     private:
         int _minNumVertices;
         int _maxNumVertices;
@@ -120,11 +126,11 @@ namespace graph_layout {
 
     class GraphComponentSplitter {
     public:
-        static std::vector<int> getConnectedComponents(const SimpleDirectedGraph &graph);
-        std::vector<SimpleDirectedGraph> &splitGraph(const SimpleDirectedGraph &graph);
-        [[nodiscard]] SimpleDirectedGraph mergeBack() const;
+        static std::vector<int> getConnectedComponents(const SPDirectedGraph &graph);
+        std::vector<SPDirectedGraph> &splitGraph(const SPDirectedGraph &graph);
+        [[nodiscard]] SPDirectedGraph mergeBack() const;
     private:
-        std::vector<SimpleDirectedGraph> _graphs;
+        std::vector<SPDirectedGraph> _graphs;
         std::vector<std::vector<int>> _groups;
     };
 }
