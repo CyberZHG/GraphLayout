@@ -51,8 +51,6 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleDirectedGra
     int num_popped_vertices = 0;
     vector<bool> popped(n);
     auto &edgeIdToIndexMap = graph.getEdgeIdToIndexMap();
-    auto &inEdges = graph.getInEdges();
-    auto &outEdges = graph.getOutEdges();
     auto removeNode = [&](const int u) {
         if (popped[u]) {
             return;
@@ -60,9 +58,8 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleDirectedGra
         ++num_popped_vertices;
         popped[u] = true;
         removeFromDifferenceBuckets(u);
-        for (const auto id : inEdges[u]) {
-            const int v = edges[edgeIdToIndexMap.find(id)->second].u;
-            if (!popped[v]) {
+        for (const auto &edge : graph.getInEdges(u)) {
+            if (const int v = edge.u; !popped[v]) {
                 if (--outDegree[v] == 0) {
                     sinks.push(v);
                 }
@@ -70,9 +67,8 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleDirectedGra
                 addToDifferenceBuckets(v);
             }
         }
-        for (const auto id : outEdges[u]) {
-            const int v = edges[edgeIdToIndexMap.find(id)->second].v;
-            if (!popped[v]) {
+        for (const auto &edge : graph.getOutEdges(u)) {
+            if (const int v = edge.v; !popped[v]) {
                 if (--inDegree[v] == 0) {
                     sources.push(v);
                 }
@@ -101,9 +97,9 @@ unordered_set<int> FeedbackArcsFinder::findFeedbackArcsEades93(SimpleDirectedGra
                 } else {
                     const int u = differenceBuckets[bucketUpperBound][0];
                     removeNode(u);
-                    for (const auto id : inEdges[u]) {
-                        if (const int v = edges[edgeIdToIndexMap.find(id)->second].u; !popped[v]) {
-                            feedbackArcs.emplace(id);
+                    for (const auto &edge : graph.getInEdges(u)) {
+                        if (const int v = edge.u; !popped[v]) {
+                            feedbackArcs.emplace(edge.id);
                         }
                     }
                     break;

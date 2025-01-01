@@ -102,18 +102,26 @@ const vector<vector<int>> &SimpleDirectedGraph::getOutVertices() {
     return _outVertices;
 }
 
-const vector<vector<int>> & SimpleDirectedGraph::getInEdges() {
+const vector<vector<int>> & SimpleDirectedGraph::getInEdgeIds() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _inEdges;
 }
 
-const vector<vector<int>> & SimpleDirectedGraph::getOutEdges() {
+const vector<vector<int>> & SimpleDirectedGraph::getOutEdgeIds() {
     if (!_inOutEdgesInitialized) {
         initInOutEdges();
     }
     return _outEdges;
+}
+
+EdgeIterationWithIDs SimpleDirectedGraph::getInEdges(const int v) {
+    return {*this, getInEdgeIds()[v]};
+}
+
+EdgeIterationWithIDs SimpleDirectedGraph::getOutEdges(const int u) {
+    return {*this, getOutEdgeIds()[u]};
 }
 
 bool SimpleDirectedGraph::hasCycle() {
@@ -163,7 +171,7 @@ void SimpleDirectedGraph::initInOutEdges() {
 
 void SimpleDirectedGraph::initHasCycle() {
     auto inDegrees = vector(getInDegrees());
-    const auto &outEdges = getOutEdges();
+    const auto &outEdges = getOutEdgeIds();
     const auto &edgeIdToIndexMap = getEdgeIdToIndexMap();
     size_t numVisited = 0;
     queue<int> q;
@@ -184,4 +192,9 @@ void SimpleDirectedGraph::initHasCycle() {
     }
     _hasCycle = numVisited != _numVertices;
     _hasCycleInitialized = true;
+}
+
+const SimpleEdge & EdgeIterationWithIDs::iterator::operator*() const {
+    const auto edgeIndex = _graph.getEdgeIdToIndexMap().find(_ids[_index])->second;
+    return _graph.edges()[edgeIndex];
 }

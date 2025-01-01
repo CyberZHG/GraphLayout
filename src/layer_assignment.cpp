@@ -18,7 +18,6 @@ std::vector<int> LayerAssignment::rankVerticesTopological(SimpleDirectedGraph &g
     const size_t n = graph.numVertices();
     const auto edges = graph.edges();
     std::vector inDegrees(graph.getInDegrees());
-    const auto outEdges = graph.getOutEdges();
     queue<int> q;
     std::vector<int> ranks(n);
     for (size_t i = 0; i < n; i++) {
@@ -30,8 +29,8 @@ std::vector<int> LayerAssignment::rankVerticesTopological(SimpleDirectedGraph &g
     while (!q.empty()) {
         const auto u = q.front();
         q.pop();
-        for (const auto idx : outEdges[u]) {
-            const int v = edges[idx].v;
+        for (const auto &edge : graph.getOutEdges(u)) {
+            const int v = edge.v;
             ranks[v] = max(ranks[v], ranks[u] + 1);
             if (--inDegrees[v] == 0) {
                 q.push(v);
