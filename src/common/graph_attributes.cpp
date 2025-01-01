@@ -16,6 +16,7 @@ const string AttributeShape::CIRCLE = "circle";
 const string AttributeShape::DOUBLE_CIRCLE = "doublecircle";
 const string AttributeShape::ELLIPSE = "ellipse";
 const string AttributeShape::RECT = "rect";
+const string AttributeShape::RECORD = "record";
 
 unordered_map<string, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
     {ATTRIBUTE_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},

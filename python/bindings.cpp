@@ -57,6 +57,7 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def_property_readonly_static("DOUBLE_CIRCLE", [](py::object) { return AttributeShape::DOUBLE_CIRCLE; })
         .def_property_readonly_static("ELLIPSE", [](py::object) { return AttributeShape::ELLIPSE; })
         .def_property_readonly_static("RECT", [](py::object) { return AttributeShape::RECT; })
+        .def_property_readonly_static("RECORD", [](py::object) { return AttributeShape::RECORD; })
     ;
     py::class_<Attributes>(m, "Attributes")
         .def(py::init<>())

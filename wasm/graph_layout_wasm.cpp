@@ -51,6 +51,7 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .class_property("DOUBLE_CIRCLE", &AttributeShape::DOUBLE_CIRCLE)
         .class_property("ELLIPSE", &AttributeShape::ELLIPSE)
         .class_property("RECT", &AttributeShape::RECT)
+        .class_property("RECORD", &AttributeShape::RECORD)
     ;
     class_<Attributes>("Attributes")
         .constructor<>()

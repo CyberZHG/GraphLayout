@@ -66,6 +66,7 @@ declare module 'sp-graph-layout' {
         static readonly DOUBLE_CIRCLE: string
         static readonly ELLIPSE: string
         static readonly RECT: string
+        static readonly RECORD: string
     }
 
     export class Attributes {

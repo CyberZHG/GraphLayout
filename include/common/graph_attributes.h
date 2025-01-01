@@ -54,6 +54,7 @@ namespace graph_layout {
         static const std::string DOUBLE_CIRCLE;
         static const std::string ELLIPSE;
         static const std::string RECT;
+        static const std::string RECORD;
     };
 
     class Attributes {
