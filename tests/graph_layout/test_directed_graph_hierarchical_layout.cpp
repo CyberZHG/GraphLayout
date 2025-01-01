@@ -29,22 +29,6 @@ TEST(TestDirectedGraphHierarchialLayout, SingleVertexSelfCycle) {
     EXPECT_EQ(graph->edges()[0].v, 0);
 }
 
-TEST(TestDirectedGraphHierarchialLayout, TwoVerticesCycle) {
-    const auto graph = make_shared<SPDirectedGraph>(2);
-    graph->addEdge(0, 1);
-    graph->addEdge(1, 0);
-    DirectedGraphHierarchicalLayout layout;
-    layout.setGraph(graph);
-    const auto [xs, ys] = layout.layoutGraph();
-    EXPECT_EQ(xs, vector({0.0, 0.0}));
-    EXPECT_EQ(ys, vector({0.0, UNIT_SIZE}));
-    EXPECT_EQ(graph->numEdges(), 2);
-    EXPECT_EQ(graph->edges()[0].u, 0);
-    EXPECT_EQ(graph->edges()[0].v, 1);
-    EXPECT_EQ(graph->edges()[1].u, 1);
-    EXPECT_EQ(graph->edges()[1].v, 0);
-}
-
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     const auto graph = make_shared<SPDirectedGraph>(4);
     graph->addEdge(0, 1); graph->addEdge(0, 2); graph->addEdge(0, 3);

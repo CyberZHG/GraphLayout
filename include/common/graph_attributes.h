@@ -12,6 +12,8 @@ namespace graph_layout {
     constexpr std::string ATTRIBUTE_KEY_SHAPE = "shape";
     constexpr std::string ATTRIBUTE_KEY_FONT_NAME = "fontname";
     constexpr std::string ATTRIBUTE_KEY_FONT_SIZE = "fontsize";
+    constexpr std::string ATTRIBUTE_KEY_WIDTH = "width";
+    constexpr std::string ATTRIBUTE_KEY_HEIGHT = "height";
 
     class Attribute {
     public:

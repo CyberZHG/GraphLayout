@@ -36,9 +36,7 @@ namespace graph_layout {
         void initializeVertexLabelsWithNumericalValues(int start = 1);
         void setVertexLabels(const std::vector<std::string> &vertexLabels);
 
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
         void drawSVG(const std::string& outputFilePath) const;
-#endif
 
     private:
         std::shared_ptr<SPDirectedGraph> _graph = nullptr;
@@ -52,13 +50,12 @@ namespace graph_layout {
 
         int _initialNumVertices = 0;
         std::vector<double> _xs, _ys;
+        std::vector<SPVirtualEdge> _virtualEdges;
 
         [[nodiscard]] bool isVirtualVertex(int u) const;
         void adjustCoordinatesByGraphRank();
 
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
         void computeVertexSizes();
-#endif
     };
 
 }

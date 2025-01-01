@@ -2,11 +2,50 @@ cmake_minimum_required(VERSION 4.0)
 project(GraphLayout)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(GRAPH_LAYOUT_ENABLE_SVG "Enable exporting to SVG" ON)
+option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
+option(GRAPH_LAYOUT_BUILD_RANDOM_TESTS "Build random tests" OFF)
+option(GRAPH_LAYOUT_ENABLE_STRICT "Use strict compile options" OFF)
+option(GRAPH_LAYOUT_ENABLE_COVERAGE "Enable coverage reporting" OFF)
+option(GRAPH_LAYOUT_BIND_PYTHON "Enable python binding" OFF)
+option(GRAPH_LAYOUT_BIND_ES "Enable ECMAScript binding" OFF)
 
 if(APPLE)
     set(ENV{PKG_CONFIG_PATH} "/opt/homebrew/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+endif()
+
+include(FetchContent)
+
+FetchContent_Declare(
+        SVGDiagram
+        GIT_REPOSITORY git@github.com:CyberZHG/SVGDiagram.git
+        GIT_TAG v1.2.0
+)
+
+FetchContent_MakeAvailable(SVGDiagram)
+
+if(GRAPH_LAYOUT_ENABLE_STRICT)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        add_compile_options(
+                -Wall
+                -Wextra
+                -Werror
+                -Wpedantic
+                -Wmissing-include-dirs
+                -Wundef
+                -Wredundant-decls
+        )
+    endif()
+endif()
+
+if(GRAPH_LAYOUT_ENABLE_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(--coverage -O0 -g)
+        add_link_options(--coverage)
+    endif()
 endif()
 
 add_library(GraphLayout STATIC
@@ -25,8 +64,6 @@ add_library(GraphLayout STATIC
         src/common/binary_indexed_tree.cpp
         include/directed/vertex_positioning.h
         src/directed/vertex_positioning.cpp
-        include/common/draw_svg.h
-        src/common/draw_svg.cpp
         include/common/graph_attributes.h
         src/common/graph_attributes.cpp
 )
@@ -35,41 +72,12 @@ target_include_directories(GraphLayout
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-if (GRAPH_LAYOUT_ENABLE_SVG)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(CAIRO REQUIRED cairo)
-    pkg_check_modules(PANGO REQUIRED pango pangocairo)
-
-    target_include_directories(GraphLayout
-            PRIVATE ${CAIRO_INCLUDE_DIRS}
-            PRIVATE ${PANGO_INCLUDE_DIRS}
-    )
-
-    target_link_directories(GraphLayout
-            PUBLIC ${CAIRO_LIBRARY_DIRS}
-            PUBLIC ${PANGO_LIBRARY_DIRS}
-    )
-
-    target_link_libraries(GraphLayout
-            PUBLIC ${CAIRO_LIBRARIES}
-            PUBLIC ${PANGO_LIBRARIES}
-    )
-
-    target_compile_options(GraphLayout
-            PUBLIC ${CAIRO_CFLAGS_OTHER}
-            PUBLIC ${PANGO_CFLAGS_OTHER})
-
-    target_compile_definitions(GraphLayout
-            PUBLIC GRAPH_LAYOUT_ENABLE_SVG
-    )
-endif()
-
-option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
+target_link_libraries(GraphLayout
+        PRIVATE SVGDiagram
+)
 
 if(GRAPH_LAYOUT_BUILD_TESTS)
     enable_testing()
-
-    include(FetchContent)
 
     FetchContent_Declare(
             googletest
@@ -103,15 +111,14 @@ if(GRAPH_LAYOUT_BUILD_TESTS)
     add_test(NAME GraphLayoutTests COMMAND runTests)
 endif ()
 
-option(GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY "Compiling for WebAssembly" OFF)
-
-if (GRAPH_LAYOUT_BUILD_WEB_ASSEMBLY)
+if (GRAPH_LAYOUT_BIND_ES)
 
     add_executable(GraphLayoutWASM
             js/graph_layout_js.cpp)
 
     target_link_libraries(GraphLayoutWASM
             PRIVATE GraphLayout
+            PRIVATE SVGDiagram
     )
 
     target_compile_options(GraphLayoutWASM PRIVATE "-O3")

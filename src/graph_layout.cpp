@@ -3,10 +3,9 @@
 #include <format>
 #include <fstream>
 
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
-#include "common/draw_svg.h"
-#endif
+#include "svg_diagram.h"
 using namespace std;
+using namespace svg_diagram;
 using namespace graph_layout;
 
 DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
@@ -45,9 +44,7 @@ void DirectedGraphHierarchicalLayout::setLayerMargin(const double margin) {
 }
 
 pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGraph() {
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
     computeVertexSizes();
-#endif
     const size_t n = _graph->numVertices();
     int newVertexIndex = static_cast<int>(n);
     int edgeIndex = CrossMinimization::VIRTUAL_EDGE_ID_OFFSET;
@@ -78,8 +75,11 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
         if (groupIndex > 0) {
             subGraphShift += maxLeftVertexSize * 0.5;
         }
+        _virtualEdges.clear();
         for (const auto& virtualEdge : virtualEdges) {
+            SPVirtualEdge newVirtualEdge;
             const auto& originalEdge = virtualEdge.originalEdge;
+            newVirtualEdge.originalEdge = originalEdge;
             const auto& edgeIds = virtualEdge.virtualEdgeIds;
             bool isReversed = _graph->isReverseEdge(originalEdge.id);
             bool removeOriginalEdge = false;
@@ -92,6 +92,7 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
                     removeOriginalEdge = true;
                     _graph->updateNumVertices(newVertexIndex + 1);
                     newEdgeIds.push_back(edgeIndex);
+                    newVirtualEdge.virtualEdgeIds.emplace_back(edgeIndex);
                     if (!isReversed) {
                         _graph->addEdge({edgeIndex++, lastVertex, newVertexIndex});
                     } else {
@@ -105,19 +106,17 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
             if (removeOriginalEdge) {
                 _graph->removeEdge(originalEdge.id);
                 newEdgeIds.push_back(edgeIndex);
+                newVirtualEdge.virtualEdgeIds.emplace_back(edgeIndex);
                 if (!isReversed) {
                     _graph->addEdge({edgeIndex++, lastVertex, originalEdge.v});
                 } else {
                     _graph->addEdge({edgeIndex++, originalEdge.v, lastVertex});
                 }
-                const int midId = newEdgeIds[newEdgeIds.size() / 2];
-                for (const auto& edgeId : newEdgeIds) {
-                    if (edgeId == midId) {
-                        _attributes.transferEdgeAttributes(originalEdge.id, midId);
-                    } else {
-                        _attributes.setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, "");
-                    }
+                if (isReversed) {
+                    swap(newVirtualEdge.originalEdge.u, newVirtualEdge.originalEdge.v);
+                    ranges::reverse(newVirtualEdge.virtualEdgeIds);
                 }
+                _virtualEdges.emplace_back(newVirtualEdge);
             }
         }
         for (int u = 0; u < subN; ++u) {
@@ -132,77 +131,47 @@ pair<vector<double>, vector<double>> DirectedGraphHierarchicalLayout::layoutGrap
     return {_xs, _ys};
 }
 
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
 void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) const {
     const int n = static_cast<int>(_graph->numVertices());
-    constexpr double margin = 30.0;
-    double minX, maxX, minY, maxY;
-    for (int u = 0; u < n; ++u) {
-        minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u));
-        maxX = max(maxX, _xs[u] + _vertexPositioning.vertexSizeAt(u));
-        minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u));
-        maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u));
+    SVGDiagram diagram;
+    if (const auto bgColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR); !bgColor.empty()) {
+        diagram.setBackgroundColor(bgColor);
     }
     unordered_map<int, unordered_set<int>> outEdges;
     const auto rankDir = _attributes.rankDir();
     for (const auto& [id, u, v] : _graph->edges()) {
         outEdges[u].insert(v);
-        if (u == v) {
-            if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
-                minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
-            } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-                maxX = max(maxX, _xs[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
-            } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
-                maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
-            } else {
-                minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
-            }
+    }
+    vector<string> nodeIds(n);
+    for (int u = 0; u < n; ++u) {
+        nodeIds[u] = format("node{}", u);
+        const auto node = diagram.addNode(nodeIds[u]);
+        node->setCenter(_xs[u], _ys[u]);
+        if (u < _initialNumVertices) {
+            node->setShape(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE));
+            node->setLabel(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL));
+        } else {
+            node->setShape(string("none"));
+            node->setMargin(0, 0);
         }
     }
-    const double width = maxX - minX + margin * 2;
-    const double height = maxY - minY + margin * 2;
-    const auto svg = DrawSVG(outputFilePath, width, height);
-    const auto backgroundColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR);
-    if (!backgroundColor.empty()) {
-        auto [red, green, blue] = AttributeColor::toRGB(backgroundColor);
-        svg.drawBackground(red, green, blue);
-    }
-    svg.translate(margin - minX, margin - minY);
-    for (int u = 0; u < _initialNumVertices; ++u) {
-        const double x = _xs[u];
-        const double y = _ys[u];
-        const double r = _vertexPositioning.vertexSizeAt(u) * 0.5;
-        const auto shape = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE);
-        if (shape == AttributeShape::CIRCLE) {
-            svg.drawCircle(x, y, r);
-        } else if (shape == AttributeShape::DOUBLE_CIRCLE) {
-            svg.drawCircle(x, y, r);
-            svg.drawCircle(x, y, r * 0.8);
-        }
-        const auto label = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL);
-        svg.drawText(x, y, label);
-    }
-
     for (const auto& edge : _graph->edges()) {
+        if (isVirtualVertex(edge.u) || isVirtualVertex(edge.v)) {
+            continue;
+        }
         const auto label = _attributes.edgeAttributes(edge.id, ATTRIBUTE_KEY_LABEL);
+        const auto e = diagram.addEdge(nodeIds[edge.u], nodeIds[edge.v]);
+        e->setLabel(label);
+        e->setSplines(SVGEdge::SPLINES_LINE);
+        e->setMargin(2);
+        e->setArrowHead();
         if (edge.u != edge.v) {
-            const double edgeLen = sqrt((_xs[edge.u] - _xs[edge.v]) * (_xs[edge.u] - _xs[edge.v]) + (_ys[edge.u] - _ys[edge.v]) * (_ys[edge.u] - _ys[edge.v]));
-            double x1, y1, x2, y2;
-            if (isVirtualVertex(edge.u)) {
-                x1 = _xs[edge.u];
-                y1 = _ys[edge.u];
-            } else {
-                x1 = _xs[edge.u] + (_xs[edge.v] - _xs[edge.u]) * _vertexPositioning.vertexSizeAt(edge.u) * 0.5 / edgeLen;
-                y1 = _ys[edge.u] + (_ys[edge.v] - _ys[edge.u]) * _vertexPositioning.vertexSizeAt(edge.u) * 0.5 / edgeLen;
-            }
-            if (isVirtualVertex(edge.v)) {
-                x2 = _xs[edge.v];
-                y2 = _ys[edge.v];
-            } else {
-                x2 = _xs[edge.v] + (_xs[edge.u] - _xs[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
-                y2 = _ys[edge.v] + (_ys[edge.u] - _ys[edge.v]) * _vertexPositioning.vertexSizeAt(edge.v) * 0.5 / edgeLen;
-            }
-            if (outEdges[edge.v].contains(edge.u)) {  // There is a reverse edge
+            if (outEdges[edge.v].contains(edge.u)) {
+                // There is a reverse edge
+                const auto x1 = _xs[edge.u];
+                const auto y1 = _ys[edge.u];
+                const auto x2 = _xs[edge.v];
+                const auto y2 = _ys[edge.v];
                 const double dx = x2 - x1;
                 const double dy = y2 - y1;
                 const double len = sqrt(dx * dx + dy * dy);
@@ -212,39 +181,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
                 const double midY = (y1 + y2) / 2;
                 const double x = midX + nx * 15.0;
                 const double y = midY + ny * 15.0;
-                x1 = _xs[edge.u];
-                y1 = _ys[edge.u];
-                x2 = _xs[edge.v];
-                y2 = _ys[edge.v];
-                const double radius1 = _vertexPositioning.vertexSizeAt(edge.u) * 0.5;
-                const double radius2 = _vertexPositioning.vertexSizeAt(edge.v) * 0.5;
-                const double edgeLen1 = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
-                const double edgeLen2 = sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
-                x1 += (x - x1) * radius1 / edgeLen1;
-                y1 += (y - y1) * radius1 / edgeLen1;
-                x2 += (x - x2) * radius2 / edgeLen2;
-                y2 += (y - y2) * radius2 / edgeLen2;
-                svg.drawLine(x1, y1, x, y);
-                svg.drawLine(x, y, x2, y2, !isVirtualVertex(edge.v));
-                if (!label.empty()) {
-                    const double tx = midX + nx * 30.0;
-                    const double ty = midY + ny * 30.0;
-                    svg.drawText(tx, ty, label);
-                }
-            } else {
-                svg.drawLine(x1, y1, x2, y2, !isVirtualVertex(edge.v));
-                if (!label.empty()) {
-                    const double dx = x2 - x1;
-                    const double dy = y2 - y1;
-                    const double len = sqrt(dx * dx + dy * dy);
-                    const double nx = -dy / len;
-                    const double ny = dx / len;
-                    const double midX = (x1 + x2) / 2;
-                    const double midY = (y1 + y2) / 2;
-                    const double x = midX + nx * 15.0;
-                    const double y = midY + ny * 15.0;
-                    svg.drawText(x, y, label);
-                }
+                e->addConnectionPoint(x, y);
             }
         } else {
             double dx = 0, dy = 0;
@@ -264,27 +201,33 @@ void DirectedGraphHierarchicalLayout::drawSVG(const string& outputFilePath) cons
             const double dir12 = dir3 + rotate;
             const double dir45 = dir3 - rotate;
             const double radius = _vertexPositioning.vertexSizeAt(edge.u) * 0.5;
-            const double x1 = x + cos(dir12) * radius;
-            const double y1 = y + sin(dir12) * radius;
             const double x2 = x + cos(dir12) * radius * 2.5;
             const double y2 = y + sin(dir12) * radius * 2.5;
             const double x3 = x + cos(dir3) * radius * 3;
             const double y3 = y + sin(dir3) * radius * 3;
             const double x4 = x + cos(dir45) * radius * 2.5;
             const double y4 = y + sin(dir45) * radius * 2.5;
-            const double x5 = x + cos(dir45) * radius;
-            const double y5 = y + sin(dir45) * radius;
-            svg.drawLine(x1, y1, x2, y2);
-            svg.drawLine(x2, y2, x3, y3);
-            svg.drawLine(x3, y3, x4, y4);
-            svg.drawLine(x4, y4, x5, y5, true);
-            const double xt = x + cos(dir3) * (radius * 3 + 15.0);
-            const double yt = y + sin(dir3) * (radius * 3 + 15.0);
-            svg.drawText(xt, yt, label);
+            e->addConnectionPoint(x2, y2);
+            e->addConnectionPoint(x3, y3);
+            e->addConnectionPoint(x4, y4);
         }
     }
+    for (const auto& virtualEdge : _virtualEdges) {
+        const auto& originalEdge = virtualEdge.originalEdge;
+        const auto& edgeIds = virtualEdge.virtualEdgeIds;
+        const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTRIBUTE_KEY_LABEL);
+        const auto e = diagram.addEdge(nodeIds[originalEdge.u], nodeIds[originalEdge.v]);
+        e->setLabel(label);
+        e->setSplines(SVGEdge::SPLINES_LINE);
+        e->setArrowHead();
+        e->setMargin(2);
+        for (int i = 0; i + 1 < edgeIds.size(); ++i) {
+            const auto& edge = _graph->getEdge(edgeIds[i]);
+            e->addConnectionPoint(_xs[edge.v], _ys[edge.v]);
+        }
+    }
+    diagram.render(outputFilePath);
 }
-#endif
 
 void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(const int start) {
     const int n = _initialNumVertices;
@@ -328,7 +271,6 @@ void DirectedGraphHierarchicalLayout::adjustCoordinatesByGraphRank() {
     }
 }
 
-#ifdef GRAPH_LAYOUT_ENABLE_SVG
 void DirectedGraphHierarchicalLayout::computeVertexSizes() {
     const int n = static_cast<int>(_graph->numVertices());
     const auto rankDir = _attributes.rankDir();
@@ -336,25 +278,24 @@ void DirectedGraphHierarchicalLayout::computeVertexSizes() {
     double vertexMargin = VertexPositioning::DEFAULT_VERTEX_MARGIN;
     vector vertexSizes(n, VertexPositioning::DEFAULT_VERTEX_SIZE);
     for (int u = 0; u < n; ++u) {
-        const auto label = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL);
-        const auto fontName = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_NAME);
-        const auto fontSize = _attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_SIZE);
-        const auto font = format("{} {}", fontName, fontSize);
-        if (!label.empty()) {
-            const auto [width, height] = DrawSVG::computeTextSize(label, font);
-            if (rankDir == AttributeRankDir::TOP_TO_BOTTOM || rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-                vertexSizes[u] = max(vertexSizes[u], max(width, height) + 15.0);
-                vertexMargin = max(vertexMargin, width + 15.0);
-                layerMargin = max(layerMargin, height + 15.0);
-            } else {
-                vertexSizes[u] = max(vertexSizes[u], max(width, height) + 15.0);
-                vertexMargin = max(vertexMargin, height + 15.0);
-                layerMargin = max(layerMargin, width + 15.0);
-            }
+        SVGNode node;
+        node.setShape(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE));
+        node.setLabel(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL));
+        node.setFontName(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_NAME));
+        node.setFontSize(stod(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_SIZE)));
+        node.adjustNodeSize();
+        const auto width = node.width();
+        const auto height = node.height();
+        vertexSizes[u] = max(vertexSizes[u], max(width, height));
+        if (rankDir == AttributeRankDir::TOP_TO_BOTTOM || rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
+            vertexMargin = max(vertexMargin, width);
+            layerMargin = max(layerMargin, height);
+        } else {
+            vertexMargin = max(vertexMargin, height);
+            layerMargin = max(layerMargin, width);
         }
     }
     _vertexPositioning.setVertexSizes(std::move(vertexSizes));
     _vertexPositioning.setVertexMargin(vertexMargin);
     _vertexPositioning.setLayerMargin(layerMargin);
 }
-#endif
