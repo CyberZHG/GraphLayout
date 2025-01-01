@@ -5,9 +5,9 @@ A library for visualizing directed graphs.
 
 [Demo](./demo)
 
-|        rankdir = TB         |        rankdir = LR         |
-|:---------------------------:|:---------------------------:|
-| ![](doc/img/example_tb.svg) | ![](doc/img/example_lr.svg) |
+|         rankdir = TB          |        rankdir = LR         |
+|:-----------------------------:|:---------------------------:|
+| ![](doc/image/example_tb.svg) | ![](doc/image/example_lr.svg) |
 
 ## Requirements
 
