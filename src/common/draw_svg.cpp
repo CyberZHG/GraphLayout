@@ -74,4 +74,24 @@ void DrawSVG::drawText(const double x, const double y, const std::string &text) 
     cairo_new_path(_cairo);
 }
 
+cairo_status_t dummy_cairo_write_func(void*, const unsigned char*, unsigned int) {
+    return CAIRO_STATUS_SUCCESS;
+}
+
+std::pair<double, double> DrawSVG::computeTextSize(const std::string &text, const std::string& font) {
+    const auto surface = cairo_svg_surface_create_for_stream(&dummy_cairo_write_func, nullptr, 400, 300);
+    const auto cr = cairo_create(surface);
+    PangoLayout* layout = pango_cairo_create_layout(cr);
+    pango_layout_set_text(layout, text.c_str(), -1);
+    PangoFontDescription* font_desc = pango_font_description_from_string(font.c_str());
+    pango_layout_set_font_description(layout, font_desc);
+    pango_font_description_free(font_desc);
+    PangoRectangle ink_rect, logical_rect;
+    pango_layout_get_extents(layout, &ink_rect, &logical_rect);
+    g_object_unref(layout);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    return std::make_pair(ink_rect.width, ink_rect.height);
+}
+
 #endif

@@ -6,8 +6,8 @@
 
 namespace graph_layout {
 
-    constexpr std::string ATTRIBUTE_KEY_BGCOLOR = "bgcolor";
-    constexpr std::string ATTRIBUTE_KEY_RANK = "rank";
+    constexpr std::string ATTRIBUTE_KEY_BG_COLOR = "bgcolor";
+    constexpr std::string ATTRIBUTE_KEY_RANK_DIR = "rankdir";
     constexpr std::string ATTRIBUTE_KEY_LABEL = "label";
     constexpr std::string ATTRIBUTE_KEY_SHAPE = "shape";
 
@@ -20,11 +20,11 @@ namespace graph_layout {
     };
 
     struct GraphAttributes {
-        Color bgcolor;
-        enum class Rank {
+        Color backgroundColor;
+        enum class RankDirection {
             TopToBottom, BottomToTop, LeftToRight, RightToLeft,
         };
-        Rank rank = Rank::TopToBottom;
+        RankDirection rankDirection = RankDirection::TopToBottom;
 
         static GraphAttributes stringMappingToAttributes(const std::unordered_map<std::string, std::string>& mapping);
     };
@@ -45,6 +45,32 @@ namespace graph_layout {
 
         static EdgeAttributes stringMappingToAttributes(const std::unordered_map<std::string, std::string>& mapping);
         static EdgeAttributes stringMappingToAttributes(const std::unordered_map<std::string, std::string>& mapping, const EdgeAttributes& defaultAttributes);
+    };
+
+    class Attributes {
+    public:
+        Attributes() = default;
+        ~Attributes() = default;
+
+        GraphAttributes& graphAttributes();
+        [[nodiscard]] const GraphAttributes& graphAttributes() const;
+
+        VertexAttributes& vertexAttributes();
+        [[nodiscard]] VertexAttributes vertexAttributes(int u) const;
+        void setVertexAttributes(int u, const std::string& key, const std::string& value);
+
+        EdgeAttributes& edgeAttributes();
+        [[nodiscard]] EdgeAttributes edgeAttributes(int u) const;
+        void setEdgeAttributes(int u, const std::string& key, const std::string& value);
+        void setEdgeAttributes(int u, const std::unordered_map<std::string, std::string>& mapping);
+        void transferEdgeAttributes(int u, int v);
+
+    private:
+        GraphAttributes _graphAttributes;
+        VertexAttributes _vertexGlobalAttributes;
+        std::unordered_map<int, std::unordered_map<std::string, std::string>> _vertexAttributes;
+        EdgeAttributes _edgeGlobalAttributes;
+        std::unordered_map<int, std::unordered_map<std::string, std::string>> _edgeAttributes;
     };
 
 }

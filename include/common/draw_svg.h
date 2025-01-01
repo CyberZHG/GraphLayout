@@ -19,6 +19,8 @@ namespace graph_layout {
         void drawLine(double x1, double y1, double x2, double y2, bool arrowhead = false) const;
         void drawText(double x, double y, const std::string& text) const;
 
+        [[nodiscard]] static std::pair<double, double> computeTextSize(const std::string& text, const std::string& font);
+
     private:
         double _width, _height;
 

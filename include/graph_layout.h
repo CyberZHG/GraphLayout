@@ -20,16 +20,7 @@ namespace graph_layout {
         void setGraph(const std::shared_ptr<SPDirectedGraph>& graph);
         [[nodiscard]] std::shared_ptr<SPDirectedGraph> graph() const;
 
-        GraphAttributes& graphAttributes();
-
-        VertexAttributes& vertexAttributes();
-        [[nodiscard]] VertexAttributes vertexAttributes(int u) const;
-        void setVertexAttributes(int u, const std::string& key, const std::string& value);
-
-        EdgeAttributes& edgeAttributes();
-        [[nodiscard]] EdgeAttributes edgeAttributes(int u) const;
-        void setEdgeAttributes(int u, const std::string& key, const std::string& value);
-        void setEdgeAttributes(int u, const std::unordered_map<std::string, std::string>& mapping);
+        Attributes& attributes();
 
         void setFeedbackArcsMethod(FeedbackArcsMethod method);
         void setLayerAssignmentMethod(LayerAssignmentMethod method);
@@ -52,11 +43,7 @@ namespace graph_layout {
     private:
         std::shared_ptr<SPDirectedGraph> _graph = nullptr;
 
-        GraphAttributes _graphAttributes;
-        VertexAttributes _vertexGlobalAttributes;
-        std::unordered_map<int, std::unordered_map<std::string, std::string>> _vertexAttributes;
-        EdgeAttributes _edgeGlobalAttributes;
-        std::unordered_map<int, std::unordered_map<std::string, std::string>> _edgeAttributes;
+        Attributes _attributes;
 
         FeedbackArcsFinder _feedbackArcsFinder;
         LayerAssignment _layerAssignment;

@@ -20,42 +20,8 @@ std::shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::graph() const 
     return _graph;
 }
 
-GraphAttributes& DirectedGraphHierarchicalLayout::graphAttributes() {
-    return _graphAttributes;
-}
-
-VertexAttributes& DirectedGraphHierarchicalLayout::vertexAttributes() {
-    return _vertexGlobalAttributes;
-}
-
-VertexAttributes DirectedGraphHierarchicalLayout::vertexAttributes(const int u) const {
-    if (const auto it = _vertexAttributes.find(u); it != _vertexAttributes.end()) {
-        return VertexAttributes::stringMappingToAttributes(it->second, _vertexGlobalAttributes);
-    }
-    return _vertexGlobalAttributes;
-}
-
-void DirectedGraphHierarchicalLayout::setVertexAttributes(const int u, const std::string &key, const std::string &value) {
-    _vertexAttributes[u][key] = value;
-}
-
-EdgeAttributes& DirectedGraphHierarchicalLayout::edgeAttributes() {
-    return _edgeGlobalAttributes;
-}
-
-EdgeAttributes DirectedGraphHierarchicalLayout::edgeAttributes(const int u) const {
-    if (const auto it = _edgeAttributes.find(u); it != _edgeAttributes.end()) {
-        return EdgeAttributes::stringMappingToAttributes(it->second, _edgeGlobalAttributes);
-    }
-    return _edgeGlobalAttributes;
-}
-
-void DirectedGraphHierarchicalLayout::setEdgeAttributes(const int u, const std::string &key, const std::string &value) {
-    _edgeAttributes[u][key] = value;
-}
-
-void DirectedGraphHierarchicalLayout::setEdgeAttributes(const int u, const unordered_map<string, string>& mapping) {
-    _edgeAttributes[u] = mapping;
+Attributes & DirectedGraphHierarchicalLayout::attributes() {
+    return _attributes;
 }
 
 void DirectedGraphHierarchicalLayout::setFeedbackArcsMethod(const FeedbackArcsMethod method) {
@@ -144,11 +110,10 @@ std::pair<std::vector<double>, std::vector<double>> DirectedGraphHierarchicalLay
                 const int midId = newEdgeIds[newEdgeIds.size() / 2];
                 for (const auto& edgeId : newEdgeIds) {
                     if (edgeId == midId) {
-                        if (_edgeAttributes.contains(originalEdge.id)) {
-                            _edgeAttributes[midId] = _edgeAttributes[originalEdge.id];
-                        }
+                        const auto originalAttributes = _attributes.edgeAttributes(originalEdge.id);
+                        _attributes.transferEdgeAttributes(originalEdge.id, midId);
                     } else {
-                        setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, "");
+                        _attributes.setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, "");
                     }
                 }
             }
@@ -181,17 +146,17 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
     for (const auto& [id, u, v] : _graph->edges()) {
         outEdges[u].insert(v);
         if (u == v) {
-            switch (_graphAttributes.rank) {
-                case GraphAttributes::Rank::TopToBottom:
+            switch (_attributes.graphAttributes().rankDirection) {
+                case GraphAttributes::RankDirection::TopToBottom:
                     minX = min(minX, _xs[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
                     break;
-                case GraphAttributes::Rank::BottomToTop:
+                case GraphAttributes::RankDirection::BottomToTop:
                     maxX = max(maxX, _xs[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
                     break;
-                case GraphAttributes::Rank::LeftToRight:
+                case GraphAttributes::RankDirection::LeftToRight:
                     maxY = max(maxY, _ys[u] + _vertexPositioning.vertexSizeAt(u) * 2.5);
                     break;
-                case GraphAttributes::Rank::RightToLeft:
+                case GraphAttributes::RankDirection::RightToLeft:
                     minY = min(minY, _ys[u] - _vertexPositioning.vertexSizeAt(u) * 2.5);
                     break;
             }
@@ -202,12 +167,12 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
     const double shiftX = (margin + abs(minX)) * scale;
     const double shiftY = (margin + abs(minY)) * scale;
     const auto svg = DrawSVG(outputFilePath, width, height);
-    if (!_graphAttributes.bgcolor.isNone()) {
-        auto [red, green, blue] = _graphAttributes.bgcolor.toRGB();
+    if (!_attributes.graphAttributes().backgroundColor.isNone()) {
+        auto [red, green, blue] = _attributes.graphAttributes().backgroundColor.toRGB();
         svg.drawBackground(red, green, blue);
     }
     for (int u = 0; u < _initialNumVertices; ++u) {
-        const VertexAttributes attributes = vertexAttributes(u);
+        const VertexAttributes attributes = _attributes.vertexAttributes(u);
         const double x = _xs[u] * scale + shiftX;
         const double y = _ys[u] * scale + shiftY;
         const double r = _vertexPositioning.vertexSizeAt(u) * 0.5 * scale;
@@ -223,7 +188,7 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
     }
 
     for (const auto& edge : _graph->edges()) {
-        const EdgeAttributes attributes = edgeAttributes(edge.id);
+        const EdgeAttributes attributes = _attributes.edgeAttributes(edge.id);
         if (edge.u != edge.v) {
             const double edgeLen = sqrt((_xs[edge.u] - _xs[edge.v]) * (_xs[edge.u] - _xs[edge.v]) + (_ys[edge.u] - _ys[edge.v]) * (_ys[edge.u] - _ys[edge.v]));
             double x1, y1, x2, y2;
@@ -291,17 +256,17 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
             }
         } else {
             double dx = 0, dy = 0;
-            switch (_graphAttributes.rank) {
-            case GraphAttributes::Rank::TopToBottom:
+            switch (_attributes.graphAttributes().rankDirection) {
+            case GraphAttributes::RankDirection::TopToBottom:
                 dy = 1.0;
                 break;
-            case GraphAttributes::Rank::BottomToTop:
+            case GraphAttributes::RankDirection::BottomToTop:
                 dy = -1.0;
                 break;
-            case GraphAttributes::Rank::LeftToRight:
+            case GraphAttributes::RankDirection::LeftToRight:
                 dx = 1.0;
                 break;
-            case GraphAttributes::Rank::RightToLeft:
+            case GraphAttributes::RankDirection::RightToLeft:
                 dx = -1.0;
                 break;
             }
@@ -339,13 +304,13 @@ void DirectedGraphHierarchicalLayout::drawSVG(const std::string& outputFilePath)
 void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(const int start) {
     const int n = _initialNumVertices;
     for (int i = 0; i < n; ++i) {
-        setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, format("{}", start + i));
+        _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, format("{}", start + i));
     }
 }
 
 void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vertexLabels) {
     for (int i = 0; i < vertexLabels.size(); ++i) {
-        setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, vertexLabels[i]);
+        _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, vertexLabels[i]);
     }
 }
 
@@ -362,17 +327,17 @@ bool DirectedGraphHierarchicalLayout::isVirtualVertex(const int u) const {
  * The default rank is top to bottom.
  */
 void DirectedGraphHierarchicalLayout::adjustCoordinatesByGraphRank() {
-    if (_graphAttributes.rank == GraphAttributes::Rank::TopToBottom) {
+    if (_attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::TopToBottom) {
         return;
     }
-    if (_graphAttributes.rank == GraphAttributes::Rank::BottomToTop || _graphAttributes.rank == GraphAttributes::Rank::RightToLeft) {
+    if (_attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::BottomToTop || _attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::RightToLeft) {
         const auto yMin = ranges::min(_ys);
         const auto yMax = ranges::max(_ys);
         for (auto& y : _ys) {
             y = yMax - y + yMin;
         }
     }
-    if (_graphAttributes.rank == GraphAttributes::Rank::LeftToRight || _graphAttributes.rank == GraphAttributes::Rank::RightToLeft) {
+    if (_attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::LeftToRight || _attributes.graphAttributes().rankDirection == GraphAttributes::RankDirection::RightToLeft) {
         swap_ranges(_xs.begin(), _xs.end(), _ys.begin());
     }
 }
