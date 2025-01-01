@@ -165,6 +165,14 @@ void DirectedGraphHierarchicalLayout::initializeVertexLabelsWithNumericalValues(
     }
 }
 
+void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vertexLabels) {
+    if (_initialNumVertices != vertexLabels.size()) {
+        throw runtime_error(format("The length of input vertex labels {} "
+                                   "does not match the number of vertices {}.", vertexLabels.size(), _initialNumVertices));
+    }
+    _vertexLabels = vertexLabels;
+}
+
 /** A vertex is virtual if the vertex ID is greater than the maximum vertex ID in the beginning graph.
  *
  * @param u A vertex ID.

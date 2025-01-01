@@ -27,6 +27,7 @@ namespace graph_layout {
          * @param start The start index.
          */
         void initializeVertexLabelsWithNumericalValues(int start = 1);
+        void setVertexLabels(const std::vector<std::string> &vertexLabels);
 
     private:
         std::shared_ptr<SPDirectedGraph> _graph = nullptr;

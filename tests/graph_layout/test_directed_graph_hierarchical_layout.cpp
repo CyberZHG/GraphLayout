@@ -45,6 +45,13 @@ TEST(TestDirectedGraphHierarchialLayout, TwoVerticesCycle) {
     EXPECT_EQ(graph->edges()[1].v, 0);
 }
 
+TEST(TestDirectedGraphHierarchialLayout, SetVertexLabelsRuntimeError) {
+    const auto graph = make_shared<SPDirectedGraph>(3);
+    DirectedGraphHierarchicalLayout layout;
+    layout.setGraph(graph);
+    EXPECT_THROW(layout.setVertexLabels({"A", "B", "C", "D"}), runtime_error);
+}
+
 TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     const auto graph = make_shared<SPDirectedGraph>(4);
     graph->addEdge(0, 1); graph->addEdge(0, 2); graph->addEdge(0, 3);
@@ -56,7 +63,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase1) {
     EXPECT_EQ(xs, vector({UNIT_SIZE * 1.5, 0.0, UNIT_SIZE, UNIT_SIZE * 1.5, UNIT_SIZE * 2, UNIT_SIZE * 3}));
     EXPECT_EQ(ys, vector({0.0, UNIT_SIZE, UNIT_SIZE, UNIT_SIZE * 2, UNIT_SIZE, UNIT_SIZE}));
     EXPECT_EQ(graph->numEdges(), 8);
-    layout.initializeVertexLabelsWithNumericalValues();
+    layout.setVertexLabels({"A", "B", "C", "D"});
     layout.drawSVG("test_directed_graph_hierarchical_layout__special_case_1.svg");
 }
 
