@@ -28,3 +28,4 @@ CTestTestfile.cmake
 *.exe
 *.out
 *.log
+dist

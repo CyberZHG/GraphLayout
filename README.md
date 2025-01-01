@@ -1,14 +1,18 @@
 Graph Layout
 ============
 
+[![C++ Unit Tests](https://github.com/CyberZHG/GraphLayout/actions/workflows/cpp-unit-test.yml/badge.svg)](https://github.com/CyberZHG/GraphLayout/actions/workflows/cpp-unit-test.yml)
+[![Python Build & Test](https://github.com/CyberZHG/GraphLayout/actions/workflows/python-build-test.yml/badge.svg)](https://github.com/CyberZHG/GraphLayout/actions/workflows/python-build-test.yml)
+[![WASM Build & Test](https://github.com/CyberZHG/GraphLayout/actions/workflows/wasm-build-test.yml/badge.svg)](https://github.com/CyberZHG/GraphLayout/actions/workflows/wasm-build-test.yml)
+
 A library for visualizing directed graphs. 
 
 [Demo](./demo)
 
 |         rank dir = TB          |         rank dir = LR          |
 |:------------------------------:|:------------------------------:|
-| ![](doc/image/example1_tb.svg) | ![](doc/image/example1_lr.svg) |
-| ![](doc/image/example2_tb.svg) | ![](doc/image/example2_lr.svg) |
+| ![](docs/images/example1_tb.svg) | ![](docs/images/example1_lr.svg) |
+| ![](docs/images/example2_tb.svg) | ![](docs/images/example2_lr.svg) |
 
 ## Requirements
 
