@@ -29,5 +29,5 @@ sudo apt install libcairo2-dev libpango1.0-dev pkg-config
 Add the following to CMake options to enable tests:
 
 ```bash
--DGRAPH_LAYOUT_BUILD_TESTS=ON
+-DGRAPH_LAYOUT_ENABLE_TESTS=ON
 ```

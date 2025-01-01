@@ -171,7 +171,7 @@ TEST(TestCrossMinimizationNumCross, RandomTwoLayers) {
     }
 }
 
-#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
+#ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS
 TEST(TestCrossMinimizationNumCross, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(64);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);

@@ -1,6 +1,8 @@
 #include "common/graph_def.h"
 
+#include <algorithm>
 #include <ranges>
+#include <functional>
 using namespace std;
 using namespace graph_layout;
 

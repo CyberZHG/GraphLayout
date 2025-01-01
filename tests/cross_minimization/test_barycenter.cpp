@@ -33,7 +33,7 @@ TEST(TestCrossMinimizationBaryCenter, SpecialCase1) {
     EXPECT_EQ(CrossMinimization::computeNumCross(graph, layering), 0);
 }
 
-#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
+#ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS
 TEST(TestCrossMinimizationBaryCenter, RandomBaryCenter) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);

@@ -168,7 +168,7 @@ TEST(TestVertexPositioningHorizontalCompaction, SpecialCase104) {
     checkMargins(layering, vertexPositioning, positions);
 }
 
-#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
+#ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS
 TEST(TestVertexPositioningHorizontalCompaction, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);

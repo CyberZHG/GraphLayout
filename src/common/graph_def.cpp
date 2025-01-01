@@ -4,6 +4,8 @@
 #include <queue>
 #include <random>
 #include <iostream>
+#include <ranges>
+#include <algorithm>
 using namespace std;
 using namespace graph_layout;
 

@@ -92,7 +92,7 @@ TEST(TestFeedbackArcsEades93, SpecialCase2) {
     EXPECT_EQ(feedbackArcs, unordered_set<int>({}));
 }
 
-#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
+#ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS
 TEST(TestFeedbackArcsEades93, Random) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);

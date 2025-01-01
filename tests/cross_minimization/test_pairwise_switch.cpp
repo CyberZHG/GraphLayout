@@ -45,7 +45,7 @@ TEST(TestCrossMinimizationPairwiseSwitch, SpecialCase2) {
     EXPECT_EQ(CrossMinimization::computeNumCross(graph, layering), 1);
 }
 
-#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
+#ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS
 TEST(TestCrossMinimizationPairwiseSwitch, RandomPairwiseSwitch) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     const FeedbackArcsFinder feedbackArcsFinder(FeedbackArcsMethod::EADES_93);

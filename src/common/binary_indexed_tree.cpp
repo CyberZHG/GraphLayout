@@ -1,4 +1,7 @@
 #include "common/binary_indexed_tree.h"
+
+#include <ranges>
+#include <algorithm>
 using namespace std;
 using namespace graph_layout;
 

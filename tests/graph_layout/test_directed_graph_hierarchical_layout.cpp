@@ -1,5 +1,6 @@
 #include <random>
 #include <unordered_set>
+#include <format>
 #include <gtest/gtest.h>
 #include "graph_layout.h"
 using namespace std;
@@ -144,7 +145,7 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
     test(AttributeRankDir::RIGHT_TO_LEFT);
 }
 
-#ifdef GRAPH_LAYOUT_BUILD_RANDOM_TESTS
+#ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS
 TEST(TestDirectedGraphHierarchialLayout, RandomNoCheck) {
     const RandomSimpleDirectedGraphGenerator graphGen(128);
     for (size_t caseIndex = 0; caseIndex < 128; ++caseIndex) {

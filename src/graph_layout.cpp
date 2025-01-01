@@ -2,6 +2,9 @@
 
 #include <format>
 #include <fstream>
+#include <cmath>
+#include <ranges>
+#include <algorithm>
 
 #include "svg_diagram.h"
 using namespace std;

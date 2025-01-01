@@ -6,6 +6,7 @@
 #include <iostream>
 #include <ostream>
 #include <ranges>
+#include <stack>
 using namespace std;
 using namespace graph_layout;
 

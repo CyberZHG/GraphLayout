@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <utility>
+#include <ranges>
 using namespace std;
 using namespace graph_layout;
 

@@ -3,6 +3,7 @@
 
 #include "common/graph_def.h"
 #include "common/binary_indexed_tree.h"
+#include <functional>
 
 namespace graph_layout {
 

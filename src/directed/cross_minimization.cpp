@@ -2,6 +2,7 @@
 
 #include <ranges>
 #include <set>
+#include <algorithm>
 using namespace std;
 using namespace graph_layout;
 

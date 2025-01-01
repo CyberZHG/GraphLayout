@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(GRAPH_LAYOUT_BUILD_TESTS "Build tests" OFF)
-option(GRAPH_LAYOUT_BUILD_RANDOM_TESTS "Build random tests" OFF)
+option(GRAPH_LAYOUT_ENABLE_TESTS "Build tests" OFF)
+option(GRAPH_LAYOUT_ENABLE_RANDOM_TESTS "Build random tests" OFF)
 option(GRAPH_LAYOUT_ENABLE_STRICT "Use strict compile options" OFF)
 option(GRAPH_LAYOUT_ENABLE_COVERAGE "Enable coverage reporting" OFF)
 option(GRAPH_LAYOUT_BIND_PYTHON "Enable python binding" OFF)
@@ -21,7 +21,7 @@ include(FetchContent)
 
 FetchContent_Declare(
         SVGDiagram
-        GIT_REPOSITORY git@github.com:CyberZHG/SVGDiagram.git
+        GIT_REPOSITORY https://github.com/CyberZHG/SVGDiagram.git
         GIT_TAG v1.2.0
 )
 
@@ -76,7 +76,7 @@ target_link_libraries(GraphLayout
         PRIVATE SVGDiagram
 )
 
-if(GRAPH_LAYOUT_BUILD_TESTS)
+if(GRAPH_LAYOUT_ENABLE_TESTS)
     enable_testing()
 
     FetchContent_Declare(
@@ -107,9 +107,9 @@ if(GRAPH_LAYOUT_BUILD_TESTS)
             PRIVATE gtest gtest_main
     )
 
-    if (GRAPH_LAYOUT_BUILD_RANDOM_TESTS)
+    if (GRAPH_LAYOUT_ENABLE_RANDOM_TESTS)
         target_compile_definitions(runTests
-                PRIVATE GRAPH_LAYOUT_BUILD_RANDOM_TESTS=ON
+                PRIVATE GRAPH_LAYOUT_ENABLE_RANDOM_TESTS=ON
         )
     endif ()
 
