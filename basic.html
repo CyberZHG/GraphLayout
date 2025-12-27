@@ -25,6 +25,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Graph Attributes" href="graph_attr.html" />
     <link rel="prev" title="Installation" href="install.html" /> 
 </head>
 
@@ -50,7 +51,11 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Concepts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#directed-hierarchical-layout">Directed Hierarchical Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="graph_attr.html">Graph Attributes</a></li>
 </ul>
 
         </div>
@@ -80,6 +85,8 @@
              
   <section id="basic-concepts">
 <h1>Basic Concepts<a class="headerlink" href="#basic-concepts" title="Permalink to this heading"></a></h1>
+<section id="directed-hierarchical-layout">
+<h2>Directed Hierarchical Layout<a class="headerlink" href="#directed-hierarchical-layout" title="Permalink to this heading"></a></h2>
 <p>The hierarchical layout for directed graphs attempts to minimize edge lengths and crossings. For each layout, a graph must first be created, with the number of vertices specified at creation time. Vertex indices start from 0, and each edge connects two vertices. You must call the layout function before generating the SVG.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
@@ -146,6 +153,7 @@ C++</label><div class="sd-tab-content docutils">
 <p>The generated SVG:</p>
 <p><img alt="" src="_images/directed.svg" /></p>
 </section>
+</section>
 
 
            </div>
@@ -157,6 +165,7 @@ C++</label><div class="sd-tab-content docutils">
 
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="graph_attr.html" class="btn btn-neutral float-right" title="Graph Attributes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

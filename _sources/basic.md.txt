@@ -1,6 +1,8 @@
 Basic Concepts
 ==============
 
+## Directed Hierarchical Layout
+
 The hierarchical layout for directed graphs attempts to minimize edge lengths and crossings. For each layout, a graph must first be created, with the number of vertices specified at creation time. Vertex indices start from 0, and each edge connects two vertices. You must call the layout function before generating the SVG.
 
 `````{tab-set}
