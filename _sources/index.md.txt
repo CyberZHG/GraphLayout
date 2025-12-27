@@ -11,4 +11,5 @@ install
 basic
 graph_attr
 vertex_attr
+edge_attr
 ```
