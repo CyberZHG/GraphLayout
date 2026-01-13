@@ -53,13 +53,13 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase2) {
             }
         }
         DirectedGraphHierarchicalLayout layout;
-        layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
+        layout.attributes().setGraphAttributes(ATTR_KEY_BG_COLOR, "white");
         layout.attributes().setRankDir(rankDir);
-        layout.attributes().setVertexAttributes(14, ATTRIBUTE_KEY_SHAPE, "doublecircle");
-        layout.attributes().setVertexAttributes(16, ATTRIBUTE_KEY_SHAPE, "doublecircle");
-        layout.attributes().setVertexAttributes(19, ATTRIBUTE_KEY_SHAPE, "doublecircle");
-        layout.attributes().setVertexAttributes(22, ATTRIBUTE_KEY_SHAPE, "doublecircle");
-        layout.attributes().setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "边");
+        layout.attributes().setVertexAttributes(14, ATTR_KEY_SHAPE, "doublecircle");
+        layout.attributes().setVertexAttributes(16, ATTR_KEY_SHAPE, "doublecircle");
+        layout.attributes().setVertexAttributes(19, ATTR_KEY_SHAPE, "doublecircle");
+        layout.attributes().setVertexAttributes(22, ATTR_KEY_SHAPE, "doublecircle");
+        layout.attributes().setEdgeAttributes(5, ATTR_KEY_LABEL, "边");
         layout.setGraph(graph);
         layout.initVertexLabelsWithNumericalValues();
         layout.layoutGraph();
@@ -85,20 +85,20 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase3) {
     }
     DirectedGraphHierarchicalLayout layout;
     layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
-        layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
+        layout.attributes().setGraphAttributes(ATTR_KEY_BG_COLOR, "white");
     layout.attributes().setRankDir(AttributeRankDir::LEFT_TO_RIGHT);
-    layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
+    layout.attributes().setVertexAttributes(0, ATTR_KEY_LABEL, "start");
     for (int u = 1; u < 12; ++u) {
-        layout.attributes().setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u - 1));
+        layout.attributes().setVertexAttributes(u, ATTR_KEY_LABEL, format("{}", u - 1));
     }
-    layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, AttributeShape::NONE);
-    layout.attributes().setVertexAttributes(11, ATTRIBUTE_KEY_SHAPE, AttributeShape::DOUBLE_CIRCLE);
+    layout.attributes().setVertexAttributes(0, ATTR_KEY_SHAPE, AttributeShape::NONE);
+    layout.attributes().setVertexAttributes(11, ATTR_KEY_SHAPE, AttributeShape::DOUBLE_CIRCLE);
     for (const auto& [id, u, v] : graph->edges()) {
         if (u == 5 && v == 6) {
-            layout.attributes().setEdgeAttributes(id, ATTRIBUTE_KEY_LABEL, "a");
+            layout.attributes().setEdgeAttributes(id, ATTR_KEY_LABEL, "a");
         }
         if (u == 8 && v == 9) {
-            layout.attributes().setEdgeAttributes(id, ATTRIBUTE_KEY_LABEL, "b");
+            layout.attributes().setEdgeAttributes(id, ATTR_KEY_LABEL, "b");
         }
     }
     layout.setGraph(graph);
@@ -116,21 +116,21 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
         graph->addEdge(4, 4);
         DirectedGraphHierarchicalLayout layout;
         layout.setFeedbackArcsMethod(FeedbackArcsMethod::MIN_ID);
-        layout.attributes().setGraphAttributes(ATTRIBUTE_KEY_BG_COLOR, "white");
+        layout.attributes().setGraphAttributes(ATTR_KEY_BG_COLOR, "white");
         layout.attributes().setRankDir(rankDir);
-        layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_LABEL, "start");
+        layout.attributes().setVertexAttributes(0, ATTR_KEY_LABEL, "start");
         for (int u = 1; u <= 4; ++u) {
-            layout.attributes().setVertexAttributes(u, ATTRIBUTE_KEY_LABEL, format("{}", u));
+            layout.attributes().setVertexAttributes(u, ATTR_KEY_LABEL, format("{}", u));
         }
-        layout.attributes().setVertexAttributes(0, ATTRIBUTE_KEY_SHAPE, "none");
-        layout.attributes().setVertexAttributes(4, ATTRIBUTE_KEY_SHAPE, "doublecircle");
-        layout.attributes().setEdgeAttributes(1, ATTRIBUTE_KEY_LABEL, "b");
-        layout.attributes().setEdgeAttributes(2, ATTRIBUTE_KEY_LABEL, "a");
-        layout.attributes().setEdgeAttributes(3, ATTRIBUTE_KEY_LABEL, "a");
-        layout.attributes().setEdgeAttributes(4, ATTRIBUTE_KEY_LABEL, "b");
-        layout.attributes().setEdgeAttributes(5, ATTRIBUTE_KEY_LABEL, "a");
-        layout.attributes().setEdgeAttributes(6, ATTRIBUTE_KEY_LABEL, "b");
-        layout.attributes().setEdgeAttributes(7, ATTRIBUTE_KEY_LABEL, "a,b");
+        layout.attributes().setVertexAttributes(0, ATTR_KEY_SHAPE, "none");
+        layout.attributes().setVertexAttributes(4, ATTR_KEY_SHAPE, "doublecircle");
+        layout.attributes().setEdgeAttributes(1, ATTR_KEY_LABEL, "b");
+        layout.attributes().setEdgeAttributes(2, ATTR_KEY_LABEL, "a");
+        layout.attributes().setEdgeAttributes(3, ATTR_KEY_LABEL, "a");
+        layout.attributes().setEdgeAttributes(4, ATTR_KEY_LABEL, "b");
+        layout.attributes().setEdgeAttributes(5, ATTR_KEY_LABEL, "a");
+        layout.attributes().setEdgeAttributes(6, ATTR_KEY_LABEL, "b");
+        layout.attributes().setEdgeAttributes(7, ATTR_KEY_LABEL, "a,b");
         layout.setGraph(graph);
         layout.layoutGraph();
         layout.render(format("test_directed_graph_hierarchical_layout__special_case_4__{}.svg", rankDir));
@@ -139,6 +139,25 @@ TEST(TestDirectedGraphHierarchialLayout, SpecialCase4) {
     test(AttributeRankDir::BOTTOM_TO_TOP);
     test(AttributeRankDir::LEFT_TO_RIGHT);
     test(AttributeRankDir::RIGHT_TO_LEFT);
+}
+
+TEST(TestDirectedGraphHierarchialLayout, Monospace) {
+    const auto graph = make_shared<SPDirectedGraph>(4);
+    graph->addEdge(0, 1); graph->addEdge(0, 2); graph->addEdge(0, 3);
+    graph->addEdge(1, 3); graph->addEdge(2, 3);
+    graph->addEdge(3, 0);
+    DirectedGraphHierarchicalLayout layout;
+    layout.attributes().setVertexDefaultShape(AttributeShape::RECORD);
+    layout.attributes().setVertexDefaultMonospace();
+    layout.attributes().setEdgeDefaultMonospace();
+    layout.attributes().setEdgeTailLabel(0, "tail");
+    layout.attributes().setEdgeHeadLabel(1, "head");
+    layout.attributes().setEdgeLabelDistance(0, 1.0);
+    layout.setGraph(graph);
+    layout.setVertexLabels({"A", "BB", "C|C|C", "{DD|DD}"});
+    layout.layoutGraph();
+    EXPECT_EQ(graph->numEdges(), 8);
+    layout.render("test_directed_graph_hierarchical_layout__monospace.svg");
 }
 
 #ifdef GRAPH_LAYOUT_ENABLE_RANDOM_TESTS

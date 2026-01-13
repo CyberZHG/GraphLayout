@@ -57,6 +57,12 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .constructor<>()
         .function("setRankDir", &Attributes::setRankDir)
         .function("setVertexShape", &Attributes::setVertexShape)
+        .function("setEdgeTailLabel", &Attributes::setEdgeTailLabel)
+        .function("setEdgeHeadLabel", &Attributes::setEdgeHeadLabel)
+        .function("setEdgeLabelDistance", &Attributes::setEdgeLabelDistance)
+        .function("setVertexDefaultShape", &Attributes::setVertexDefaultShape)
+        .function("setVertexDefaultMonospace", &Attributes::setVertexDefaultMonospace)
+        .function("setEdgeDefaultMonospace", &Attributes::setEdgeDefaultMonospace)
     ;
     class_<DirectedGraphHierarchicalLayout>("DirectedGraphHierarchicalLayout")
         .constructor<>()

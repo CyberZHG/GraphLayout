@@ -73,6 +73,9 @@ declare module 'sp-graph-layout' {
         constructor()
         setRankDir(rankDir: string): void
         setVertexShape(u: number, shape: string): void
+        setEdgeTailLabel(edgeId: number, label: string): void
+        setEdgeHeadLabel(edgeId: number, label: string): void
+        setEdgeLabelDistance(edgeId: number, scale: number): void
     }
 
     export class DirectedGraphHierarchicalLayout {

@@ -153,7 +153,7 @@ string DirectedGraphHierarchicalLayout::render() const {
     }
     const int n = static_cast<int>(_graph->numVertices());
     SVGDiagram diagram;
-    if (const auto bgColor = _attributes.graphAttributes(ATTRIBUTE_KEY_BG_COLOR); !bgColor.empty()) {
+    if (const auto bgColor = _attributes.graphAttributes(ATTR_KEY_BG_COLOR); !bgColor.empty()) {
         diagram.setBackgroundColor(bgColor);
     }
     unordered_map<int, unordered_set<int>> outEdges;
@@ -167,8 +167,8 @@ string DirectedGraphHierarchicalLayout::render() const {
         const auto node = diagram.addNode(nodeIds[u]);
         node->setCenter(_xs[u], _ys[u]);
         if (u < _initialNumVertices) {
-            node->setShape(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE));
-            node->setLabel(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL));
+            node->setShape(_attributes.vertexAttributes(u, ATTR_KEY_SHAPE));
+            node->setLabel(_attributes.vertexAttributes(u, ATTR_KEY_LABEL));
         } else {
             node->setShape(string("none"));
             node->setMargin(0, 0);
@@ -178,9 +178,17 @@ string DirectedGraphHierarchicalLayout::render() const {
         if (isVirtualVertex(edge.u) || isVirtualVertex(edge.v)) {
             continue;
         }
-        const auto label = _attributes.edgeAttributes(edge.id, ATTRIBUTE_KEY_LABEL);
         const auto e = diagram.addEdge(nodeIds[edge.u], nodeIds[edge.v]);
-        e->setLabel(label);
+        if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_LABEL); !label.empty()) {
+            e->setLabel(label);
+        }
+        if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_TAIL_LABEL); !label.empty()) {
+            e->setTailLabel(label);
+        }
+        if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_HEAD_LABEL); !label.empty()) {
+            e->setHeadLabel(label);
+        }
+        e->setLabelDistance(stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_LABEL_DISTANCE)));
         e->setMargin(2);
         e->setArrowHead();
         if (edge.u != edge.v) {
@@ -217,7 +225,7 @@ string DirectedGraphHierarchicalLayout::render() const {
     for (const auto& virtualEdge : _virtualEdges) {
         const auto& originalEdge = virtualEdge.originalEdge;
         const auto& edgeIds = virtualEdge.virtualEdgeIds;
-        const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTRIBUTE_KEY_LABEL);
+        const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTR_KEY_LABEL);
         const auto e = diagram.addEdge(nodeIds[originalEdge.u], nodeIds[originalEdge.v]);
         e->setLabel(label);
         e->setSplines(SVGEdge::SPLINES_LINE);
@@ -240,18 +248,18 @@ void DirectedGraphHierarchicalLayout::render(const string& filePath) const {
 void DirectedGraphHierarchicalLayout::initVertexLabelsWithNumericalValues(const int start) {
     const int n = _initialNumVertices;
     for (int i = 0; i < n; ++i) {
-        _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, format("{}", start + i));
+        _attributes.setVertexAttributes(i, ATTR_KEY_LABEL, format("{}", start + i));
     }
 }
 
 void DirectedGraphHierarchicalLayout::setVertexLabels(const vector<string> &vertexLabels) {
     for (int i = 0; i < static_cast<int>(vertexLabels.size()); ++i) {
-        _attributes.setVertexAttributes(i, ATTRIBUTE_KEY_LABEL, vertexLabels[i]);
+        _attributes.setVertexAttributes(i, ATTR_KEY_LABEL, vertexLabels[i]);
     }
 }
 
 void DirectedGraphHierarchicalLayout::setEdgeLabel(const int edgeId, const string& label) {
-    _attributes.setEdgeAttributes(edgeId, ATTRIBUTE_KEY_LABEL, label);
+    _attributes.setEdgeAttributes(edgeId, ATTR_KEY_LABEL, label);
 }
 
 /** A vertex is virtual if the vertex ID is greater than the maximum vertex ID in the beginning graph.
@@ -291,10 +299,10 @@ void DirectedGraphHierarchicalLayout::computeVertexSizes() {
     vector vertexSizes(n, VertexPositioning::DEFAULT_VERTEX_SIZE);
     for (int u = 0; u < n; ++u) {
         SVGNode node;
-        node.setShape(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_SHAPE));
-        node.setLabel(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_LABEL));
-        node.setFontName(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_NAME));
-        node.setFontSize(stod(_attributes.vertexAttributes(u, ATTRIBUTE_KEY_FONT_SIZE)));
+        node.setShape(_attributes.vertexAttributes(u, ATTR_KEY_SHAPE));
+        node.setLabel(_attributes.vertexAttributes(u, ATTR_KEY_LABEL));
+        node.setFontName(_attributes.vertexAttributes(u, ATTR_KEY_FONT_NAME));
+        node.setFontSize(stod(_attributes.vertexAttributes(u, ATTR_KEY_FONT_SIZE)));
         node.adjustNodeSize();
         const auto width = node.width();
         const auto height = node.height();

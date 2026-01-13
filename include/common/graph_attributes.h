@@ -6,14 +6,17 @@
 
 namespace graph_layout {
 
-    constexpr std::string ATTRIBUTE_KEY_BG_COLOR = "bgcolor";
-    constexpr std::string ATTRIBUTE_KEY_RANK_DIR = "rankdir";
-    constexpr std::string ATTRIBUTE_KEY_LABEL = "label";
-    constexpr std::string ATTRIBUTE_KEY_SHAPE = "shape";
-    constexpr std::string ATTRIBUTE_KEY_FONT_NAME = "fontname";
-    constexpr std::string ATTRIBUTE_KEY_FONT_SIZE = "fontsize";
-    constexpr std::string ATTRIBUTE_KEY_WIDTH = "width";
-    constexpr std::string ATTRIBUTE_KEY_HEIGHT = "height";
+    constexpr std::string_view ATTR_KEY_BG_COLOR = "bgcolor";
+    constexpr std::string_view ATTR_KEY_RANK_DIR = "rankdir";
+    constexpr std::string_view ATTR_KEY_LABEL = "label";
+    constexpr std::string_view ATTR_KEY_SHAPE = "shape";
+    constexpr std::string_view ATTR_KEY_FONT_NAME = "fontname";
+    constexpr std::string_view ATTR_KEY_FONT_SIZE = "fontsize";
+    constexpr std::string_view ATTR_KEY_WIDTH = "width";
+    constexpr std::string_view ATTR_KEY_HEIGHT = "height";
+    constexpr std::string_view ATTR_KEY_TAIL_LABEL = "taillabel";
+    constexpr std::string_view ATTR_KEY_HEAD_LABEL = "headlabel";
+    constexpr std::string_view ATTR_KEY_LABEL_DISTANCE = "labeldistance";
 
     class Attribute {
     public:
@@ -62,34 +65,45 @@ namespace graph_layout {
         Attributes() = default;
         ~Attributes() = default;
 
-        [[nodiscard]] std::string graphAttributes(const std::string& key) const;
-        void setGraphAttributes(const std::string& key, const std::string& value);
-        void setGraphAttributes(const std::unordered_map<std::string, std::string> &attributes);
+        [[nodiscard]] std::string graphAttributes(const std::string_view& key) const;
+        void setGraphAttributes(const std::string_view& key, const std::string& value);
+        void setGraphAttributes(const std::unordered_map<std::string_view, std::string> &attributes);
 
-        [[nodiscard]] std::string vertexAttributes(int u, const std::string& key) const;
-        void setVertexAttributes(int u, const std::string& key, const std::string& value);
-        void setVertexAttributes(int u, const std::unordered_map<std::string, std::string> &attributes);
+        [[nodiscard]] std::string vertexAttributes(int u, const std::string_view& key) const;
+        void setVertexAttributes(int u, const std::string_view& key, const std::string& value);
+        void setVertexAttributes(int u, const std::unordered_map<std::string_view, std::string> &attributes);
 
-        [[nodiscard]] std::string edgeAttributes(int u, const std::string& key) const;
-        void setEdgeAttributes(int u, const std::string& key, const std::string& value);
-        void setEdgeAttributes(int u, const std::unordered_map<std::string, std::string>& mapping);
+        [[nodiscard]] std::string edgeAttributes(int u, const std::string_view& key) const;
+        void setEdgeAttributes(int u, const std::string_view& key, const std::string& value);
+        void setEdgeAttributes(int u, const std::string_view& key, double value);
+
+        void setEdgeAttributes(int u, const std::unordered_map<std::string_view, std::string>& mapping);
         void transferEdgeAttributes(int u, int v);
 
         [[nodiscard]] std::string rankDir() const;
         void setRankDir(const std::string& value);
 
+        void setVertexDefaultShape(const std::string& value);
+        void setVertexDefaultMonospace();
+        void setEdgeDefaultMonospace();
+
         void setVertexShape(int u, const std::string& value);
+        void setEdgeTailLabel(int edgeId, const std::string& label);
+        void setEdgeHeadLabel(int edgeId, const std::string& label);
+        void setEdgeLabelDistance(int edgeId, double scale);
 
     private:
-        static std::unordered_map<std::string, std::string> DEFAULT_GRAPH_ATTRIBUTE_VALUES;
-        static std::unordered_map<std::string, std::string> DEFAULT_VERTEX_ATTRIBUTE_VALUES;
-        static std::unordered_map<std::string, std::string> DEFAULT_EDGE_ATTRIBUTE_VALUES;
+        static const std::string MONOSPACE_FONT_FAMILY;
 
-        std::unordered_map<std::string, std::string> _graphAttributes;
-        std::unordered_map<std::string, std::string> _vertexGlobalAttributes;
-        std::unordered_map<int, std::unordered_map<std::string, std::string>> _vertexAttributes;
-        std::unordered_map<std::string, std::string> _edgeGlobalAttributes;
-        std::unordered_map<int, std::unordered_map<std::string, std::string>> _edgeAttributes;
+        static std::unordered_map<std::string_view, std::string> DEFAULT_GRAPH_ATTRIBUTE_VALUES;
+        static std::unordered_map<std::string_view, std::string> DEFAULT_VERTEX_ATTRIBUTE_VALUES;
+        static std::unordered_map<std::string_view, std::string> DEFAULT_EDGE_ATTRIBUTE_VALUES;
+
+        std::unordered_map<std::string_view, std::string> _graphAttributes;
+        std::unordered_map<std::string_view, std::string> _vertexDefaultAttributes;
+        std::unordered_map<int, std::unordered_map<std::string_view, std::string>> _vertexAttributes;
+        std::unordered_map<std::string_view, std::string> _edgeDefaultAttributes;
+        std::unordered_map<int, std::unordered_map<std::string_view, std::string>> _edgeAttributes;
     };
 
 }

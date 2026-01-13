@@ -63,6 +63,12 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def(py::init<>())
         .def("set_rank_dir", &Attributes::setRankDir)
         .def("set_vertex_shape", &Attributes::setVertexShape)
+        .def("set_edge_tail_label", &Attributes::setEdgeTailLabel, py::arg("edge_id"), py::arg("label"))
+        .def("set_edge_head_label", &Attributes::setEdgeHeadLabel, py::arg("edge_id"), py::arg("label"))
+        .def("set_edge_label_distance", &Attributes::setEdgeLabelDistance, py::arg("edge_id"), py::arg("scale"))
+        .def("set_vertex_default_shape", &Attributes::setVertexDefaultShape)
+        .def("set_vertex_default_monospace", &Attributes::setVertexDefaultMonospace)
+        .def("set_edge_default_monospace", &Attributes::setEdgeDefaultMonospace)
     ;
     py::class_<DirectedGraphHierarchicalLayout>(m, "DirectedGraphHierarchicalLayout")
         .def(py::init<>())
