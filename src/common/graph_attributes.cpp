@@ -3,6 +3,7 @@
 #include <functional>
 #include <utility>
 #include <ranges>
+#include <format>
 using namespace std;
 using namespace graph_layout;
 
@@ -18,20 +19,25 @@ const string AttributeShape::ELLIPSE = "ellipse";
 const string AttributeShape::RECT = "rect";
 const string AttributeShape::RECORD = "record";
 
-unordered_map<string, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
-    {ATTRIBUTE_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
-    {ATTRIBUTE_KEY_BG_COLOR, "none"},
-    {ATTRIBUTE_KEY_FONT_NAME, "Times,serif"},
-    {ATTRIBUTE_KEY_FONT_SIZE, "14"},
+const string Attributes::MONOSPACE_FONT_FAMILY = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace";
+
+unordered_map<string_view, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
+    {ATTR_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
+    {ATTR_KEY_BG_COLOR, "none"},
+    {ATTR_KEY_FONT_NAME, "Times,serif"},
+    {ATTR_KEY_FONT_SIZE, "14"},
 };
 
-unordered_map<string, string> Attributes::DEFAULT_VERTEX_ATTRIBUTE_VALUES = {
-    {ATTRIBUTE_KEY_LABEL, ""},
-    {ATTRIBUTE_KEY_SHAPE, AttributeShape::CIRCLE},
+unordered_map<string_view, string> Attributes::DEFAULT_VERTEX_ATTRIBUTE_VALUES = {
+    {ATTR_KEY_LABEL, ""},
+    {ATTR_KEY_SHAPE, AttributeShape::CIRCLE},
 };
 
-unordered_map<string, string> Attributes::DEFAULT_EDGE_ATTRIBUTE_VALUES = {
-    {ATTRIBUTE_KEY_LABEL, ""},
+unordered_map<string_view, string> Attributes::DEFAULT_EDGE_ATTRIBUTE_VALUES = {
+    {ATTR_KEY_LABEL, ""},
+    {ATTR_KEY_TAIL_LABEL, ""},
+    {ATTR_KEY_HEAD_LABEL, ""},
+    {ATTR_KEY_LABEL_DISTANCE, "2.0"},
 };
 
 Attribute::Attribute() = default;
@@ -47,35 +53,28 @@ const string& Attribute::value() const {
     return _raw;
 }
 
-tuple<double, double, double> AttributeColor::toRGB(const string& raw) {
-    if (raw == "white") {
-        return make_tuple(1.0, 1.0, 1.0);
-    }
-    return make_tuple(0.0, 0.0, 0.0);
-}
-
-string Attributes::graphAttributes(const string &key) const {
+string Attributes::graphAttributes(const string_view& key) const {
     if (const auto it = _graphAttributes.find(key); it != _graphAttributes.end()) {
         return it->second;
     }
     return DEFAULT_GRAPH_ATTRIBUTE_VALUES[key];
 }
 
-void Attributes::setGraphAttributes(const string &key, const string &value) {
+void Attributes::setGraphAttributes(const string_view& key, const string &value) {
     _graphAttributes[key] = value;
 }
 
-void Attributes::setGraphAttributes(const unordered_map<string, string>& attributes) {
+void Attributes::setGraphAttributes(const unordered_map<string_view, string>& attributes) {
     _graphAttributes = attributes;
 }
 
-string Attributes::vertexAttributes(const int u, const string &key) const {
+string Attributes::vertexAttributes(const int u, const string_view& key) const {
     if (const auto vIt = _vertexAttributes.find(u); vIt != _vertexAttributes.end()) {
         if (const auto it = vIt->second.find(key); it != vIt->second.end()) {
             return it->second;
         }
     }
-    if (const auto it = _vertexGlobalAttributes.find(key); it != _vertexGlobalAttributes.end()) {
+    if (const auto it = _vertexDefaultAttributes.find(key); it != _vertexDefaultAttributes.end()) {
         return it->second;
     }
     if (const auto it = DEFAULT_VERTEX_ATTRIBUTE_VALUES.find(key); it != DEFAULT_VERTEX_ATTRIBUTE_VALUES.end()) {
@@ -84,21 +83,21 @@ string Attributes::vertexAttributes(const int u, const string &key) const {
     return graphAttributes(key);
 }
 
-void Attributes::setVertexAttributes(const int u, const string &key, const string &value) {
+void Attributes::setVertexAttributes(const int u, const string_view& key, const string &value) {
     _vertexAttributes[u][key] = value;
 }
 
-void Attributes::setVertexAttributes(const int u, const unordered_map<string, string>& attributes) {
+void Attributes::setVertexAttributes(const int u, const unordered_map<string_view, string>& attributes) {
     _vertexAttributes[u] = attributes;
 }
 
-string Attributes::edgeAttributes(const int u, const string &key) const {
+string Attributes::edgeAttributes(const int u, const string_view& key) const {
     if (const auto eIt = _edgeAttributes.find(u); eIt != _edgeAttributes.end()) {
         if (const auto it = eIt->second.find(key); it != eIt->second.end()) {
             return it->second;
         }
     }
-    if (const auto it = _edgeGlobalAttributes.find(key); it != _edgeGlobalAttributes.end()) {
+    if (const auto it = _edgeDefaultAttributes.find(key); it != _edgeDefaultAttributes.end()) {
         return it->second;
     }
     if (const auto it = DEFAULT_EDGE_ATTRIBUTE_VALUES.find(key); it != DEFAULT_EDGE_ATTRIBUTE_VALUES.end()) {
@@ -107,11 +106,15 @@ string Attributes::edgeAttributes(const int u, const string &key) const {
     return edgeAttributes(u, key);
 }
 
-void Attributes::setEdgeAttributes(const int u, const string &key, const string &value) {
+void Attributes::setEdgeAttributes(const int u, const string_view& key, const string &value) {
     _edgeAttributes[u][key] = value;
 }
 
-void Attributes::setEdgeAttributes(const int u, const unordered_map<string, string>& mapping) {
+void Attributes::setEdgeAttributes(const int u, const string_view& key, const double value) {
+    _edgeAttributes[u][key] = format("{}", value);
+}
+
+void Attributes::setEdgeAttributes(const int u, const unordered_map<string_view, string>& mapping) {
     _edgeAttributes[u] = mapping;
 }
 
@@ -122,13 +125,37 @@ void Attributes::transferEdgeAttributes(const int u, const int v) {
 }
 
 string Attributes::rankDir() const {
-    return graphAttributes(ATTRIBUTE_KEY_RANK_DIR);
+    return graphAttributes(ATTR_KEY_RANK_DIR);
 }
 
 void Attributes::setRankDir(const string &value) {
-    setGraphAttributes(ATTRIBUTE_KEY_RANK_DIR, value);
+    setGraphAttributes(ATTR_KEY_RANK_DIR, value);
+}
+
+void Attributes::setVertexDefaultShape(const string& value) {
+    _vertexDefaultAttributes[ATTR_KEY_SHAPE] = value;
+}
+
+void Attributes::setVertexDefaultMonospace() {
+    _vertexDefaultAttributes[ATTR_KEY_FONT_NAME] = MONOSPACE_FONT_FAMILY;
+}
+
+void Attributes::setEdgeDefaultMonospace() {
+    _edgeDefaultAttributes[ATTR_KEY_FONT_NAME] = MONOSPACE_FONT_FAMILY;
 }
 
 void Attributes::setVertexShape(const int u, const string &value) {
-    setVertexAttributes(u, ATTRIBUTE_KEY_SHAPE, value);
+    setVertexAttributes(u, ATTR_KEY_SHAPE, value);
+}
+
+void Attributes::setEdgeTailLabel(const int edgeId, const string& label) {
+    setEdgeAttributes(edgeId, ATTR_KEY_TAIL_LABEL, label);
+}
+
+void Attributes::setEdgeHeadLabel(const int edgeId, const string& label) {
+    setEdgeAttributes(edgeId, ATTR_KEY_HEAD_LABEL, label);
+}
+
+void Attributes::setEdgeLabelDistance(const int edgeId, const double scale) {
+    setEdgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE, scale);
 }
