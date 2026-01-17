@@ -212,15 +212,14 @@ string DirectedGraphHierarchicalLayout::render() const {
                 e->addConnectionPoint(x, y);
             }
         } else {
-            const double vertexSize = _vertexPositioning.vertexSizeAt(edge.u);
             if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
-                e->setSelfLoopAttributes(180, vertexSize * 0.8, 30);
+                e->setSelfLoopAttributes(180, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
             } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-                e->setSelfLoopAttributes(0, vertexSize * 0.8, 30);
+                e->setSelfLoopAttributes(0, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
             } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
-                e->setSelfLoopAttributes(-90, vertexSize * 0.8, 30);
+                e->setSelfLoopAttributes(-90, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
             } else {
-                e->setSelfLoopAttributes(90, vertexSize * 0.8, 30);
+                e->setSelfLoopAttributes(90, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
             }
         }
     }
@@ -297,7 +296,6 @@ void DirectedGraphHierarchicalLayout::computeVertexSizes() {
     const int n = static_cast<int>(_graph->numVertices());
     const auto rankDir = _attributes.rankDir();
     double layerMargin = VertexPositioning::DEFAULT_LAYER_MARGIN;
-    double vertexMargin = VertexPositioning::DEFAULT_VERTEX_MARGIN;
     vector vertexSizes(n, VertexPositioning::DEFAULT_VERTEX_SIZE);
     for (int u = 0; u < n; ++u) {
         SVGNode node;
@@ -310,14 +308,12 @@ void DirectedGraphHierarchicalLayout::computeVertexSizes() {
         const auto height = node.height();
         vertexSizes[u] = max(vertexSizes[u], max(width, height));
         if (rankDir == AttributeRankDir::TOP_TO_BOTTOM || rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-            vertexMargin = max(vertexMargin, width);
             layerMargin = max(layerMargin, height);
         } else {
-            vertexMargin = max(vertexMargin, height);
             layerMargin = max(layerMargin, width);
         }
     }
     _vertexPositioning.setVertexSizes(std::move(vertexSizes));
-    _vertexPositioning.setVertexMargin(vertexMargin);
+    _vertexPositioning.setVertexMargin(VertexPositioning::DEFAULT_VERTEX_MARGIN);
     _vertexPositioning.setLayerMargin(layerMargin);
 }
