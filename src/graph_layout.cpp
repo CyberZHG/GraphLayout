@@ -169,6 +169,7 @@ string DirectedGraphHierarchicalLayout::render() const {
         if (u < _initialNumVertices) {
             node->setShape(_attributes.vertexAttributes(u, ATTR_KEY_SHAPE));
             node->setLabel(_attributes.vertexAttributes(u, ATTR_KEY_LABEL));
+            node->setFont(_attributes.vertexAttributes(u, ATTR_KEY_FONT_NAME), stod(_attributes.vertexAttributes(u, ATTR_KEY_FONT_SIZE)));
         } else {
             node->setShape(string("none"));
             node->setMargin(0, 0);
@@ -188,6 +189,7 @@ string DirectedGraphHierarchicalLayout::render() const {
         if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_HEAD_LABEL); !label.empty()) {
             e->setHeadLabel(label);
         }
+        e->setFont(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_SIZE)));
         e->setLabelDistance(stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_LABEL_DISTANCE)));
         e->setMargin(2);
         e->setArrowHead();
