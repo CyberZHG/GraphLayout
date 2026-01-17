@@ -68,6 +68,8 @@ add_library(GraphLayout STATIC
         src/common/graph_attributes.cpp
         include/common/compare_svg.h
         src/common/compare_svg.cpp
+        include/common/test_utils.h
+        src/common/test_utils.cpp
 )
 
 target_include_directories(GraphLayout

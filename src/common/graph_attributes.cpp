@@ -103,7 +103,7 @@ string Attributes::edgeAttributes(const int u, const string_view& key) const {
     if (const auto it = DEFAULT_EDGE_ATTRIBUTE_VALUES.find(key); it != DEFAULT_EDGE_ATTRIBUTE_VALUES.end()) {
         return it->second;
     }
-    return edgeAttributes(u, key);
+    return graphAttributes(key);
 }
 
 void Attributes::setEdgeAttributes(const int u, const string_view& key, const string &value) {
