@@ -17,6 +17,7 @@ namespace graph_layout {
     constexpr std::string_view ATTR_KEY_TAIL_LABEL = "taillabel";
     constexpr std::string_view ATTR_KEY_HEAD_LABEL = "headlabel";
     constexpr std::string_view ATTR_KEY_LABEL_DISTANCE = "labeldistance";
+    constexpr std::string_view ATTR_KEY_SPLINES = "splines";
 
     class Attribute {
     public:
@@ -60,6 +61,14 @@ namespace graph_layout {
         static const std::string RECORD;
     };
 
+    class AttributeSplines : public Attribute {
+    public:
+        using Attribute::Attribute;
+
+        static const std::string LINE;
+        static const std::string SPLINE;
+    };
+
     class Attributes {
     public:
         Attributes() = default;
@@ -84,10 +93,12 @@ namespace graph_layout {
         void setRankDir(const std::string& value);
 
         void setVertexDefaultShape(const std::string& value);
+        void setEdgeDefaultSplines(const std::string& value);
         void setVertexDefaultMonospace();
         void setEdgeDefaultMonospace();
 
         void setVertexShape(int u, const std::string& value);
+        void setEdgeSplines(int edgeId, const std::string& value);
         void setEdgeTailLabel(int edgeId, const std::string& label);
         void setEdgeHeadLabel(int edgeId, const std::string& label);
         void setEdgeLabelDistance(int edgeId, double scale);

@@ -239,7 +239,7 @@ string DirectedGraphHierarchicalLayout::render() const {
         }
         e->setFont(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_SIZE)));
         e->setLabelDistance(stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE)));
-        e->setSplines(SVGEdge::SPLINES_LINE);
+        e->setSplines(_attributes.edgeAttributes(edgeId, ATTR_KEY_SPLINES));
         e->setArrowHead();
         e->setMargin(2);
         for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {
