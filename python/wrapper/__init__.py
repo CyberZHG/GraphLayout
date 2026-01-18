@@ -1,5 +1,6 @@
 from ._core import (
     Attribute,
+    AttributeArrowShape,
     AttributeRankDir,
     Attributes,
     AttributeShape,
@@ -21,6 +22,7 @@ __all__ = [
     "VertexPositioningMethod",
     "SPDirectedGraph",
     "Attribute",
+    "AttributeArrowShape",
     "AttributeRankDir",
     "AttributeShape",
     "Attributes",

@@ -69,6 +69,13 @@ declare module 'sp-graph-layout' {
         static readonly RECORD: string
     }
 
+    export class AttributeArrowShape extends Attribute {
+        constructor()
+        static readonly NONE: string
+        static readonly NORMAL: string
+        static readonly EMPTY: string
+    }
+
     export class Attributes {
         constructor()
         setRankDir(rankDir: string): void
@@ -76,6 +83,13 @@ declare module 'sp-graph-layout' {
         setEdgeTailLabel(edgeId: number, label: string): void
         setEdgeHeadLabel(edgeId: number, label: string): void
         setEdgeLabelDistance(edgeId: number, scale: number): void
+        setVertexDefaultShape(shape: string): void
+        setVertexDefaultMonospace(): void
+        setEdgeDefaultMonospace(): void
+        setEdgeDefaultArrowHead(value: string): void
+        setEdgeDefaultArrowTail(value: string): void
+        setEdgeArrowHead(edgeId: number, value: string): void
+        setEdgeArrowTail(edgeId: number, value: string): void
     }
 
     export class DirectedGraphHierarchicalLayout {

@@ -192,7 +192,8 @@ string DirectedGraphHierarchicalLayout::render() const {
         e->setFont(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_SIZE)));
         e->setLabelDistance(stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_LABEL_DISTANCE)));
         e->setMargin(2);
-        e->setArrowHead();
+        e->setArrowHead(_attributes.edgeAttributes(edge.id, ATTR_KEY_ARROW_HEAD));
+        e->setArrowTail(_attributes.edgeAttributes(edge.id, ATTR_KEY_ARROW_TAIL));
         if (edge.u != edge.v) {
             if (outEdges[edge.v].contains(edge.u)) {
                 // There is a reverse edge
@@ -240,7 +241,8 @@ string DirectedGraphHierarchicalLayout::render() const {
         e->setFont(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_SIZE)));
         e->setLabelDistance(stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE)));
         e->setSplines(_attributes.edgeAttributes(edgeId, ATTR_KEY_SPLINES));
-        e->setArrowHead();
+        e->setArrowHead(_attributes.edgeAttributes(edgeId, ATTR_KEY_ARROW_HEAD));
+        e->setArrowTail(_attributes.edgeAttributes(edgeId, ATTR_KEY_ARROW_TAIL));
         e->setMargin(2);
         for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {
             const auto& edge = _graph->getEdge(edgeIds[i]);

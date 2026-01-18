@@ -22,6 +22,10 @@ const string AttributeShape::RECORD = "record";
 const string AttributeSplines::LINE = "line";
 const string AttributeSplines::SPLINE = "spline";
 
+const string AttributeArrowShape::NONE = "none";
+const string AttributeArrowShape::NORMAL = "normal";
+const string AttributeArrowShape::EMPTY = "empty";
+
 const string Attributes::MONOSPACE_FONT_FAMILY = R"(ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)";
 
 unordered_map<string_view, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
@@ -42,6 +46,8 @@ unordered_map<string_view, string> Attributes::DEFAULT_EDGE_ATTRIBUTE_VALUES = {
     {ATTR_KEY_HEAD_LABEL, ""},
     {ATTR_KEY_LABEL_DISTANCE, "2.0"},
     {ATTR_KEY_SPLINES, "line"},
+    {ATTR_KEY_ARROW_HEAD, AttributeArrowShape::NORMAL},
+    {ATTR_KEY_ARROW_TAIL, AttributeArrowShape::NONE},
 };
 
 Attribute::Attribute() = default;
@@ -170,4 +176,20 @@ void Attributes::setEdgeHeadLabel(const int edgeId, const string& label) {
 
 void Attributes::setEdgeLabelDistance(const int edgeId, const double scale) {
     setEdgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE, scale);
+}
+
+void Attributes::setEdgeDefaultArrowHead(const string& value) {
+    _edgeDefaultAttributes[ATTR_KEY_ARROW_HEAD] = value;
+}
+
+void Attributes::setEdgeDefaultArrowTail(const string& value) {
+    _edgeDefaultAttributes[ATTR_KEY_ARROW_TAIL] = value;
+}
+
+void Attributes::setEdgeArrowHead(const int edgeId, const string& value) {
+    setEdgeAttributes(edgeId, ATTR_KEY_ARROW_HEAD, value);
+}
+
+void Attributes::setEdgeArrowTail(const int edgeId, const string& value) {
+    setEdgeAttributes(edgeId, ATTR_KEY_ARROW_TAIL, value);
 }

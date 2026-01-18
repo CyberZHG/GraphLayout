@@ -53,6 +53,12 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .class_property("RECT", &AttributeShape::RECT)
         .class_property("RECORD", &AttributeShape::RECORD)
     ;
+    class_<AttributeArrowShape, base<Attribute>>("AttributeArrowShape")
+        .constructor<>()
+        .class_property("NONE", &AttributeArrowShape::NONE)
+        .class_property("NORMAL", &AttributeArrowShape::NORMAL)
+        .class_property("EMPTY", &AttributeArrowShape::EMPTY)
+    ;
     class_<Attributes>("Attributes")
         .constructor<>()
         .function("setRankDir", &Attributes::setRankDir)
@@ -63,6 +69,10 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .function("setVertexDefaultShape", &Attributes::setVertexDefaultShape)
         .function("setVertexDefaultMonospace", &Attributes::setVertexDefaultMonospace)
         .function("setEdgeDefaultMonospace", &Attributes::setEdgeDefaultMonospace)
+        .function("setEdgeDefaultArrowHead", &Attributes::setEdgeDefaultArrowHead)
+        .function("setEdgeDefaultArrowTail", &Attributes::setEdgeDefaultArrowTail)
+        .function("setEdgeArrowHead", &Attributes::setEdgeArrowHead)
+        .function("setEdgeArrowTail", &Attributes::setEdgeArrowTail)
     ;
     class_<DirectedGraphHierarchicalLayout>("DirectedGraphHierarchicalLayout")
         .constructor<>()
