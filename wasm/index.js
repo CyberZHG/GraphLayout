@@ -42,6 +42,7 @@ export {
     Attribute,
     AttributeRankDir,
     AttributeShape,
+    AttributeArrowShape,
     Attributes,
     DirectedGraphHierarchicalLayout,
 };
