@@ -59,6 +59,12 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def_property_readonly_static("RECT", [](py::object) { return AttributeShape::RECT; })
         .def_property_readonly_static("RECORD", [](py::object) { return AttributeShape::RECORD; })
     ;
+    py::class_<AttributeArrowShape, Attribute>(m, "AttributeArrowShape")
+        .def(py::init<>())
+        .def_property_readonly_static("NONE", [](py::object) { return AttributeArrowShape::NONE; })
+        .def_property_readonly_static("NORMAL", [](py::object) { return AttributeArrowShape::NORMAL; })
+        .def_property_readonly_static("EMPTY", [](py::object) { return AttributeArrowShape::EMPTY; })
+    ;
     py::class_<Attributes>(m, "Attributes")
         .def(py::init<>())
         .def("set_rank_dir", &Attributes::setRankDir)
@@ -69,6 +75,10 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
         .def("set_vertex_default_shape", &Attributes::setVertexDefaultShape)
         .def("set_vertex_default_monospace", &Attributes::setVertexDefaultMonospace)
         .def("set_edge_default_monospace", &Attributes::setEdgeDefaultMonospace)
+        .def("set_edge_default_arrow_head", &Attributes::setEdgeDefaultArrowHead, py::arg("value"))
+        .def("set_edge_default_arrow_tail", &Attributes::setEdgeDefaultArrowTail, py::arg("value"))
+        .def("set_edge_arrow_head", &Attributes::setEdgeArrowHead, py::arg("edge_id"), py::arg("value"))
+        .def("set_edge_arrow_tail", &Attributes::setEdgeArrowTail, py::arg("edge_id"), py::arg("value"))
     ;
     py::class_<DirectedGraphHierarchicalLayout>(m, "DirectedGraphHierarchicalLayout")
         .def(py::init<>())

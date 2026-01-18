@@ -47,12 +47,16 @@ void VertexPositioning::sortIncidentEdges(SPDirectedGraph& graph, SPLayering& la
     auto& outEdgeIds = graph.getOutEdgeIdsRef();
     for (int i = 0; i < numLayers; i++) {
         for (const auto u : layering.orders[i]) {
-            ranges::sort(inEdgeIds[u], [&](const int a, const int b) {
-                return layering.positions[i - 1][graph.getEdge(a).u] < layering.positions[i - 1][graph.getEdge(b).u];
-            });
-            ranges::sort(outEdgeIds[u], [&](const int a, const int b) {
-                return layering.positions[i + 1][graph.getEdge(a).v] < layering.positions[i + 1][graph.getEdge(b).v];
-            });
+            if (i > 0) {
+                ranges::sort(inEdgeIds[u], [&](const int a, const int b) {
+                    return layering.positions[i - 1][graph.getEdge(a).u] < layering.positions[i - 1][graph.getEdge(b).u];
+                });
+            }
+            if (i + 1 < numLayers) {
+                ranges::sort(outEdgeIds[u], [&](const int a, const int b) {
+                    return layering.positions[i + 1][graph.getEdge(a).v] < layering.positions[i + 1][graph.getEdge(b).v];
+                });
+            }
         }
     }
 }

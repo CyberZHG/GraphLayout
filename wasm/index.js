@@ -21,6 +21,7 @@ const SPDirectedGraph = GraphLayoutWASM.SPDirectedGraph;
 const Attribute = GraphLayoutWASM.Attribute;
 const AttributeRankDir = GraphLayoutWASM.AttributeRankDir;
 const AttributeShape = GraphLayoutWASM.AttributeShape;
+const AttributeArrowShape = GraphLayoutWASM.AttributeArrowShape;
 const Attributes = GraphLayoutWASM.Attributes;
 const DirectedGraphHierarchicalLayout = GraphLayoutWASM.DirectedGraphHierarchicalLayout;
 

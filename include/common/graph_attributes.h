@@ -18,6 +18,8 @@ namespace graph_layout {
     constexpr std::string_view ATTR_KEY_HEAD_LABEL = "headlabel";
     constexpr std::string_view ATTR_KEY_LABEL_DISTANCE = "labeldistance";
     constexpr std::string_view ATTR_KEY_SPLINES = "splines";
+    constexpr std::string_view ATTR_KEY_ARROW_HEAD = "arrowhead";
+    constexpr std::string_view ATTR_KEY_ARROW_TAIL = "arrowtail";
 
     class Attribute {
     public:
@@ -69,6 +71,15 @@ namespace graph_layout {
         static const std::string SPLINE;
     };
 
+    class AttributeArrowShape : public Attribute {
+    public:
+        using Attribute::Attribute;
+
+        static const std::string NONE;
+        static const std::string NORMAL;
+        static const std::string EMPTY;
+    };
+
     class Attributes {
     public:
         Attributes() = default;
@@ -102,6 +113,11 @@ namespace graph_layout {
         void setEdgeTailLabel(int edgeId, const std::string& label);
         void setEdgeHeadLabel(int edgeId, const std::string& label);
         void setEdgeLabelDistance(int edgeId, double scale);
+
+        void setEdgeDefaultArrowHead(const std::string& value);
+        void setEdgeDefaultArrowTail(const std::string& value);
+        void setEdgeArrowHead(int edgeId, const std::string& value);
+        void setEdgeArrowTail(int edgeId, const std::string& value);
 
     private:
         static const std::string MONOSPACE_FONT_FAMILY;

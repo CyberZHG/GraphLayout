@@ -273,12 +273,16 @@ void CrossMinimization::reduceNumCrossWithBaryCenterHeuristic(SPDirectedGraph& g
             for (const auto& edge : _graph.getInEdges(u)) {
                 weight += positions.find(edge.u)->second;
             }
-            weight /= _graph.getInDegrees()[u];
+            if (const auto degree = _graph.getInDegrees()[u]; degree > 0) {
+                weight /= degree;
+            }
         } else {
             for (const auto& edge : _graph.getOutEdges(u)) {
                 weight += positions.find(edge.v)->second;
             }
-            weight /= _graph.getOutDegrees()[u];
+            if (const auto degree = _graph.getOutDegrees()[u]; degree > 0) {
+                weight /= degree;
+            }
         }
         return weight;
     };
@@ -299,7 +303,6 @@ void CrossMinimization::reduceNumCrossWithMedianHeuristic(SPDirectedGraph& graph
             for (const auto& edge : _graph.getInEdges(u)) {
                 adjPositions.emplace_back(positions.find(edge.u)->second);
             }
-            ranges::sort(adjPositions);
         } else {
             for (const auto& edge : _graph.getOutEdges(u)) {
                 adjPositions.emplace_back(positions.find(edge.v)->second);
