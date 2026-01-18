@@ -224,12 +224,22 @@ string DirectedGraphHierarchicalLayout::render() const {
         }
     }
     for (const auto& virtualEdge : _virtualEdges) {
+        const auto& edgeId = virtualEdge.originalEdge.id;
         const auto& originalEdge = virtualEdge.originalEdge;
         const auto& edgeIds = virtualEdge.virtualEdgeIds;
-        const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTR_KEY_LABEL);
         const auto e = diagram.addEdge(nodeIds[originalEdge.u], nodeIds[originalEdge.v]);
-        e->setLabel(label);
-        e->setSplines(SVGEdge::SPLINES_LINE);
+        if (const auto label = _attributes.edgeAttributes(edgeId, ATTR_KEY_LABEL); !label.empty()) {
+            e->setLabel(label);
+        }
+        if (const auto label = _attributes.edgeAttributes(edgeId, ATTR_KEY_TAIL_LABEL); !label.empty()) {
+            e->setTailLabel(label);
+        }
+        if (const auto label = _attributes.edgeAttributes(edgeId, ATTR_KEY_HEAD_LABEL); !label.empty()) {
+            e->setHeadLabel(label);
+        }
+        e->setFont(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_SIZE)));
+        e->setLabelDistance(stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE)));
+        e->setSplines(_attributes.edgeAttributes(edgeId, ATTR_KEY_SPLINES));
         e->setArrowHead();
         e->setMargin(2);
         for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {

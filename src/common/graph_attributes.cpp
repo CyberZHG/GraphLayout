@@ -19,7 +19,10 @@ const string AttributeShape::ELLIPSE = "ellipse";
 const string AttributeShape::RECT = "rect";
 const string AttributeShape::RECORD = "record";
 
-const string Attributes::MONOSPACE_FONT_FAMILY = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace";
+const string AttributeSplines::LINE = "line";
+const string AttributeSplines::SPLINE = "spline";
+
+const string Attributes::MONOSPACE_FONT_FAMILY = R"(ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace)";
 
 unordered_map<string_view, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = {
     {ATTR_KEY_RANK_DIR, AttributeRankDir::TOP_TO_BOTTOM},
@@ -38,6 +41,7 @@ unordered_map<string_view, string> Attributes::DEFAULT_EDGE_ATTRIBUTE_VALUES = {
     {ATTR_KEY_TAIL_LABEL, ""},
     {ATTR_KEY_HEAD_LABEL, ""},
     {ATTR_KEY_LABEL_DISTANCE, "2.0"},
+    {ATTR_KEY_SPLINES, "line"},
 };
 
 Attribute::Attribute() = default;
@@ -136,6 +140,10 @@ void Attributes::setVertexDefaultShape(const string& value) {
     _vertexDefaultAttributes[ATTR_KEY_SHAPE] = value;
 }
 
+void Attributes::setEdgeDefaultSplines(const string& value) {
+    _edgeDefaultAttributes[ATTR_KEY_SPLINES] = value;
+}
+
 void Attributes::setVertexDefaultMonospace() {
     _vertexDefaultAttributes[ATTR_KEY_FONT_NAME] = MONOSPACE_FONT_FAMILY;
 }
@@ -146,6 +154,10 @@ void Attributes::setEdgeDefaultMonospace() {
 
 void Attributes::setVertexShape(const int u, const string &value) {
     setVertexAttributes(u, ATTR_KEY_SHAPE, value);
+}
+
+void Attributes::setEdgeSplines(const int edgeId, const string& value) {
+    setEdgeAttributes(edgeId, ATTR_KEY_SPLINES, value);
 }
 
 void Attributes::setEdgeTailLabel(const int edgeId, const string& label) {
