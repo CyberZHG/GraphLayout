@@ -213,13 +213,13 @@ string DirectedGraphHierarchicalLayout::render() const {
             }
         } else {
             if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
-                e->setSelfLoopAttributes(180, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
+                e->setSelfLoopAttributes(180, VertexPositioning::DEFAULT_VERTEX_MARGIN, 30);
             } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-                e->setSelfLoopAttributes(0, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
+                e->setSelfLoopAttributes(0, VertexPositioning::DEFAULT_VERTEX_MARGIN, 30);
             } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
-                e->setSelfLoopAttributes(-90, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
+                e->setSelfLoopAttributes(-90, VertexPositioning::DEFAULT_VERTEX_MARGIN, 30);
             } else {
-                e->setSelfLoopAttributes(90, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
+                e->setSelfLoopAttributes(90, VertexPositioning::DEFAULT_VERTEX_MARGIN, 30);
             }
         }
     }
