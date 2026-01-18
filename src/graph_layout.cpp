@@ -226,9 +226,16 @@ string DirectedGraphHierarchicalLayout::render() const {
     for (const auto& virtualEdge : _virtualEdges) {
         const auto& originalEdge = virtualEdge.originalEdge;
         const auto& edgeIds = virtualEdge.virtualEdgeIds;
-        const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTR_KEY_LABEL);
         const auto e = diagram.addEdge(nodeIds[originalEdge.u], nodeIds[originalEdge.v]);
-        e->setLabel(label);
+        if (const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTR_KEY_LABEL); !label.empty()) {
+            e->setLabel(label);
+        }
+        if (const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTR_KEY_TAIL_LABEL); !label.empty()) {
+            e->setTailLabel(label);
+        }
+        if (const auto label = _attributes.edgeAttributes(virtualEdge.originalEdge.id, ATTR_KEY_HEAD_LABEL); !label.empty()) {
+            e->setHeadLabel(label);
+        }
         e->setSplines(SVGEdge::SPLINES_LINE);
         e->setArrowHead();
         e->setMargin(2);
