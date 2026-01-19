@@ -170,6 +170,9 @@ string DirectedGraphHierarchicalLayout::render() const {
             node->setShape(_attributes.vertexAttributes(u, ATTR_KEY_SHAPE));
             node->setLabel(_attributes.vertexAttributes(u, ATTR_KEY_LABEL));
             node->setFont(_attributes.vertexAttributes(u, ATTR_KEY_FONT_NAME), stod(_attributes.vertexAttributes(u, ATTR_KEY_FONT_SIZE)));
+            node->setColor(_attributes.vertexAttributes(u, ATTR_KEY_COLOR));
+            node->setFillColor(_attributes.vertexAttributes(u, ATTR_KEY_FILL_COLOR));
+            node->setFontColor(_attributes.vertexAttributes(u, ATTR_KEY_FONT_COLOR));
         } else {
             node->setShape(string("none"));
             node->setMargin(0, 0);
@@ -194,6 +197,8 @@ string DirectedGraphHierarchicalLayout::render() const {
         e->setMargin(2);
         e->setArrowHead(_attributes.edgeAttributes(edge.id, ATTR_KEY_ARROW_HEAD));
         e->setArrowTail(_attributes.edgeAttributes(edge.id, ATTR_KEY_ARROW_TAIL));
+        e->setColor(_attributes.edgeAttributes(edge.id, ATTR_KEY_COLOR));
+        e->setFontColor(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_COLOR));
         if (edge.u != edge.v) {
             if (outEdges[edge.v].contains(edge.u)) {
                 // There is a reverse edge
@@ -244,6 +249,8 @@ string DirectedGraphHierarchicalLayout::render() const {
         e->setArrowHead(_attributes.edgeAttributes(edgeId, ATTR_KEY_ARROW_HEAD));
         e->setArrowTail(_attributes.edgeAttributes(edgeId, ATTR_KEY_ARROW_TAIL));
         e->setMargin(2);
+        e->setColor(_attributes.edgeAttributes(edgeId, ATTR_KEY_COLOR));
+        e->setFontColor(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_COLOR));
         for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {
             const auto& edge = _graph->getEdge(edgeIds[i]);
             e->addConnectionPoint(_xs[edge.v], _ys[edge.v]);

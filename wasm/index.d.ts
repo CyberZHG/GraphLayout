@@ -90,6 +90,16 @@ declare module 'sp-graph-layout' {
         setEdgeDefaultArrowTail(value: string): void
         setEdgeArrowHead(edgeId: number, value: string): void
         setEdgeArrowTail(edgeId: number, value: string): void
+        setVertexDefaultColor(value: string): void
+        setVertexDefaultFillColor(value: string): void
+        setVertexDefaultFontColor(value: string): void
+        setEdgeDefaultColor(value: string): void
+        setEdgeDefaultFontColor(value: string): void
+        setVertexColor(u: number, value: string): void
+        setVertexFillColor(u: number, value: string): void
+        setVertexFontColor(u: number, value: string): void
+        setEdgeColor(edgeId: number, value: string): void
+        setEdgeFontColor(edgeId: number, value: string): void
     }
 
     export class DirectedGraphHierarchicalLayout {

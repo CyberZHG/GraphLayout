@@ -73,6 +73,16 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .function("setEdgeDefaultArrowTail", &Attributes::setEdgeDefaultArrowTail)
         .function("setEdgeArrowHead", &Attributes::setEdgeArrowHead)
         .function("setEdgeArrowTail", &Attributes::setEdgeArrowTail)
+        .function("setVertexDefaultColor", &Attributes::setVertexDefaultColor)
+        .function("setVertexDefaultFillColor", &Attributes::setVertexDefaultFillColor)
+        .function("setVertexDefaultFontColor", &Attributes::setVertexDefaultFontColor)
+        .function("setEdgeDefaultColor", &Attributes::setEdgeDefaultColor)
+        .function("setEdgeDefaultFontColor", &Attributes::setEdgeDefaultFontColor)
+        .function("setVertexColor", &Attributes::setVertexColor)
+        .function("setVertexFillColor", &Attributes::setVertexFillColor)
+        .function("setVertexFontColor", &Attributes::setVertexFontColor)
+        .function("setEdgeColor", &Attributes::setEdgeColor)
+        .function("setEdgeFontColor", &Attributes::setEdgeFontColor)
     ;
     class_<DirectedGraphHierarchicalLayout>("DirectedGraphHierarchicalLayout")
         .constructor<>()
@@ -88,5 +98,5 @@ EMSCRIPTEN_BINDINGS(GraphLayoutWASM) {
         .function("attributes", &DirectedGraphHierarchicalLayout::attributes, return_value_policy::reference())
         .function("layoutGraph", &DirectedGraphHierarchicalLayout::layoutGraph)
         .function("render", select_overload<string()const>(&DirectedGraphHierarchicalLayout::render))
-        ;
+    ;
 }

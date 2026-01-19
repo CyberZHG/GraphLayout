@@ -153,6 +153,11 @@ TEST(TestDirectedGraphHierarchialLayout, Monospace) {
     layout.attributes().setEdgeTailLabel(0, "tail");
     layout.attributes().setEdgeHeadLabel(1, "head");
     layout.attributes().setEdgeLabelDistance(0, 1.0);
+    layout.attributes().setVertexDefaultColor("darkgray");
+    layout.attributes().setVertexDefaultFillColor("gray");
+    layout.attributes().setVertexDefaultFontColor("white");
+    layout.attributes().setEdgeDefaultColor("darkgray");
+    layout.attributes().setEdgeDefaultFontColor("white");
     layout.setGraph(graph);
     layout.setVertexLabels({"A", "BB", "C|C|C", "{DD|DD}"});
     layout.layoutGraph();

@@ -20,6 +20,9 @@ namespace graph_layout {
     constexpr std::string_view ATTR_KEY_SPLINES = "splines";
     constexpr std::string_view ATTR_KEY_ARROW_HEAD = "arrowhead";
     constexpr std::string_view ATTR_KEY_ARROW_TAIL = "arrowtail";
+    constexpr std::string_view ATTR_KEY_COLOR = "color";
+    constexpr std::string_view ATTR_KEY_FILL_COLOR = "fillcolor";
+    constexpr std::string_view ATTR_KEY_FONT_COLOR = "fontcolor";
 
     class Attribute {
     public:
@@ -118,6 +121,17 @@ namespace graph_layout {
         void setEdgeDefaultArrowTail(const std::string& value);
         void setEdgeArrowHead(int edgeId, const std::string& value);
         void setEdgeArrowTail(int edgeId, const std::string& value);
+
+        void setVertexDefaultColor(const std::string& value);
+        void setVertexDefaultFillColor(const std::string& value);
+        void setVertexDefaultFontColor(const std::string& value);
+        void setEdgeDefaultColor(const std::string& value);
+        void setEdgeDefaultFontColor(const std::string& value);
+        void setVertexColor(int u, const std::string& value);
+        void setVertexFillColor(int u, const std::string& value);
+        void setVertexFontColor(int u, const std::string& value);
+        void setEdgeColor(int edgeId, const std::string& value);
+        void setEdgeFontColor(int edgeId, const std::string& value);
 
     private:
         static const std::string MONOSPACE_FONT_FAMILY;
