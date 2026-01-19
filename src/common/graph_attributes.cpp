@@ -33,6 +33,9 @@ unordered_map<string_view, string> Attributes::DEFAULT_GRAPH_ATTRIBUTE_VALUES = 
     {ATTR_KEY_BG_COLOR, "none"},
     {ATTR_KEY_FONT_NAME, "Times,serif"},
     {ATTR_KEY_FONT_SIZE, "14"},
+    {ATTR_KEY_COLOR, "black"},
+    {ATTR_KEY_FILL_COLOR, "none"},
+    {ATTR_KEY_FONT_COLOR, "black"},
 };
 
 unordered_map<string_view, string> Attributes::DEFAULT_VERTEX_ATTRIBUTE_VALUES = {
@@ -192,4 +195,44 @@ void Attributes::setEdgeArrowHead(const int edgeId, const string& value) {
 
 void Attributes::setEdgeArrowTail(const int edgeId, const string& value) {
     setEdgeAttributes(edgeId, ATTR_KEY_ARROW_TAIL, value);
+}
+
+void Attributes::setVertexDefaultColor(const string& value) {
+    _vertexDefaultAttributes[ATTR_KEY_COLOR] = value;
+}
+
+void Attributes::setVertexDefaultFillColor(const string& value) {
+    _vertexDefaultAttributes[ATTR_KEY_FILL_COLOR] = value;
+}
+
+void Attributes::setVertexDefaultFontColor(const string& value) {
+    _vertexDefaultAttributes[ATTR_KEY_FONT_COLOR] = value;
+}
+
+void Attributes::setEdgeDefaultColor(const string& value) {
+    _edgeDefaultAttributes[ATTR_KEY_COLOR] = value;
+}
+
+void Attributes::setEdgeDefaultFontColor(const string& value) {
+    _edgeDefaultAttributes[ATTR_KEY_FONT_COLOR] = value;
+}
+
+void Attributes::setVertexColor(const int u, const string& value) {
+    setVertexAttributes(u, ATTR_KEY_COLOR, value);
+}
+
+void Attributes::setVertexFillColor(const int u, const string& value) {
+    setVertexAttributes(u, ATTR_KEY_FILL_COLOR, value);
+}
+
+void Attributes::setVertexFontColor(const int u, const string& value) {
+    setVertexAttributes(u, ATTR_KEY_FONT_COLOR, value);
+}
+
+void Attributes::setEdgeColor(const int edgeId, const string& value) {
+    setEdgeAttributes(edgeId, ATTR_KEY_COLOR, value);
+}
+
+void Attributes::setEdgeFontColor(const int edgeId, const string& value) {
+    setEdgeAttributes(edgeId, ATTR_KEY_FONT_COLOR, value);
 }
