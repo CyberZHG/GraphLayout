@@ -22,7 +22,7 @@ include(FetchContent)
 FetchContent_Declare(
         SVGDiagram
         GIT_REPOSITORY https://github.com/CyberZHG/SVGDiagram.git
-        GIT_TAG v1.7.0
+        GIT_TAG v1.8.0
 )
 
 FetchContent_MakeAvailable(SVGDiagram)
