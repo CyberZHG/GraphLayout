@@ -11,6 +11,79 @@ using namespace std;
 using namespace svg_diagram;
 using namespace graph_layout;
 
+namespace {
+
+using graph_layout::Attributes;
+using graph_layout::ATTR_KEY_SHAPE;
+using graph_layout::ATTR_KEY_LABEL;
+using graph_layout::ATTR_KEY_FONT_NAME;
+using graph_layout::ATTR_KEY_FONT_SIZE;
+using graph_layout::ATTR_KEY_COLOR;
+using graph_layout::ATTR_KEY_FILL_COLOR;
+using graph_layout::ATTR_KEY_FONT_COLOR;
+using graph_layout::ATTR_KEY_TAIL_LABEL;
+using graph_layout::ATTR_KEY_HEAD_LABEL;
+using graph_layout::ATTR_KEY_LABEL_DISTANCE;
+using graph_layout::ATTR_KEY_SPLINES;
+using graph_layout::ATTR_KEY_ARROW_HEAD;
+using graph_layout::ATTR_KEY_ARROW_TAIL;
+using graph_layout::AttributeRankDir;
+
+void applyNodeAttributes(SVGNode* node, const Attributes& attrs, const int u) {
+    node->setShape(attrs.vertexAttributes(u, ATTR_KEY_SHAPE));
+    node->setLabel(attrs.vertexAttributes(u, ATTR_KEY_LABEL));
+    node->setFont(attrs.vertexAttributes(u, ATTR_KEY_FONT_NAME), stod(attrs.vertexAttributes(u, ATTR_KEY_FONT_SIZE)));
+    node->setColor(attrs.vertexAttributes(u, ATTR_KEY_COLOR));
+    node->setFillColor(attrs.vertexAttributes(u, ATTR_KEY_FILL_COLOR));
+    node->setFontColor(attrs.vertexAttributes(u, ATTR_KEY_FONT_COLOR));
+}
+
+void applyEdgeAttributes(SVGEdge* edge, const Attributes& attrs, const int edgeId) {
+    if (const auto label = attrs.edgeAttributes(edgeId, ATTR_KEY_LABEL); !label.empty()) {
+        edge->setLabel(label);
+    }
+    if (const auto label = attrs.edgeAttributes(edgeId, ATTR_KEY_TAIL_LABEL); !label.empty()) {
+        edge->setTailLabel(label);
+    }
+    if (const auto label = attrs.edgeAttributes(edgeId, ATTR_KEY_HEAD_LABEL); !label.empty()) {
+        edge->setHeadLabel(label);
+    }
+    edge->setFont(attrs.edgeAttributes(edgeId, ATTR_KEY_FONT_NAME), stod(attrs.edgeAttributes(edgeId, ATTR_KEY_FONT_SIZE)));
+    edge->setLabelDistance(stod(attrs.edgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE)));
+    edge->setSplines(attrs.edgeAttributes(edgeId, ATTR_KEY_SPLINES));
+    edge->setArrowHead(attrs.edgeAttributes(edgeId, ATTR_KEY_ARROW_HEAD));
+    edge->setArrowTail(attrs.edgeAttributes(edgeId, ATTR_KEY_ARROW_TAIL));
+    edge->setMargin(2);
+    edge->setColor(attrs.edgeAttributes(edgeId, ATTR_KEY_COLOR));
+    edge->setFontColor(attrs.edgeAttributes(edgeId, ATTR_KEY_FONT_COLOR));
+}
+
+pair<double, double> computeReverseEdgeOffset(const double x1, const double y1, const double x2, const double y2) {
+    const double dx = x2 - x1;
+    const double dy = y2 - y1;
+    const double len = sqrt(dx * dx + dy * dy);
+    const double nx = -dy / len;
+    const double ny = dx / len;
+    const double midX = (x1 + x2) / 2;
+    const double midY = (y1 + y2) / 2;
+    return {midX + nx * 10.0, midY + ny * 10.0};
+}
+
+double getSelfLoopDirection(const string& rankDir) {
+    if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
+        return 180;
+    }
+    if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
+        return 0;
+    }
+    if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
+        return -90;
+    }
+    return 90;
+}
+
+}
+
 DirectedGraphHierarchicalLayout::DirectedGraphHierarchicalLayout() = default;
 
 shared_ptr<SPDirectedGraph> DirectedGraphHierarchicalLayout::createGraph(const size_t numVertices) {
@@ -156,106 +229,54 @@ string DirectedGraphHierarchicalLayout::render() const {
     if (const auto bgColor = _attributes.graphAttributes(ATTR_KEY_BG_COLOR); !bgColor.empty()) {
         diagram.setBackgroundColor(bgColor);
     }
-    unordered_map<int, unordered_set<int>> outEdges;
-    const auto rankDir = _attributes.rankDir();
-    for (const auto& [id, u, v] : _graph->edges()) {
-        outEdges[u].insert(v);
-    }
+
     vector<string> nodeIds(n);
     for (int u = 0; u < n; ++u) {
         nodeIds[u] = format("node{}", u);
         const auto node = diagram.addNode(nodeIds[u]);
         node->setCenter(_xs[u], _ys[u]);
         if (u < _initialNumVertices) {
-            node->setShape(_attributes.vertexAttributes(u, ATTR_KEY_SHAPE));
-            node->setLabel(_attributes.vertexAttributes(u, ATTR_KEY_LABEL));
-            node->setFont(_attributes.vertexAttributes(u, ATTR_KEY_FONT_NAME), stod(_attributes.vertexAttributes(u, ATTR_KEY_FONT_SIZE)));
-            node->setColor(_attributes.vertexAttributes(u, ATTR_KEY_COLOR));
-            node->setFillColor(_attributes.vertexAttributes(u, ATTR_KEY_FILL_COLOR));
-            node->setFontColor(_attributes.vertexAttributes(u, ATTR_KEY_FONT_COLOR));
+            applyNodeAttributes(node.get(), _attributes, u);
         } else {
             node->setShape(string("none"));
             node->setMargin(0, 0);
         }
     }
-    for (const auto& edge : _graph->edges()) {
-        if (isVirtualVertex(edge.u) || isVirtualVertex(edge.v)) {
+
+    unordered_map<int, unordered_set<int>> outEdges;
+    for (const auto& [id, u, v] : _graph->edges()) {
+        outEdges[u].insert(v);
+    }
+
+    const auto rankDir = _attributes.rankDir();
+    const double selfLoopDir = getSelfLoopDirection(rankDir);
+
+    for (const auto& [id, u, v] : _graph->edges()) {
+        if (isVirtualVertex(u) || isVirtualVertex(v)) {
             continue;
         }
-        const auto e = diagram.addEdge(nodeIds[edge.u], nodeIds[edge.v]);
-        if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_LABEL); !label.empty()) {
-            e->setLabel(label);
-        }
-        if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_TAIL_LABEL); !label.empty()) {
-            e->setTailLabel(label);
-        }
-        if (const auto label = _attributes.edgeAttributes(edge.id, ATTR_KEY_HEAD_LABEL); !label.empty()) {
-            e->setHeadLabel(label);
-        }
-        e->setFont(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_SIZE)));
-        e->setLabelDistance(stod(_attributes.edgeAttributes(edge.id, ATTR_KEY_LABEL_DISTANCE)));
-        e->setMargin(2);
-        e->setArrowHead(_attributes.edgeAttributes(edge.id, ATTR_KEY_ARROW_HEAD));
-        e->setArrowTail(_attributes.edgeAttributes(edge.id, ATTR_KEY_ARROW_TAIL));
-        e->setColor(_attributes.edgeAttributes(edge.id, ATTR_KEY_COLOR));
-        e->setFontColor(_attributes.edgeAttributes(edge.id, ATTR_KEY_FONT_COLOR));
-        if (edge.u != edge.v) {
-            if (outEdges[edge.v].contains(edge.u)) {
-                // There is a reverse edge
-                const auto x1 = _xs[edge.u];
-                const auto y1 = _ys[edge.u];
-                const auto x2 = _xs[edge.v];
-                const auto y2 = _ys[edge.v];
-                const double dx = x2 - x1;
-                const double dy = y2 - y1;
-                const double len = sqrt(dx * dx + dy * dy);
-                const double nx = -dy / len;
-                const double ny = dx / len;
-                const double midX = (x1 + x2) / 2;
-                const double midY = (y1 + y2) / 2;
-                const double x = midX + nx * 10.0;
-                const double y = midY + ny * 10.0;
+        const auto e = diagram.addEdge(nodeIds[u], nodeIds[v]);
+        applyEdgeAttributes(e.get(), _attributes, id);
+        if (u != v) {
+            if (outEdges[v].contains(u)) {
+                auto [x, y] = computeReverseEdgeOffset(_xs[u], _ys[u], _xs[v], _ys[v]);
                 e->addConnectionPoint(x, y);
             }
         } else {
-            if (rankDir == AttributeRankDir::TOP_TO_BOTTOM) {
-                e->setSelfLoopAttributes(180, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
-            } else if (rankDir == AttributeRankDir::BOTTOM_TO_TOP) {
-                e->setSelfLoopAttributes(0, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
-            } else if (rankDir == AttributeRankDir::LEFT_TO_RIGHT) {
-                e->setSelfLoopAttributes(-90, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
-            } else {
-                e->setSelfLoopAttributes(90, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
-            }
+            e->setSelfLoopAttributes(selfLoopDir, VertexPositioning::DEFAULT_VERTEX_MARGIN * 0.8, 30);
         }
     }
-    for (const auto& virtualEdge : _virtualEdges) {
-        const auto& edgeId = virtualEdge.originalEdge.id;
-        const auto& originalEdge = virtualEdge.originalEdge;
-        const auto& edgeIds = virtualEdge.virtualEdgeIds;
+
+    for (const auto&[originalEdge, edgeIds] : _virtualEdges) {
+        const auto& edgeId = originalEdge.id;
         const auto e = diagram.addEdge(nodeIds[originalEdge.u], nodeIds[originalEdge.v]);
-        if (const auto label = _attributes.edgeAttributes(edgeId, ATTR_KEY_LABEL); !label.empty()) {
-            e->setLabel(label);
-        }
-        if (const auto label = _attributes.edgeAttributes(edgeId, ATTR_KEY_TAIL_LABEL); !label.empty()) {
-            e->setTailLabel(label);
-        }
-        if (const auto label = _attributes.edgeAttributes(edgeId, ATTR_KEY_HEAD_LABEL); !label.empty()) {
-            e->setHeadLabel(label);
-        }
-        e->setFont(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_NAME), stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_SIZE)));
-        e->setLabelDistance(stod(_attributes.edgeAttributes(edgeId, ATTR_KEY_LABEL_DISTANCE)));
-        e->setSplines(_attributes.edgeAttributes(edgeId, ATTR_KEY_SPLINES));
-        e->setArrowHead(_attributes.edgeAttributes(edgeId, ATTR_KEY_ARROW_HEAD));
-        e->setArrowTail(_attributes.edgeAttributes(edgeId, ATTR_KEY_ARROW_TAIL));
-        e->setMargin(2);
-        e->setColor(_attributes.edgeAttributes(edgeId, ATTR_KEY_COLOR));
-        e->setFontColor(_attributes.edgeAttributes(edgeId, ATTR_KEY_FONT_COLOR));
+        applyEdgeAttributes(e.get(), _attributes, edgeId);
         for (int i = 0; i + 1 < static_cast<int>(edgeIds.size()); ++i) {
             const auto& edge = _graph->getEdge(edgeIds[i]);
             e->addConnectionPoint(_xs[edge.v], _ys[edge.v]);
         }
     }
+
     return diagram.render();
 }
 
